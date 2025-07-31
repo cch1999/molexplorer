@@ -1397,10 +1397,37 @@ const moleculeManager = new MoleculeManager();
 
 // Initialize when page loads
 window.onload = async () => {
+    // Show disclaimer modal first
+    showDisclaimerModal();
+};
+
+// Function to show disclaimer modal on launch
+function showDisclaimerModal() {
+    const disclaimerModal = document.getElementById('launch-disclaimer-modal');
+    const acceptBtn = document.getElementById('accept-disclaimer-btn');
+
+    if (disclaimerModal && acceptBtn) {
+        // Show the disclaimer modal
+        disclaimerModal.style.display = 'flex';
+
+        // Handle acceptance
+        acceptBtn.addEventListener('click', async () => {
+            disclaimerModal.style.display = 'none';
+            // Initialize the app after disclaimer is accepted
+            await initializeApp();
+        });
+    } else {
+        // If modal doesn't exist, initialize immediately
+        initializeApp();
+    }
+}
+
+// Function to initialize the main application
+async function initializeApp() {
     moleculeManager.init();
     await moleculeManager.loadAllMolecules();
     initializeModal();
-};
+}
 
 // Modal functionality
 function initializeModal() {
