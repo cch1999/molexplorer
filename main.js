@@ -771,15 +771,30 @@ class MoleculeManager {
             dateCell.textContent = 'N/A';
         }
 
-        // View Structure button
+        // View Structure buttons
         const viewCell = document.createElement('td');
-        const viewButton = document.createElement('button');
-        viewButton.textContent = 'View Structure';
-        viewButton.className = 'view-structure-btn';
-        viewButton.addEventListener('click', () => {
+        viewCell.className = 'view-buttons-cell';
+
+        // RCSB PDB button
+        const rcsbButton = document.createElement('button');
+        rcsbButton.textContent = 'RCSB PDB';
+        rcsbButton.className = 'view-structure-btn rcsb-btn';
+        rcsbButton.title = `View ${pdbId.toUpperCase()} on RCSB PDB`;
+        rcsbButton.addEventListener('click', () => {
             window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
         });
-        viewCell.appendChild(viewButton);
+
+        // PDBe button
+        const pdbeButton = document.createElement('button');
+        pdbeButton.textContent = 'PDBe';
+        pdbeButton.className = 'view-structure-btn pdbe-btn';
+        pdbeButton.title = `View ${pdbId.toUpperCase()} on PDBe`;
+        pdbeButton.addEventListener('click', () => {
+            window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+        });
+
+        viewCell.appendChild(rcsbButton);
+        viewCell.appendChild(pdbeButton);
 
         row.appendChild(idCell);
         row.appendChild(titleCell);
@@ -818,15 +833,30 @@ class MoleculeManager {
         dateCell.textContent = 'N/A';
         dateCell.className = 'pdb-date';
 
-        // View Structure button
+        // View Structure buttons
         const viewCell = document.createElement('td');
-        const viewButton = document.createElement('button');
-        viewButton.textContent = 'View Structure';
-        viewButton.className = 'view-structure-btn';
-        viewButton.addEventListener('click', () => {
+        viewCell.className = 'view-buttons-cell';
+
+        // RCSB PDB button
+        const rcsbButton = document.createElement('button');
+        rcsbButton.textContent = 'RCSB PDB';
+        rcsbButton.className = 'view-structure-btn rcsb-btn';
+        rcsbButton.title = `View ${pdbId.toUpperCase()} on RCSB PDB`;
+        rcsbButton.addEventListener('click', () => {
             window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
         });
-        viewCell.appendChild(viewButton);
+
+        // PDBe button
+        const pdbeButton = document.createElement('button');
+        pdbeButton.textContent = 'PDBe';
+        pdbeButton.className = 'view-structure-btn pdbe-btn';
+        pdbeButton.title = `View ${pdbId.toUpperCase()} on PDBe`;
+        pdbeButton.addEventListener('click', () => {
+            window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+        });
+
+        viewCell.appendChild(rcsbButton);
+        viewCell.appendChild(pdbeButton);
 
         row.appendChild(idCell);
         row.appendChild(titleCell);
