@@ -458,14 +458,14 @@ main {
 }
 
 .similar-table .structure-2d {
-    width: 80px;
+    width: 100px;
     text-align: center;
     padding: 8px 4px;
 }
 
 .similar-table .structure-2d img {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     object-fit: contain;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
@@ -473,28 +473,28 @@ main {
 }
 
 .similar-table .structure-2d .loading {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f8f9fa;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
-    font-size: 10px;
+    font-size: 11px;
     color: #666;
 }
 
 .similar-table .structure-2d .error {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #fff5f5;
     border: 1px solid #fed7d7;
     border-radius: 4px;
-    font-size: 10px;
+    font-size: 11px;
     color: #c53030;
 }
 
