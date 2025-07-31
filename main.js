@@ -1,3 +1,30 @@
+// A list of interesting CCD codes for the "I'm Feeling Lucky" feature
+const luckyDipCodes = [
+    'STI', 'Imatinib (Gleevec), cancer drug',
+    '1PE', 'Polyethylene glycol, common crystallizing agent',
+    'AF3', 'Aspirin, painkiller',
+    'VIA', 'Sildenafil (Viagra), erectile dysfunction drug',
+    'CFF', 'Caffeine, stimulant',
+    'N8P', 'NADP, cofactor',
+    'HEM', 'Heme group, in hemoglobin',
+    'FAD', 'Flavin adenine dinucleotide, cofactor',
+    'COA', 'Coenzyme A, cofactor',
+    'ATP', 'Adenosine triphosphate, energy currency',
+    'ADP', 'Adenosine diphosphate',
+    'GTP', 'Guanosine triphosphate',
+    'UDP', 'Uridine diphosphate',
+    'NAD', 'Nicotinamide adenine dinucleotide',
+    'FMN', 'Flavin mononucleotide',
+    'SAM', 'S-Adenosyl methionine',
+    'GLC', 'Glucose, sugar',
+    'FRU', 'Fructose, sugar',
+    'GOL', 'Glycerol, solvent',
+    'EDO', 'Ethylene glycol, solvent',
+    'SO4', 'Sulfate ion, common buffer',
+    'PO4', 'Phosphate ion, common buffer',
+    'CIT', 'Citrate ion, common buffer'
+];
+
 // Molecule Manager Class
 class MoleculeManager {
     constructor() {
@@ -1289,6 +1316,7 @@ function initializeModal() {
     const closeBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const confirmBtn = document.getElementById('confirm-add-btn');
+    const feelingLuckyBtn = document.getElementById('feeling-lucky-btn');
     const input = document.getElementById('molecule-code');
 
     // Details Modal
@@ -1356,6 +1384,21 @@ function initializeModal() {
             alert(`Molecule ${code} already exists in the database`);
         }
     };
+
+    if (feelingLuckyBtn) {
+        feelingLuckyBtn.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * (luckyDipCodes.length / 2)) * 2;
+            const randomCode = luckyDipCodes[randomIndex];
+
+            const success = moleculeManager.addMolecule(randomCode);
+            if (success) {
+                showNotification(`Feeling lucky! Adding ${randomCode}...`, 'success');
+                closeAddModal();
+            } else {
+                showNotification(`Molecule ${randomCode} already exists, try again!`, 'info');
+            }
+        });
+    }
 
     confirmBtn.addEventListener('click', addMolecule);
 

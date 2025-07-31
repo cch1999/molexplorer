@@ -218,12 +218,18 @@ main {
 
 .modal-footer {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.modal-footer div {
+    display: flex;
     gap: 10px;
-    padding: 20px 25px;
-    border-top: 1px solid #eee;
-    background-color: #f9f9f9;
-    border-radius: 0 0 12px 12px;
 }
 
 .btn-primary,
