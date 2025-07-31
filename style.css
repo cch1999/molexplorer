@@ -112,6 +112,16 @@ main {
     margin: 4px 0;
 }
 
+.ccd-link {
+    color: #3a3a9e;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.ccd-link:hover {
+    color: #6e45e2;
+}
+
 .add-to-library-btn {
     background-color: #4CAF50;
     /* Green */

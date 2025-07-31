@@ -1486,12 +1486,29 @@ class FragmentManager {
 
         const info = document.createElement('div');
         info.className = 'fragment-info';
+
+        let ccdText = 'No';
+        if (fragment.in_ccd && fragment.ccd) {
+            const ccdCode = fragment.ccd.split(',')[0].trim();
+            ccdText = `Yes (<a href="#" class="ccd-link" data-ccd="${ccdCode}">${ccdCode}</a>)`;
+        }
+
         info.innerHTML = `
             <p><strong>Source:</strong> ${fragment.source}</p>
-            <p><strong>In CCD:</strong> ${fragment.in_ccd ? `Yes (${fragment.ccd})` : 'No'}</p>
+            <p><strong>In CCD:</strong> ${ccdText}</p>
             <p><strong>Type:</strong> ${fragment.kind}</p>
         `;
         card.appendChild(info);
+
+        // Add event listener for the CCD link
+        const ccdLink = info.querySelector('.ccd-link');
+        if (ccdLink) {
+            ccdLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const ccd = e.target.dataset.ccd;
+                moleculeManager.showMoleculeDetails(ccd);
+            });
+        }
 
         // Add "Add to library" button if in CCD
         if (fragment.in_ccd && fragment.ccd) {
