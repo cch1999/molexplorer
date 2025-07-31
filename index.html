@@ -162,6 +162,26 @@
             <div id="pdb-viewer-container" class="details-viewer" style="display: none;">
                 <!-- 3Dmol.js viewer will be inserted here -->
             </div>
+            <div id="bound-ligands-section" class="details-section" style="display: none;">
+                <h4>Bound Ligands</h4>
+                <table id="bound-ligands-table" class="similar-table">
+                    <thead>
+                        <tr>
+                            <th>2D Structure</th>
+                            <th>CCD Code</th>
+                            <th>Chain ID</th>
+                            <th>Residue No.</th>
+                            <th>Entity ID</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bound-ligands-tbody">
+                    </tbody>
+                </table>
+                <div id="no-bound-ligands-message" class="no-similar-ligands" style="display: none;">
+                    No bound ligands found in this entry.
+                </div>
+            </div>
         </div>
     </div>
 

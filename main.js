@@ -1072,6 +1072,9 @@ class MoleculeManager {
 
             body.innerHTML = this.createPDBDetailsHTML(doc);
 
+            // Populate bound ligands table
+            this.populateBoundLigands(pdbId);
+
             // Add event listeners for the new buttons
             document.getElementById('open-rcsb-btn').addEventListener('click', () => {
                 window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
@@ -1170,6 +1173,102 @@ class MoleculeManager {
             </div>
         `;
     }
+
+    // Populate the bound ligands table
+    populateBoundLigands(pdbId) {
+        const section = document.getElementById('bound-ligands-section');
+        const table = document.getElementById('bound-ligands-table');
+        const tableBody = document.getElementById('bound-ligands-tbody');
+        const noLigandsMessage = document.getElementById('no-bound-ligands-message');
+
+        tableBody.innerHTML = ''; // Clear previous entries
+
+        fetch(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const ligands = data[pdbId.toLowerCase()];
+
+                if (ligands && ligands.length > 0) {
+                    // Filter out common ions and solvents, unless they are the only things present
+                    const significantLigands = ligands.filter(l => !['HOH', 'ZN', 'MG', 'CA', 'NA', 'K', 'CL'].includes(l.chem_comp_id));
+                    const ligandsToShow = significantLigands.length > 0 ? significantLigands : ligands;
+
+                    section.style.display = 'block';
+                    table.style.display = 'table';
+                    noLigandsMessage.style.display = 'none';
+
+                    ligandsToShow.forEach(ligand => {
+                        const row = this.createBoundLigandRow(ligand);
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    section.style.display = 'block';
+                    table.style.display = 'none';
+                    noLigandsMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching bound ligands:', error);
+                section.style.display = 'block';
+                table.style.display = 'none';
+                noLigandsMessage.style.display = 'block';
+                noLigandsMessage.textContent = 'Could not load bound ligand data.';
+            });
+    }
+
+    // Create a table row for a bound ligand
+    createBoundLigandRow(ligand) {
+        const row = document.createElement('tr');
+
+        // 2D Structure image
+        const imageCell = document.createElement('td');
+        imageCell.className = 'structure-2d';
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'loading';
+        imageContainer.textContent = 'Loading...';
+        imageCell.appendChild(imageContainer);
+        this.load2DStructure(ligand.chem_comp_id, imageContainer);
+
+        // CCD Code
+        const codeCell = document.createElement('td');
+        const codeSpan = document.createElement('span');
+        codeSpan.className = 'ccd-code';
+        codeSpan.textContent = ligand.chem_comp_id;
+        codeCell.appendChild(codeSpan);
+
+        // Chain ID
+        const chainCell = document.createElement('td');
+        chainCell.textContent = ligand.chain_id;
+
+        // Residue Number
+        const residueCell = document.createElement('td');
+        residueCell.textContent = ligand.author_residue_number;
+
+        // Entity ID
+        const entityCell = document.createElement('td');
+        entityCell.textContent = ligand.entity_id;
+
+        // Name
+        const nameCell = document.createElement('td');
+        nameCell.className = 'ligand-name';
+        nameCell.textContent = ligand.chem_comp_name;
+        nameCell.title = ligand.chem_comp_name;
+
+        row.appendChild(imageCell);
+        row.appendChild(codeCell);
+        row.appendChild(chainCell);
+        row.appendChild(residueCell);
+        row.appendChild(entityCell);
+        row.appendChild(nameCell);
+
+        return row;
+    }
+
 }
 
 // Global molecule manager instance
