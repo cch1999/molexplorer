@@ -10,6 +10,7 @@ header {
     color: white;
     padding: 20px 40px;
     text-align: center;
+    position: relative;
 }
 
 header h1 {
@@ -20,6 +21,17 @@ header h1 {
 header p {
     margin: 5px 0 0;
     font-weight: 300;
+}
+
+header .author {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.8;
+    font-style: italic;
 }
 
 main {
