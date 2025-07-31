@@ -285,6 +285,51 @@ main {
     font-size: 16px;
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.section-header h4 {
+    margin: 0;
+    color: #6e45e2;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.add-all-btn {
+    background: #6e45e2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(110, 69, 226, 0.2);
+}
+
+.add-all-btn:hover {
+    background: #5a37c7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(110, 69, 226, 0.3);
+}
+
+.add-all-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(110, 69, 226, 0.2);
+}
+
+.add-all-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .info-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

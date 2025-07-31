@@ -286,7 +286,7 @@ class MoleculeManager {
                         height: '100%'
                     });
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: {} });
+                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
                     viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
                     viewer.zoomTo();
                     viewer.render();
@@ -318,7 +318,7 @@ class MoleculeManager {
         // Show modal
         modal.style.display = 'block';
 
-        // Load similar ligands
+        // Load similar ligands and initialize add all button
         this.loadSimilarLigands(ligandCode);
     }
 
@@ -327,10 +327,15 @@ class MoleculeManager {
         const container = document.getElementById('similar-ligands-container');
         const table = document.getElementById('similar-ligands-table');
         const tbody = document.getElementById('similar-ligands-tbody');
+        const addAllBtn = document.getElementById('add-all-similar-btn');
+
+        // Store similar ligands for "Add all" functionality
+        this.currentSimilarLigands = [];
 
         try {
             container.innerHTML = '<p>Loading similar ligands...</p>';
             table.style.display = 'none';
+            addAllBtn.style.display = 'none';
 
             const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ligandCode}`);
 
@@ -348,6 +353,7 @@ class MoleculeManager {
 
             // Clear previous results
             tbody.innerHTML = '';
+            this.currentSimilarLigands = [];
 
             const ligandInfo = ligandData[0];
 
@@ -356,6 +362,7 @@ class MoleculeManager {
                 ligandInfo.stereoisomers.forEach(ligand => {
                     const row = this.createSimilarLigandRow('stereoisomer', ligand);
                     tbody.appendChild(row);
+                    this.currentSimilarLigands.push(ligand);
                 });
             }
 
@@ -364,6 +371,7 @@ class MoleculeManager {
                 ligandInfo.same_scaffold.forEach(ligand => {
                     const row = this.createSimilarLigandRow('scaffold', ligand);
                     tbody.appendChild(row);
+                    this.currentSimilarLigands.push(ligand);
                 });
             }
 
@@ -372,12 +380,23 @@ class MoleculeManager {
                 ligandInfo.similar_ligands.forEach(ligand => {
                     const row = this.createSimilarLigandRow('similar', ligand);
                     tbody.appendChild(row);
+                    this.currentSimilarLigands.push(ligand);
                 });
             }
 
-            // Show table and hide loading message
+            // Show table and add all button
             container.style.display = 'none';
             table.style.display = 'table';
+
+            if (this.currentSimilarLigands.length > 0) {
+                addAllBtn.style.display = 'inline-block';
+                addAllBtn.textContent = `Add All (${this.currentSimilarLigands.length})`;
+
+                // Remove existing event listeners and add new one
+                addAllBtn.replaceWith(addAllBtn.cloneNode(true));
+                const newAddAllBtn = document.getElementById('add-all-similar-btn');
+                newAddAllBtn.addEventListener('click', () => this.addAllSimilarLigands());
+            }
 
         } catch (error) {
             console.error(`Error fetching similar ligands for ${ligandCode}:`, error);
@@ -390,6 +409,50 @@ class MoleculeManager {
                 this.showDemoSimilarLigands();
             }
         }
+    }
+
+    // Add all similar ligands to the database
+    addAllSimilarLigands() {
+        if (!this.currentSimilarLigands || this.currentSimilarLigands.length === 0) {
+            showNotification('No similar ligands to add', 'info');
+            return;
+        }
+
+        const addAllBtn = document.getElementById('add-all-similar-btn');
+        addAllBtn.disabled = true;
+        addAllBtn.textContent = 'Adding...';
+
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        this.currentSimilarLigands.forEach((ligand, index) => {
+            setTimeout(() => {
+                const success = this.addMolecule(ligand.chem_comp_id);
+                if (success) {
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+
+                // Show final notification when all are processed
+                if (index === this.currentSimilarLigands.length - 1) {
+                    let message = '';
+                    if (addedCount > 0 && skippedCount > 0) {
+                        message = `Added ${addedCount} new molecules, ${skippedCount} already existed`;
+                    } else if (addedCount > 0) {
+                        message = `Added ${addedCount} new molecules`;
+                    } else {
+                        message = `All ${skippedCount} molecules already existed`;
+                    }
+
+                    showNotification(message, addedCount > 0 ? 'success' : 'info');
+
+                    // Re-enable button
+                    addAllBtn.disabled = false;
+                    addAllBtn.textContent = `Add All (${this.currentSimilarLigands.length})`;
+                }
+            }, index * 100); // Stagger the additions to avoid overwhelming the UI
+        });
     }
 
     // Create a table row for similar ligand
