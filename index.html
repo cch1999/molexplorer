@@ -13,23 +13,21 @@
         <h1>ChemLogic Interface</h1>
         <p>Molecular Data Visualization and Pattern Analysis</p>
     </header>
-    <nav>
-        <button class="active">Molecules</button>
-        <button>Patterns</button>
-        <button>Reactions</button>
-    </nav>
     <main>
-        <div class="main-header">
-            <h2>Molecular Database</h2>
-            <span id="loading-message" style="display: none;">Loading molecules... ⚛️</span>
+        <div class="tabs">
+            <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Patterns</button>
+            <button class="tab-button">Reactions</button>
         </div>
-        <div id="molecule-grid" class="grid-container">
-            <!-- Molecules will be loaded here by JavaScript -->
+        <div class="content">
+            <h2>Molecular Database</h2>
+            <div id="molecule-grid" class="molecule-grid">
+                <div class="loading-indicator">Loading molecules...</div>
+            </div>
         </div>
     </main>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="main.js"></script>
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 
 </html>

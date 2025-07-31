@@ -1,63 +1,79 @@
-$(document).ready(function () {
-    const molecules = [
-        { name: "Caffeine", pubchemId: 2519, smiles: "CN1C=NC2=C1C(=O)N(C(=O)N2C)C" },
-        { name: "Aspirin", pubchemId: 2244, smiles: "CC(=O)OC1=CC=CC=C1C(=O)O" },
-        { name: "Ethanol", pubchemId: 702, smiles: "CCO" },
-        { name: "Benzene", pubchemId: 241, smiles: "C1=CC=CC=C1" },
-        { name: "Methane", pubchemId: 297, smiles: "C" },
-        { name: "Glucose", pubchemId: 5793, smiles: "C(C1C(C(C(C(O1)O)O)O)O)O" },
+
+window.onload = async () => {
+    const ligandCodes = [
+        'HEM', 'NAD', 'FAD', 'COA', 'ATP', 'ADP', '355', 'GPY', 'YQD',
     ];
 
-    const grid = $('#molecule-grid');
-    const loadingMessage = $('#loading-message');
+    const grid = document.getElementById('molecule-grid');
+    const loadingIndicator = document.querySelector('.loading-indicator');
 
-    function createMoleculeCard(molecule, index) {
-        return new Promise((resolve) => {
-            console.log(`Creating card for: ${molecule.name}`);
-
-            const card = `
-                <div class="card" id="molecule-${molecule.pubchemId}">
-                    <h3>${molecule.name}</h3>
-                    <div id="viewer-${molecule.pubchemId}" class="viewer">
-                        <div style="padding: 20px; text-align: center; color: #666;">
-                            <div style="font-size: 3em; margin-bottom: 10px;">⚛️</div>
-                            <div style="font-size: 1em; font-weight: bold;">${molecule.name}</div>
-                            <div style="font-size: 0.8em; margin-top: 5px;">PubChem ID: ${molecule.pubchemId}</div>
-                        </div>
-                    </div>
-                    <p style="font-size: 0.8em; color: #666; margin-top: 5px;">SMILES: ${molecule.smiles}</p>
-                </div>
-            `;
-
-            grid.append(card);
-
-            // Simulate loading time
-            setTimeout(() => {
-                console.log(`Loaded: ${molecule.name}`);
-                resolve();
-            }, 200 + Math.random() * 300);
-        });
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
     }
 
-    function loadMolecules() {
-        console.log('Starting to load molecules...');
-        loadingMessage.show();
-        grid.hide();
-
-        const promises = molecules.map((mol, index) => createMoleculeCard(mol, index));
-
-        Promise.all(promises).then(() => {
-            console.log('All molecules loaded successfully');
-            loadingMessage.hide();
-            grid.show();
-        }).catch((error) => {
-            console.error('Error loading molecules:', error);
-            loadingMessage.hide();
-            grid.show();
-        });
+    for (const code of ligandCodes) {
+        await fetchMoleculeData(code, grid);
     }
 
-    // Add some debugging
-    console.log('Document ready, starting load process...');
-    loadMolecules();
-}); 
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+    }
+};
+
+async function fetchMoleculeData(ligandCode, grid) {
+    try {
+        const response = await fetch(`https://files.rcsb.org/ligands/view/${ligandCode}_ideal.sdf`);
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(`Ligand ${ligandCode} not found.`);
+                createNotFoundCard(ligandCode, grid);
+                return;
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const sdfData = await response.text();
+        createMoleculeCard(sdfData, ligandCode, grid);
+    } catch (error) {
+        console.error(`Could not fetch or process data for ${ligandCode}:`, error);
+        createNotFoundCard(ligandCode, grid, "Failed to load");
+    }
+}
+
+function createMoleculeCard(sdfData, ligandCode, grid) {
+    const card = document.createElement('div');
+    card.className = 'molecule-card';
+
+    const title = document.createElement('h3');
+    title.textContent = ligandCode;
+    card.appendChild(title);
+
+    const viewerContainer = document.createElement('div');
+    viewerContainer.id = `viewer-${ligandCode}`;
+    viewerContainer.className = 'viewer-container';
+    card.appendChild(viewerContainer);
+
+    grid.appendChild(card);
+
+    // Wait a bit for the DOM to be ready
+    setTimeout(() => {
+        try {
+            const viewer = $3Dmol.createViewer(viewerContainer, {
+                backgroundColor: 'white'
+            });
+            viewer.addModel(sdfData, 'sdf');
+            viewer.setStyle({}, { stick: {} });
+            viewer.zoomTo();
+            viewer.render();
+        } catch (e) {
+            console.error(`Error initializing 3Dmol viewer for ${ligandCode}:`, e);
+            viewerContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Render Error</p>';
+        }
+    }, 100);
+}
+
+function createNotFoundCard(ligandCode, grid, message = "Not found") {
+    const card = document.createElement('div');
+    card.className = 'molecule-card';
+    card.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
+    grid.appendChild(card);
+} 

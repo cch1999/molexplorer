@@ -1,12 +1,12 @@
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     margin: 0;
-    background-color: #f0f2f5;
-    color: #1c1e21;
+    background-color: #f4f6f8;
+    color: #333;
 }
 
 header {
-    background: linear-gradient(90deg, #4a00e0, #8e2de2);
+    background: linear-gradient(90deg, #6e45e2 0%, #88d3ce 100%);
     color: white;
     padding: 20px 40px;
     text-align: center;
@@ -14,96 +14,117 @@ header {
 
 header h1 {
     margin: 0;
-    font-size: 2em;
+    font-weight: 500;
 }
 
 header p {
     margin: 5px 0 0;
-    font-size: 1em;
-    opacity: 0.9;
-}
-
-nav {
-    background-color: #ffffff;
-    border-bottom: 1px solid #dddfe2;
-    padding: 0 40px;
-    display: flex;
-    justify-content: flex-start;
-}
-
-nav button {
-    background-color: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    padding: 15px 20px;
-    font-size: 1em;
-    cursor: pointer;
-    color: #606770;
-    margin-right: 10px;
-    transition: all 0.2s ease-in-out;
-}
-
-nav button.active {
-    color: #2d88ff;
-    border-bottom-color: #2d88ff;
-}
-
-nav button:hover {
-    background-color: #f0f2f5;
+    font-weight: 300;
 }
 
 main {
-    padding: 20px 40px;
+    padding: 20px;
 }
 
-.main-header {
+.tabs {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border-bottom: 1px solid #ddd;
     margin-bottom: 20px;
 }
 
-.main-header h2 {
-    margin: 0;
-    font-size: 1.5em;
-    color: #333;
+.tab-button {
+    background: none;
+    border: none;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+    position: relative;
+    transition: color 0.3s;
 }
 
-#loading-message {
-    font-style: italic;
-    color: #606770;
+.tab-button.active {
+    color: #6e45e2;
 }
 
-.grid-container {
+.tab-button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #6e45e2;
+}
+
+.content h2 {
+    font-weight: 500;
+    color: #444;
+}
+
+.molecule-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
 }
 
-.card {
-    background-color: #ffffff;
-    border: 1px solid #dddfe2;
+.molecule-card {
+    background: white;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 15px;
-    text-align: center;
-    transition: box-shadow 0.3s ease;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.molecule-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.card h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2em;
+.molecule-card h3 {
+    margin: 0 0 5px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6e45e2;
 }
 
-.viewer {
+.molecule-card .formula {
+    margin: 0 0 10px;
+    font-size: 12px;
+    color: #888;
+}
+
+.molecule-card .viewer-container {
     width: 100%;
     height: 200px;
+    /* Adjust as needed */
     position: relative;
-    background-color: #f0f2f5;
+    border: 1px solid #eee;
     border-radius: 4px;
-    margin-bottom: 10px;
+}
+
+.molecule-card .info {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    justify-content: space-between;
+}
+
+.molecule-card p {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.loading-indicator {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #888;
 }
