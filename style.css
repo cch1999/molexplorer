@@ -448,12 +448,15 @@ main {
 
 .similar-table .ccd-code {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-weight: 600;
-    color: #6e45e2;
+    font-weight: 500;
+    color: #4a00e0;
     cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s;
 }
 
-.similar-table .ccd-code:hover {
+.ccd-code:hover {
+    color: #8e2de2;
     text-decoration: underline;
 }
 
@@ -966,4 +969,30 @@ main {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 15px;
+}
+
+.similar-table th:last-child,
+.similar-table td:last-child {
+    width: 60px;
+    text-align: center;
+}
+
+.add-ligand-btn {
+    background-color: #6e45e2;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    line-height: 28px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-ligand-btn:hover {
+    background-color: #5838b4;
 }
