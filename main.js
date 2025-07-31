@@ -1392,15 +1392,39 @@ class MoleculeManager {
     }
 }
 
-// Global molecule manager instance
-const moleculeManager = new MoleculeManager();
+function initializeApp() {
+    const moleculeManager = new MoleculeManager();
 
-// Initialize when page loads
-window.onload = async () => {
-    moleculeManager.init();
-    await moleculeManager.loadAllMolecules();
-    initializeModal();
-};
+    // Set up initial molecules if any, etc.
+    // For example, to start with ATP:
+    moleculeManager.addMolecule('ATP');
+
+    // Make it globally accessible for debugging if needed
+    window.moleculeManager = moleculeManager;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const disclaimerModal = document.getElementById('disclaimer-modal');
+    const acceptBtn = document.getElementById('accept-disclaimer-btn');
+
+    const initializeApp = () => {
+        const moleculeManager = new MoleculeManager();
+        moleculeManager.addMolecule('ATP'); // Start with a default molecule
+        window.moleculeManager = moleculeManager; // Make it globally accessible
+    };
+
+    if (disclaimerModal && acceptBtn) {
+        disclaimerModal.style.display = 'flex';
+
+        acceptBtn.addEventListener('click', () => {
+            disclaimerModal.style.display = 'none';
+            initializeApp();
+        });
+    } else {
+        // If the disclaimer modal doesn't exist for some reason, initialize immediately
+        initializeApp();
+    }
+});
 
 // Modal functionality
 function initializeModal() {
