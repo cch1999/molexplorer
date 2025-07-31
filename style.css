@@ -1,98 +1,109 @@
 body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     margin: 0;
     background-color: #f0f2f5;
-    color: #333;
+    color: #1c1e21;
 }
 
 header {
-    background: linear-gradient(90deg, #4a69bd, #6a89cc);
+    background: linear-gradient(90deg, #4a00e0, #8e2de2);
     color: white;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px 40px;
+    text-align: center;
 }
 
 header h1 {
     margin: 0;
-    font-size: 1.8rem;
+    font-size: 2em;
 }
 
 header p {
-    margin: 0;
-    font-size: 1rem;
+    margin: 5px 0 0;
+    font-size: 1em;
     opacity: 0.9;
 }
 
 nav {
-    background-color: white;
-    padding: 0 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+    border-bottom: 1px solid #dddfe2;
+    padding: 0 40px;
     display: flex;
-    border-bottom: 1px solid #ddd;
+    justify-content: flex-start;
 }
 
-nav a {
-    padding: 1rem 1.5rem;
-    text-decoration: none;
-    color: #555;
-    font-weight: 500;
+nav button {
+    background-color: transparent;
+    border: none;
     border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
+    padding: 15px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    color: #606770;
+    margin-right: 10px;
+    transition: all 0.2s ease-in-out;
 }
 
-nav a.active,
-nav a:hover {
-    color: #4a69bd;
-    border-bottom-color: #4a69bd;
+nav button.active {
+    color: #2d88ff;
+    border-bottom-color: #2d88ff;
+}
+
+nav button:hover {
+    background-color: #f0f2f5;
 }
 
 main {
-    padding: 2rem;
+    padding: 20px 40px;
 }
 
-h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.main-header h2 {
+    margin: 0;
+    font-size: 1.5em;
     color: #333;
 }
 
-#molecule-grid {
+#loading-message {
+    font-style: italic;
+    color: #606770;
+}
+
+.grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    gap: 20px;
 }
 
-.molecule-card {
-    background-color: white;
+.card {
+    background-color: #ffffff;
+    border: 1px solid #dddfe2;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
 }
 
-.molecule-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.viewer-container {
+.card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+}
+
+.viewer {
     width: 100%;
     height: 200px;
-    background-color: #e9ecef;
-}
-
-.molecule-info {
-    padding: 1rem;
-}
-
-.molecule-info h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
-}
-
-.molecule-info p {
-    margin: 0;
-    color: #666;
-    font-size: 0.9rem;
+    position: relative;
+    background-color: #f0f2f5;
+    border-radius: 4px;
+    margin-bottom: 10px;
 }
