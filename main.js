@@ -318,8 +318,41 @@ class MoleculeManager {
         // Show modal
         modal.style.display = 'block';
 
-        // Load similar ligands and initialize add all button
+        // Clear any cached data from previous molecule views
+        this.clearPreviousModalData();
+
+        // Load similar ligands and PDB entries
         this.loadSimilarLigands(ligandCode);
+        this.loadPDBEntries(ligandCode);
+    }
+
+    // Clear any cached data from previous molecule modal views
+    clearPreviousModalData() {
+        // Clear similar ligands data
+        this.currentSimilarLigands = [];
+        const similarTable = document.getElementById('similar-ligands-table');
+        const similarTbody = document.getElementById('similar-ligands-tbody');
+        const similarContainer = document.getElementById('similar-ligands-container');
+        const addAllBtn = document.getElementById('add-all-similar-btn');
+
+        if (similarTable) similarTable.style.display = 'none';
+        if (similarTbody) similarTbody.innerHTML = '';
+        if (similarContainer) similarContainer.innerHTML = '<p>Loading similar ligands...</p>';
+        if (addAllBtn) addAllBtn.style.display = 'none';
+
+        // Clear PDB entries data
+        const pdbTable = document.getElementById('pdb-entries-table-container');
+        const pdbTbody = document.getElementById('pdb-entries-tbody');
+        const pdbContainer = document.getElementById('pdb-entries-container');
+
+        if (pdbTable) {
+            pdbTable.style.display = 'none';
+            // Remove any existing notes
+            const existingNotes = pdbTable.querySelectorAll('p[style*="font-size: 12px"]');
+            existingNotes.forEach(note => note.remove());
+        }
+        if (pdbTbody) pdbTbody.innerHTML = '';
+        if (pdbContainer) pdbContainer.innerHTML = '<p>Loading PDB entries...</p>';
     }
 
     // Load similar ligands from PDBe API
@@ -576,6 +609,226 @@ class MoleculeManager {
             container.className = 'error';
             container.textContent = 'Error';
         }
+    }
+
+    // Load PDB entries containing the ligand
+    async loadPDBEntries(ligandCode) {
+        const container = document.getElementById('pdb-entries-container');
+        const tableContainer = document.getElementById('pdb-entries-table-container');
+        const tbody = document.getElementById('pdb-entries-tbody');
+
+        try {
+            // Clear all previous content completely
+            container.innerHTML = '<p>Loading PDB entries...</p>';
+            tbody.innerHTML = ''; // Clear table body
+            tableContainer.style.display = 'none';
+
+            // Remove any existing notes from previous searches
+            const existingNotes = tableContainer.querySelectorAll('p[style*="font-size: 12px"]');
+            existingNotes.forEach(note => note.remove());
+
+            // Fetch PDB entries containing this ligand
+            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb/${ligandCode}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const pdbIds = data[ligandCode];
+
+            if (!pdbIds || pdbIds.length === 0) {
+                container.innerHTML = '<div class="no-pdb-entries">No PDB entries found containing this ligand</div>';
+                return;
+            }
+
+            // Clear previous results
+            tbody.innerHTML = '';
+
+            // Limit to first 10 entries to avoid overwhelming the UI
+            const limitedPdbIds = pdbIds.slice(0, 10);
+
+            console.log(`Found ${pdbIds.length} PDB entries for ${ligandCode}, showing first ${limitedPdbIds.length}`);
+
+            // Create table rows with just PDB IDs (no detailed info to avoid CORS issues)
+            limitedPdbIds.forEach(pdbId => {
+                const row = this.createSimplePDBEntryRow(pdbId);
+                tbody.appendChild(row);
+            });
+
+            // Show table and hide loading
+            container.style.display = 'none';
+            tableContainer.style.display = 'block';
+
+            // Add note if we limited the results
+            if (pdbIds.length > 10) {
+                const note = document.createElement('p');
+                note.style.fontSize = '12px';
+                note.style.color = '#666';
+                note.style.fontStyle = 'italic';
+                note.style.marginTop = '10px';
+                note.textContent = `Showing first 10 of ${pdbIds.length} PDB entries containing ${ligandCode}`;
+                tableContainer.appendChild(note);
+            }
+
+        } catch (error) {
+            console.error(`Error fetching PDB entries for ${ligandCode}:`, error);
+
+            // Clear table and show error message
+            tbody.innerHTML = '';
+            tableContainer.style.display = 'none';
+            container.innerHTML = '<div class="no-pdb-entries">PDB entries feature temporarily unavailable due to CORS restrictions. <br><small>In production, this would be handled via a backend proxy.</small></div>';
+
+            // Show demo data for ATP as an example
+            if (ligandCode === 'ATP') {
+                this.showDemoPDBEntries();
+            }
+        }
+    }
+
+    // Fetch detailed information for a PDB entry
+    async fetchPDBDetails(pdbId) {
+        try {
+            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
+
+            if (!response.ok) {
+                return null;
+            }
+
+            const data = await response.json();
+            return data[pdbId] && data[pdbId][0] ? data[pdbId][0] : null;
+        } catch (error) {
+            console.error(`Error fetching details for PDB ${pdbId}:`, error);
+            return null;
+        }
+    }
+
+    // Create a simple table row for PDB entry (without detailed info)
+    createSimplePDBEntryRow(pdbId) {
+        const row = document.createElement('tr');
+
+        // PDB ID (clickable)
+        const idCell = document.createElement('td');
+        const idSpan = document.createElement('span');
+        idSpan.className = 'pdb-id';
+        idSpan.textContent = pdbId.toUpperCase();
+        idSpan.title = `Click to view ${pdbId.toUpperCase()} on RCSB PDB`;
+        idSpan.addEventListener('click', () => {
+            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+        });
+        idCell.appendChild(idSpan);
+
+        // View Structure button
+        const viewCell = document.createElement('td');
+        const viewButton = document.createElement('button');
+        viewButton.textContent = 'View on RCSB PDB';
+        viewButton.className = 'view-structure-btn';
+        viewButton.addEventListener('click', () => {
+            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+        });
+        viewCell.appendChild(viewButton);
+
+        row.appendChild(idCell);
+        row.appendChild(viewCell);
+
+        return row;
+    }
+
+    // Create a table row for PDB entry
+    createPDBEntryRow(pdbId, details) {
+        const row = document.createElement('tr');
+
+        // PDB ID (clickable)
+        const idCell = document.createElement('td');
+        const idSpan = document.createElement('span');
+        idSpan.className = 'pdb-id';
+        idSpan.textContent = pdbId.toUpperCase();
+        idSpan.title = `View ${pdbId.toUpperCase()} on RCSB PDB`;
+        idSpan.addEventListener('click', () => {
+            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+        });
+        idCell.appendChild(idSpan);
+
+        // Title
+        const titleCell = document.createElement('td');
+        titleCell.className = 'pdb-title';
+        titleCell.textContent = details.title || 'N/A';
+
+        // Resolution
+        const resolutionCell = document.createElement('td');
+        resolutionCell.className = 'pdb-resolution';
+        if (details.resolution && details.resolution.length > 0) {
+            resolutionCell.textContent = `${details.resolution[0].toFixed(2)}`;
+        } else {
+            resolutionCell.textContent = 'N/A';
+        }
+
+        // Release date
+        const dateCell = document.createElement('td');
+        dateCell.className = 'pdb-date';
+        if (details.release_date) {
+            const date = new Date(details.release_date);
+            dateCell.textContent = date.toLocaleDateString();
+        } else {
+            dateCell.textContent = 'N/A';
+        }
+
+        // Experimental method
+        const methodCell = document.createElement('td');
+        if (details.experimental_method && details.experimental_method.length > 0) {
+            const method = details.experimental_method[0].toLowerCase();
+            const methodSpan = document.createElement('span');
+            methodSpan.className = 'pdb-method';
+
+            // Add specific class based on method type
+            if (method.includes('x-ray') || method.includes('diffraction')) {
+                methodSpan.classList.add('method-xray');
+            } else if (method.includes('nmr')) {
+                methodSpan.classList.add('method-nmr');
+            } else if (method.includes('electron') || method.includes('em')) {
+                methodSpan.classList.add('method-em');
+            } else {
+                methodSpan.classList.add('method-other');
+            }
+
+            methodSpan.textContent = details.experimental_method[0];
+            methodCell.appendChild(methodSpan);
+        } else {
+            methodCell.textContent = 'N/A';
+        }
+
+        row.appendChild(idCell);
+        row.appendChild(titleCell);
+        row.appendChild(resolutionCell);
+        row.appendChild(dateCell);
+        row.appendChild(methodCell);
+
+        return row;
+    }
+
+    // Show demo PDB entries for ATP when CORS fails
+    showDemoPDBEntries() {
+        const container = document.getElementById('pdb-entries-container');
+        const tableContainer = document.getElementById('pdb-entries-table-container');
+        const tbody = document.getElementById('pdb-entries-tbody');
+
+        // Clear any existing content first
+        tbody.innerHTML = '';
+        const existingNotes = tableContainer.querySelectorAll('p[style*="font-size: 12px"]');
+        existingNotes.forEach(note => note.remove());
+
+        // Demo data for ATP - just PDB IDs
+        const demoEntries = ['1atp', '2atp', '3atp', '1a49', '1a5u', '1aq2', '1atn'];
+
+        tbody.innerHTML = '';
+
+        demoEntries.forEach(pdbId => {
+            const row = this.createSimplePDBEntryRow(pdbId);
+            tbody.appendChild(row);
+        });
+
+        container.innerHTML = '<div style="background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">Demo data shown due to CORS restrictions. In production, this would show all PDB entries containing ATP.</div>';
+        tableContainer.style.display = 'block';
     }
 
     // Demo function to show how similar ligands would work (for ATP example)

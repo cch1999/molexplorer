@@ -107,18 +107,37 @@
                 </div>
 
                 <div class="details-section">
+                    <h4>PDB Entries</h4>
+                    <div id="pdb-entries-container">
+                        <p>Loading PDB entries...</p>
+                    </div>
+                    <div id="pdb-entries-table-container" style="display: none;">
+                        <table id="pdb-entries-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>PDB ID</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pdb-entries-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="details-section">
                     <h4>JSON Representation</h4>
                     <div class="json-container">
                         <pre id="details-json">{
-  "molecule_id": "",
-  "ccd_code": "",
-  "source": "building_blocks",
-  "type": "building_block",
-  "structure_data": "...",
-  "properties": {
-    "molecular_weight": null,
-    "formula": null
-  }
+    "molecule_id": "",
+    "ccd_code": "",
+    "source": "building_blocks",
+    "type": "building_block",
+    "structure_data": "...",
+    "properties": {
+      "molecular_weight": null,
+      "formula": null
+    }
 }</pre>
                     </div>
                 </div>
