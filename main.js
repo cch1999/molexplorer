@@ -42,6 +42,13 @@ async function fetchMoleculeData(ligandCode, grid) {
 function createMoleculeCard(sdfData, ligandCode, grid) {
     const card = document.createElement('div');
     card.className = 'molecule-card';
+    card.draggable = true;
+
+    // Add drag handle
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.innerHTML = '⋯';
+    card.appendChild(dragHandle);
 
     const title = document.createElement('h3');
     title.textContent = ligandCode;
@@ -51,6 +58,12 @@ function createMoleculeCard(sdfData, ligandCode, grid) {
     viewerContainer.id = `viewer-${ligandCode}`;
     viewerContainer.className = 'viewer-container';
     card.appendChild(viewerContainer);
+
+    // Add drag event listeners
+    card.addEventListener('dragstart', handleDragStart);
+    card.addEventListener('dragover', handleDragOver);
+    card.addEventListener('drop', handleDrop);
+    card.addEventListener('dragend', handleDragEnd);
 
     grid.appendChild(card);
 
@@ -74,6 +87,67 @@ function createMoleculeCard(sdfData, ligandCode, grid) {
 function createNotFoundCard(ligandCode, grid, message = "Not found") {
     const card = document.createElement('div');
     card.className = 'molecule-card';
-    card.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
+    card.draggable = true;
+
+    // Add drag handle
+    const dragHandle = document.createElement('div');
+    dragHandle.className = 'drag-handle';
+    dragHandle.innerHTML = '⋯';
+    card.appendChild(dragHandle);
+
+    const content = document.createElement('div');
+    content.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
+    card.appendChild(content);
+
+    // Add drag event listeners
+    card.addEventListener('dragstart', handleDragStart);
+    card.addEventListener('dragover', handleDragOver);
+    card.addEventListener('drop', handleDrop);
+    card.addEventListener('dragend', handleDragEnd);
+
     grid.appendChild(card);
+}
+
+// Drag and drop functionality
+let draggedElement = null;
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+
+    if (draggedElement !== this) {
+        const grid = document.getElementById('molecule-grid');
+        const allCards = Array.from(grid.querySelectorAll('.molecule-card'));
+        const draggedIndex = allCards.indexOf(draggedElement);
+        const targetIndex = allCards.indexOf(this);
+
+        if (draggedIndex < targetIndex) {
+            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedElement, this);
+        }
+    }
+
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    draggedElement = null;
 } 

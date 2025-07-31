@@ -91,6 +91,37 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
+}
+
+.drag-handle {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: grab;
+    color: #ccc;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: color 0.3s;
+    user-select: none;
+    z-index: 10;
+}
+
+.drag-handle:hover {
+    color: #6e45e2;
+    background-color: rgba(110, 69, 226, 0.1);
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.molecule-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .molecule-card:hover {
