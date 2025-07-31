@@ -123,10 +123,12 @@ main {
     z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
+    margin: 0;
+    padding: 0;
 }
 
 .modal-content {
@@ -995,4 +997,112 @@ main {
 
 .add-ligand-btn:hover {
     background-color: #5838b4;
+}
+
+/* Disclaimer Modal Styles */
+.disclaimer-modal {
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.disclaimer-modal .modal-content {
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: fadeInScale 0.3s ease-out;
+    margin: 0;
+    position: relative;
+}
+
+.disclaimer-modal .modal-header {
+    background: linear-gradient(135deg, #ff8a00, #ffd600);
+    color: white;
+    text-align: center;
+    padding: 15px 20px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+}
+
+.disclaimer-modal .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.disclaimer-modal .modal-body {
+    padding: 20px;
+}
+
+.disclaimer-modal .modal-body p {
+    margin-bottom: 15px;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.disclaimer-modal .modal-body p:first-child {
+    font-size: 15px;
+    color: #d63031;
+    font-weight: 600;
+}
+
+.disclaimer-modal .modal-body p:last-child {
+    margin-bottom: 0;
+    font-style: italic;
+    color: #666;
+}
+
+.disclaimer-modal .modal-body a {
+    color: #0984e3;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.disclaimer-modal .modal-body a:hover {
+    text-decoration: underline;
+}
+
+.disclaimer-modal .modal-footer {
+    justify-content: center;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    background-color: #f8f9fa;
+    border-radius: 0 0 12px 12px;
+    margin: 0;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive adjustments for disclaimer modal */
+@media (max-width: 600px) {
+    .disclaimer-modal {
+        padding: 10px;
+    }
+
+    .disclaimer-modal .modal-content {
+        width: 95%;
+        margin: 0;
+        max-height: 90vh;
+    }
+
+    .disclaimer-modal .modal-body {
+        padding: 15px;
+    }
+
+    .disclaimer-modal .modal-body p {
+        font-size: 13px;
+    }
 }
