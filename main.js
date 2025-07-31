@@ -143,6 +143,10 @@ class MoleculeManager {
 
         const title = document.createElement('h3');
         title.textContent = ligandCode;
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', () => {
+            this.showMoleculeDetails(ligandCode, sdfData);
+        });
         card.appendChild(title);
 
         const viewerContainer = document.createElement('div');
@@ -202,6 +206,14 @@ class MoleculeManager {
 
         const content = document.createElement('div');
         content.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
+
+        // Make title clickable
+        const title = content.querySelector('h3');
+        title.style.cursor = 'pointer';
+        title.addEventListener('click', () => {
+            this.showMoleculeDetails(ligandCode, null);
+        });
+
         card.appendChild(content);
 
         // Add drag event listeners
@@ -239,6 +251,72 @@ class MoleculeManager {
         this.clearAll();
         await this.loadAllMolecules();
     }
+
+    // Show molecule details in a modal
+    showMoleculeDetails(ligandCode, sdfData) {
+        const modal = document.getElementById('molecule-details-modal');
+        const detailsTitle = document.getElementById('details-title');
+        const detailsCode = document.getElementById('details-code');
+        const detailsSource = document.getElementById('details-source');
+        const detailsType = document.getElementById('details-type');
+        const detailsViewer = document.getElementById('details-viewer-container');
+        const detailsJSON = document.getElementById('details-json');
+
+        // Update basic information
+        detailsTitle.textContent = `Molecule Details: ${ligandCode}`;
+        detailsCode.textContent = ligandCode;
+
+        // Get molecule info
+        const molecule = this.getMolecule(ligandCode);
+        const isAminoAcid = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'].includes(ligandCode);
+
+        detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
+        detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
+
+        // Clear and setup 3D viewer
+        detailsViewer.innerHTML = '<p>Loading structure...</p>';
+
+        if (sdfData) {
+            setTimeout(() => {
+                try {
+                    const viewer = $3Dmol.createViewer(detailsViewer, {
+                        backgroundColor: 'white',
+                        width: '100%',
+                        height: '100%'
+                    });
+                    viewer.addModel(sdfData, 'sdf');
+                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
+                    viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
+                    viewer.zoomTo();
+                    viewer.render();
+                } catch (e) {
+                    console.error(`Error initializing details viewer for ${ligandCode}:`, e);
+                    detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
+                }
+            }, 100);
+        } else {
+            detailsViewer.innerHTML = '<p style="color: #666;">Structure data not available</p>';
+        }
+
+        // Update JSON representation
+        const jsonData = {
+            molecule_id: `mol_${ligandCode.toLowerCase()}`,
+            ccd_code: ligandCode,
+            source: isAminoAcid ? 'building_blocks' : 'reagents',
+            type: isAminoAcid ? 'building_block' : 'reagent',
+            structure_data: sdfData ? sdfData.substring(0, 100) + '...' : 'N/A',
+            properties: {
+                molecular_weight: null,
+                formula: null,
+                status: molecule ? molecule.status : 'unknown'
+            }
+        };
+
+        detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
+
+        // Show modal
+        modal.style.display = 'block';
+    }
 }
 
 // Global molecule manager instance
@@ -253,32 +331,46 @@ window.onload = async () => {
 
 // Modal functionality
 function initializeModal() {
-    const modal = document.getElementById('add-molecule-modal');
+    // Add Molecule Modal
+    const addModal = document.getElementById('add-molecule-modal');
     const addBtn = document.getElementById('add-molecule-btn');
     const closeBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const confirmBtn = document.getElementById('confirm-add-btn');
     const input = document.getElementById('molecule-code');
 
-    // Open modal
+    // Details Modal
+    const detailsModal = document.getElementById('molecule-details-modal');
+    const closeDetailsBtn = document.getElementById('close-details-modal');
+
+    // Open add modal
     addBtn.addEventListener('click', () => {
-        modal.style.display = 'block';
+        addModal.style.display = 'block';
         input.focus();
     });
 
-    // Close modal functions
-    const closeModal = () => {
-        modal.style.display = 'none';
+    // Close add modal functions
+    const closeAddModal = () => {
+        addModal.style.display = 'none';
         input.value = '';
     };
 
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
+    // Close details modal function
+    const closeDetailsModal = () => {
+        detailsModal.style.display = 'none';
+    };
 
-    // Close modal when clicking outside
+    closeBtn.addEventListener('click', closeAddModal);
+    cancelBtn.addEventListener('click', closeAddModal);
+    closeDetailsBtn.addEventListener('click', closeDetailsModal);
+
+    // Close modals when clicking outside
     window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            closeModal();
+        if (event.target === addModal) {
+            closeAddModal();
+        }
+        if (event.target === detailsModal) {
+            closeDetailsModal();
         }
     });
 
@@ -305,7 +397,7 @@ function initializeModal() {
 
         const success = moleculeManager.addMolecule(code);
         if (success) {
-            closeModal();
+            closeAddModal();
             // Show success message briefly
             showNotification(`Adding molecule ${code}...`, 'success');
         } else {

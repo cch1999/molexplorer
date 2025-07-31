@@ -255,6 +255,109 @@ main {
     background: #d0d0d0;
 }
 
+/* Molecule Details Modal */
+.details-modal {
+    max-width: 800px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.details-body {
+    padding: 0;
+}
+
+.details-section {
+    padding: 20px 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.details-section:last-child {
+    border-bottom: none;
+}
+
+.details-section h4 {
+    margin: 0 0 15px;
+    color: #6e45e2;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.info-item label {
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.info-item span {
+    color: #333;
+    font-size: 14px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.details-viewer {
+    width: 100%;
+    height: 300px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+}
+
+.json-container {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.json-container pre {
+    margin: 0;
+    padding: 15px;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .details-modal {
+        width: 98%;
+        margin: 5% auto;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .details-viewer {
+        height: 250px;
+    }
+}
+
 .molecule-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));

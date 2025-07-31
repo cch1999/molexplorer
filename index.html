@@ -50,6 +50,59 @@
         </div>
     </div>
 
+    <!-- Molecule Details Modal -->
+    <div id="molecule-details-modal" class="modal">
+        <div class="modal-content details-modal">
+            <div class="modal-header">
+                <h3 id="details-title">Molecule Details: </h3>
+                <span class="close" id="close-details-modal">&times;</span>
+            </div>
+            <div class="modal-body details-body">
+                <div class="details-section">
+                    <h4>Basic Information</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>CCD Code:</label>
+                            <span id="details-code">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Source:</label>
+                            <span id="details-source">building_blocks</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Type:</label>
+                            <span id="details-type">building_block</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Interactive Molecular Structure</h4>
+                    <div id="details-viewer-container" class="details-viewer">
+                        <p>Loading structure...</p>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>JSON Representation</h4>
+                    <div class="json-container">
+                        <pre id="details-json">{
+  "molecule_id": "",
+  "ccd_code": "",
+  "source": "building_blocks",
+  "type": "building_block",
+  "structure_data": "...",
+  "properties": {
+    "molecular_weight": null,
+    "formula": null
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script type="module" src="main.js"></script>
 </body>
