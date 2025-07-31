@@ -130,6 +130,17 @@ class MoleculeManager {
         dragHandle.innerHTML = '⋯';
         card.appendChild(dragHandle);
 
+        // Add delete button
+        const deleteBtn = document.createElement('div');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
+        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.confirmDelete(ligandCode);
+        });
+        card.appendChild(deleteBtn);
+
         const title = document.createElement('h3');
         title.textContent = ligandCode;
         card.appendChild(title);
@@ -178,6 +189,17 @@ class MoleculeManager {
         dragHandle.innerHTML = '⋯';
         card.appendChild(dragHandle);
 
+        // Add delete button
+        const deleteBtn = document.createElement('div');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
+        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.confirmDelete(ligandCode);
+        });
+        card.appendChild(deleteBtn);
+
         const content = document.createElement('div');
         content.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
         card.appendChild(content);
@@ -189,6 +211,18 @@ class MoleculeManager {
         card.addEventListener('dragend', handleDragEnd);
 
         this.grid.appendChild(card);
+    }
+
+    // Confirm delete with user
+    confirmDelete(code) {
+        if (confirm(`Are you sure you want to delete molecule ${code}?`)) {
+            const success = this.removeMolecule(code);
+            if (success) {
+                showNotification(`Molecule ${code} deleted`, 'success');
+            } else {
+                showNotification(`Failed to delete molecule ${code}`, 'error');
+            }
+        }
     }
 
     // Clear all molecules
