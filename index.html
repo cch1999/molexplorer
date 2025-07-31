@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemLogic Interface</title>
+  <script type="module" crossorigin src="/molexplorer/assets/index-ClCjy87G.js"></script>
+  <link rel="stylesheet" crossorigin href="/molexplorer/assets/index-Dh82hKFX.css">
+</head>
+
+<body>
+    <header>
+        <h1>ChemLogic Interface</h1>
+        <p>Molecular Data Visualization and Pattern Analysis</p>
+        <p class="author">By Charlie Harris 🛡️</p>
+    </header>
+    <main>
+        <div class="tabs">
+            <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Patterns</button>
+            <button class="tab-button">Reactions</button>
+        </div>
+        <div class="content">
+            <div class="database-header">
+                <h2>Molecular Database</h2>
+                <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
+            </div>
+            <div id="molecule-grid" class="molecule-grid">
+                <div class="loading-indicator">Loading molecules...</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Molecule Modal -->
+    <div id="add-molecule-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Molecule</h3>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="molecule-code">CCD Code:</label>
+                <input type="text" id="molecule-code" placeholder="Enter 3-letter code (e.g., ATP)" maxlength="10">
+                <p class="help-text">Enter a Chemical Component Dictionary (CCD) code</p>
+            </div>
+            <div class="modal-footer">
+                <button id="feeling-lucky-btn" class="btn-secondary">I'm Feeling Lucky</button>
+                <div>
+                    <button id="cancel-btn" class="btn-secondary">Cancel</button>
+                    <button id="confirm-add-btn" class="btn-primary">Add Molecule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Molecule Details Modal -->
+    <div id="molecule-details-modal" class="modal">
+        <div class="modal-content details-modal">
+            <div class="modal-header">
+                <h3 id="details-title">Molecule Details: </h3>
+                <span class="close" id="close-details-modal">&times;</span>
+            </div>
+            <div class="modal-body details-body">
+                <div class="details-section">
+                    <h4>Basic Information</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>CCD Code:</label>
+                            <span id="details-code">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Source:</label>
+                            <span id="details-source">building_blocks</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Type:</label>
+                            <span id="details-type">building_block</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Interactive Molecular Structure</h4>
+                    <div id="details-viewer-container" class="details-viewer">
+                        <p>Loading structure...</p>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <div class="section-header">
+                        <h4>Similar Ligands</h4>
+                        <button id="add-all-similar-btn" class="add-all-btn" style="display: none;">Add All</button>
+                    </div>
+                    <div id="similar-ligands-container">
+                        <p>Loading similar ligands...</p>
+                    </div>
+                    <table id="similar-ligands-table" class="similar-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>2D Structure</th>
+                                <th>Type</th>
+                                <th>CCD Code</th>
+                                <th>Name</th>
+                                <th>Match Info</th>
+                                <th>Add</th>
+                            </tr>
+                        </thead>
+                        <tbody id="similar-ligands-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="details-section">
+                    <h4>PDB Entries</h4>
+                    <div id="pdb-entries-container">
+                        <p>Loading PDB entries...</p>
+                    </div>
+                    <div id="pdb-entries-table-container" style="display: none;">
+                        <table id="pdb-entries-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>PDB ID</th>
+                                    <th>Title</th>
+                                    <th>Resolution (Å)</th>
+                                    <th>Release Date</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pdb-entries-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>JSON Representation</h4>
+                    <div class="json-container">
+                        <pre id="details-json">{
+    "molecule_id": "",
+    "ccd_code": "",
+    "source": "building_blocks",
+    "type": "building_block",
+    "structure_data": "...",
+    "properties": {
+      "molecular_weight": null,
+      "formula": null
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDB Details Modal -->
+    <div id="pdb-details-modal" class="modal">
+        <div class="modal-content details-modal pdb-details-modal styled-like-ligand">
+            <div class="modal-header">
+                <h3 id="pdb-details-title">PDB Entry Details</h3>
+                <span class="close" id="close-pdb-details-modal">&times;</span>
+            </div>
+            <div id="pdb-details-body" class="modal-body details-body">
+                <!-- Content will be populated by JavaScript -->
+                <div class="properties-loading">Loading PDB entry details...</div>
+            </div>
+            <div id="pdb-viewer-container" class="details-viewer" style="display: none;">
+                <!-- 3Dmol.js viewer will be inserted here -->
+            </div>
+            <div id="bound-ligands-section" class="details-section" style="display: none;">
+                <div class="section-header">
+                    <h4>Bound Ligands</h4>
+                    <button id="add-all-bound-btn" class="add-all-btn" style="display: none;">Add All</button>
+                </div>
+                <table id="bound-ligands-table" class="similar-table">
+                    <thead>
+                        <tr>
+                            <th>2D Structure</th>
+                            <th>CCD Code</th>
+                            <th>Chain ID</th>
+                            <th>Residue No.</th>
+                            <th>Entity ID</th>
+                            <th>Name</th>
+                            <th>Add</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bound-ligands-tbody">
+                    </tbody>
+                </table>
+                <div id="no-bound-ligands-message" class="no-similar-ligands" style="display: none;">
+                    No bound ligands found in this entry.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+</body>
+
+
+</html>
