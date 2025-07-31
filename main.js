@@ -1457,7 +1457,7 @@ class FragmentManager {
             this.renderFragments();
         } catch (error) {
             console.error('Failed to load fragment library:', error);
-            this.grid.innerHTML = '<p>Error loading fragment library.</p>';
+            this.grid.innerHTML = '<p>No fragments match your criteria.</p>';
         }
     }
 
