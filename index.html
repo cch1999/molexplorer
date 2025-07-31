@@ -21,12 +21,35 @@
             <button class="tab-button">Reactions</button>
         </div>
         <div class="content">
-            <h2>Molecular Database</h2>
+            <div class="database-header">
+                <h2>Molecular Database</h2>
+                <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
+            </div>
             <div id="molecule-grid" class="molecule-grid">
                 <div class="loading-indicator">Loading molecules...</div>
             </div>
         </div>
     </main>
+
+    <!-- Add Molecule Modal -->
+    <div id="add-molecule-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Molecule</h3>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="molecule-code">CCD Code:</label>
+                <input type="text" id="molecule-code" placeholder="Enter 3-letter code (e.g., ATP)" maxlength="10">
+                <p class="help-text">Enter a Chemical Component Dictionary (CCD) code</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-add-btn" class="btn-primary">Add Molecule</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script type="module" src="main.js"></script>
 </body>

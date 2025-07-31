@@ -214,7 +214,122 @@ const moleculeManager = new MoleculeManager();
 window.onload = async () => {
     moleculeManager.init();
     await moleculeManager.loadAllMolecules();
+    initializeModal();
 };
+
+// Modal functionality
+function initializeModal() {
+    const modal = document.getElementById('add-molecule-modal');
+    const addBtn = document.getElementById('add-molecule-btn');
+    const closeBtn = document.getElementById('close-modal');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const confirmBtn = document.getElementById('confirm-add-btn');
+    const input = document.getElementById('molecule-code');
+
+    // Open modal
+    addBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        input.focus();
+    });
+
+    // Close modal functions
+    const closeModal = () => {
+        modal.style.display = 'none';
+        input.value = '';
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Handle Enter key in input
+    input.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            addMolecule();
+        }
+    });
+
+    // Add molecule function
+    const addMolecule = () => {
+        const code = input.value.trim().toUpperCase();
+
+        if (!code) {
+            alert('Please enter a molecule code');
+            return;
+        }
+
+        if (code.length > 10) {
+            alert('Molecule code should be 10 characters or less');
+            return;
+        }
+
+        const success = moleculeManager.addMolecule(code);
+        if (success) {
+            closeModal();
+            // Show success message briefly
+            showNotification(`Adding molecule ${code}...`, 'success');
+        } else {
+            alert(`Molecule ${code} already exists in the database`);
+        }
+    };
+
+    confirmBtn.addEventListener('click', addMolecule);
+}
+
+// Simple notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    // Style the notification
+    Object.assign(notification.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        padding: '12px 20px',
+        borderRadius: '6px',
+        color: 'white',
+        fontWeight: '500',
+        zIndex: '1001',
+        opacity: '0',
+        transform: 'translateY(-20px)',
+        transition: 'all 0.3s ease'
+    });
+
+    if (type === 'success') {
+        notification.style.background = '#4CAF50';
+    } else if (type === 'error') {
+        notification.style.background = '#f44336';
+    } else {
+        notification.style.background = '#6e45e2';
+    }
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+    }, 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
 
 // Legacy functions for backward compatibility (now just wrappers)
 async function fetchMoleculeData(ligandCode, grid) {
