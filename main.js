@@ -650,11 +650,19 @@ class MoleculeManager {
 
             console.log(`Found ${pdbIds.length} PDB entries for ${ligandCode}, showing first ${limitedPdbIds.length}`);
 
-            // Create table rows with just PDB IDs (no detailed info to avoid CORS issues)
-            limitedPdbIds.forEach(pdbId => {
-                const row = this.createSimplePDBEntryRow(pdbId);
-                tbody.appendChild(row);
-            });
+            // Create table rows with detailed info from RCSB PDB REST API
+            for (const pdbId of limitedPdbIds) {
+                try {
+                    const details = await this.fetchRCSBDetails(pdbId);
+                    const row = this.createDetailedPDBEntryRow(pdbId, details);
+                    tbody.appendChild(row);
+                } catch (error) {
+                    console.warn(`Failed to fetch details for ${pdbId}:`, error);
+                    // Fallback to simple row
+                    const row = this.createSimplePDBEntryRow(pdbId);
+                    tbody.appendChild(row);
+                }
+            }
 
             // Show table and hide loading
             container.style.display = 'none';
@@ -686,7 +694,24 @@ class MoleculeManager {
         }
     }
 
-    // Fetch detailed information for a PDB entry
+    // Fetch detailed information from RCSB PDB REST API
+    async fetchRCSBDetails(pdbId) {
+        try {
+            const response = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toLowerCase()}`);
+
+            if (!response.ok) {
+                return null;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Error fetching RCSB details for PDB ${pdbId}:`, error);
+            return null;
+        }
+    }
+
+    // Fetch detailed information for a PDB entry (legacy method)
     async fetchPDBDetails(pdbId) {
         try {
             const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
@@ -701,6 +726,68 @@ class MoleculeManager {
             console.error(`Error fetching details for PDB ${pdbId}:`, error);
             return null;
         }
+    }
+
+    // Create a detailed table row for PDB entry with RCSB data
+    createDetailedPDBEntryRow(pdbId, details) {
+        const row = document.createElement('tr');
+
+        // PDB ID (clickable)
+        const idCell = document.createElement('td');
+        const idSpan = document.createElement('span');
+        idSpan.className = 'pdb-id';
+        idSpan.textContent = pdbId.toUpperCase();
+        idSpan.title = `Click to view ${pdbId.toUpperCase()} on RCSB PDB`;
+        idSpan.addEventListener('click', () => {
+            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+        });
+        idCell.appendChild(idSpan);
+
+        // Title
+        const titleCell = document.createElement('td');
+        titleCell.className = 'pdb-title';
+        if (details && details.struct && details.struct.title) {
+            titleCell.textContent = details.struct.title;
+        } else {
+            titleCell.textContent = 'N/A';
+        }
+
+        // Resolution
+        const resolutionCell = document.createElement('td');
+        resolutionCell.className = 'pdb-resolution';
+        if (details && details.rcsb_entry_info && details.rcsb_entry_info.resolution_combined && details.rcsb_entry_info.resolution_combined.length > 0) {
+            resolutionCell.textContent = `${details.rcsb_entry_info.resolution_combined[0].toFixed(2)}`;
+        } else {
+            resolutionCell.textContent = 'N/A';
+        }
+
+        // Release date
+        const dateCell = document.createElement('td');
+        dateCell.className = 'pdb-date';
+        if (details && details.rcsb_accession_info && details.rcsb_accession_info.initial_release_date) {
+            const date = new Date(details.rcsb_accession_info.initial_release_date);
+            dateCell.textContent = date.toLocaleDateString();
+        } else {
+            dateCell.textContent = 'N/A';
+        }
+
+        // View Structure button
+        const viewCell = document.createElement('td');
+        const viewButton = document.createElement('button');
+        viewButton.textContent = 'View Structure';
+        viewButton.className = 'view-structure-btn';
+        viewButton.addEventListener('click', () => {
+            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+        });
+        viewCell.appendChild(viewButton);
+
+        row.appendChild(idCell);
+        row.appendChild(titleCell);
+        row.appendChild(resolutionCell);
+        row.appendChild(dateCell);
+        row.appendChild(viewCell);
+
+        return row;
     }
 
     // Create a simple table row for PDB entry (without detailed info)
@@ -718,10 +805,23 @@ class MoleculeManager {
         });
         idCell.appendChild(idSpan);
 
+        // Fill empty cells for simple fallback
+        const titleCell = document.createElement('td');
+        titleCell.textContent = 'Loading...';
+        titleCell.className = 'pdb-title';
+
+        const resolutionCell = document.createElement('td');
+        resolutionCell.textContent = 'N/A';
+        resolutionCell.className = 'pdb-resolution';
+
+        const dateCell = document.createElement('td');
+        dateCell.textContent = 'N/A';
+        dateCell.className = 'pdb-date';
+
         // View Structure button
         const viewCell = document.createElement('td');
         const viewButton = document.createElement('button');
-        viewButton.textContent = 'View on RCSB PDB';
+        viewButton.textContent = 'View Structure';
         viewButton.className = 'view-structure-btn';
         viewButton.addEventListener('click', () => {
             window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
@@ -729,6 +829,9 @@ class MoleculeManager {
         viewCell.appendChild(viewButton);
 
         row.appendChild(idCell);
+        row.appendChild(titleCell);
+        row.appendChild(resolutionCell);
+        row.appendChild(dateCell);
         row.appendChild(viewCell);
 
         return row;
@@ -817,13 +920,49 @@ class MoleculeManager {
         const existingNotes = tableContainer.querySelectorAll('p[style*="font-size: 12px"]');
         existingNotes.forEach(note => note.remove());
 
-        // Demo data for ATP - just PDB IDs
-        const demoEntries = ['1atp', '2atp', '3atp', '1a49', '1a5u', '1aq2', '1atn'];
+        // Demo data for ATP with sample details
+        const demoEntries = [
+            {
+                pdb_id: '1atp',
+                title: 'CRYSTAL STRUCTURE OF THE TERNARY COMPLEX OF PHENYLALANYL-TRNA SYNTHETASE WITH TRNA AND A PHENYLALANYL-ADENYLATE ANALOGUE',
+                resolution: 2.7,
+                release_date: '1995-01-31'
+            },
+            {
+                pdb_id: '2atp',
+                title: 'ADENOSINE-5\'-TRIPHOSPHATE',
+                resolution: 1.83,
+                release_date: '1996-07-17'
+            },
+            {
+                pdb_id: '3atp',
+                title: 'ATP SYNTHASE',
+                resolution: 2.4,
+                release_date: '1999-02-24'
+            },
+            {
+                pdb_id: '1a49',
+                title: 'CRYSTAL STRUCTURE OF ADENYLYL CYCLASE',
+                resolution: 2.8,
+                release_date: '1998-04-15'
+            },
+            {
+                pdb_id: '1a5u',
+                title: 'ATP BINDING CASSETTE TRANSPORTER',
+                resolution: 3.2,
+                release_date: '1998-08-12'
+            }
+        ];
 
         tbody.innerHTML = '';
 
-        demoEntries.forEach(pdbId => {
-            const row = this.createSimplePDBEntryRow(pdbId);
+        demoEntries.forEach(entry => {
+            const mockDetails = {
+                struct: { title: entry.title },
+                rcsb_entry_info: { resolution_combined: [entry.resolution] },
+                rcsb_accession_info: { initial_release_date: entry.release_date }
+            };
+            const row = this.createDetailedPDBEntryRow(entry.pdb_id, mockDetails);
             tbody.appendChild(row);
         });
 
