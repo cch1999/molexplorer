@@ -75,6 +75,7 @@ function createMoleculeCard(sdfData, ligandCode, grid) {
             });
             viewer.addModel(sdfData, 'sdf');
             viewer.setStyle({}, { stick: {} });
+            viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
             viewer.zoomTo();
             viewer.render();
         } catch (e) {
