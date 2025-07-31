@@ -1433,7 +1433,7 @@ class FragmentManager {
 
     async loadFragments() {
         try {
-            const response = await fetch('data/fragment_library_ccd.tsv');
+            const response = await fetch(`${import.meta.env.BASE_URL}data/fragment_library_ccd.tsv`);
             const tsvData = await response.text();
 
             const rows = tsvData.split('\n').slice(1); // Skip header
