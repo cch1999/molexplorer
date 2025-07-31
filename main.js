@@ -395,6 +395,18 @@ class MoleculeManager {
     createSimilarLigandRow(type, ligand) {
         const row = document.createElement('tr');
 
+        // 2D Structure image
+        const imageCell = document.createElement('td');
+        imageCell.className = 'structure-2d';
+
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'loading';
+        imageContainer.textContent = 'Loading...';
+        imageCell.appendChild(imageContainer);
+
+        // Load 2D structure image
+        this.load2DStructure(ligand.chem_comp_id, imageContainer);
+
         // Type badge
         const typeCell = document.createElement('td');
         const typeBadge = document.createElement('span');
@@ -452,12 +464,55 @@ class MoleculeManager {
             matchCell.textContent = '-';
         }
 
+        row.appendChild(imageCell);
         row.appendChild(typeCell);
         row.appendChild(codeCell);
         row.appendChild(nameCell);
         row.appendChild(matchCell);
 
         return row;
+    }
+
+    // Load 2D structure image from RCSB PDB CDN
+    async load2DStructure(ligandCode, container) {
+        try {
+            // RCSB PDB provides 2D structure images at this CDN endpoint
+            // Format: https://cdn.rcsb.org/images/ccd/unlabeled/{first_letter}/{code}.svg
+            const firstLetter = ligandCode.charAt(0).toUpperCase();
+            const imageUrl = `https://cdn.rcsb.org/images/ccd/unlabeled/${firstLetter}/${ligandCode.toUpperCase()}.svg`;
+
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = `2D structure of ${ligandCode}`;
+
+            img.onload = () => {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+
+            img.onerror = () => {
+                // Try with lowercase code as fallback
+                const altImageUrl = `https://cdn.rcsb.org/images/ccd/unlabeled/${firstLetter}/${ligandCode.toLowerCase()}.svg`;
+                const altImg = document.createElement('img');
+                altImg.src = altImageUrl;
+                altImg.alt = `2D structure of ${ligandCode}`;
+
+                altImg.onload = () => {
+                    container.innerHTML = '';
+                    container.appendChild(altImg);
+                };
+
+                altImg.onerror = () => {
+                    container.className = 'error';
+                    container.textContent = 'No image';
+                };
+            };
+
+        } catch (error) {
+            console.error(`Error loading 2D structure for ${ligandCode}:`, error);
+            container.className = 'error';
+            container.textContent = 'Error';
+        }
     }
 
     // Demo function to show how similar ligands would work (for ATP example)
