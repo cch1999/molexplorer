@@ -235,6 +235,10 @@ class MoleculeManager {
             e.stopPropagation();
             this.confirmDelete(ligandCode);
         });
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.confirmDelete(ligandCode);
+        });
         card.appendChild(deleteBtn);
 
         const content = document.createElement('div');
@@ -422,31 +426,41 @@ class MoleculeManager {
 
             const ligandInfo = ligandData[0];
 
+            let allLigands = [];
+
             // Add stereoisomers
             if (ligandInfo.stereoisomers && ligandInfo.stereoisomers.length > 0) {
-                ligandInfo.stereoisomers.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('stereoisomer', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.stereoisomers.map(l => ({ ...l, type: 'stereoisomer' })));
             }
 
             // Add same scaffold ligands
             if (ligandInfo.same_scaffold && ligandInfo.same_scaffold.length > 0) {
-                ligandInfo.same_scaffold.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('scaffold', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.same_scaffold.map(l => ({ ...l, type: 'scaffold' })));
             }
 
             // Add similar ligands (>60% similarity)
             if (ligandInfo.similar_ligands && ligandInfo.similar_ligands.length > 0) {
-                ligandInfo.similar_ligands.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('similar', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.similar_ligands.map(l => ({ ...l, type: 'similar' })));
+            }
+
+            // Limit to the top 10 most relevant ligands
+            const limitedLigands = allLigands.slice(0, 10);
+
+            limitedLigands.forEach(ligand => {
+                const row = this.createSimilarLigandRow(ligand.type, ligand);
+                tbody.appendChild(row);
+                this.currentSimilarLigands.push(ligand);
+            });
+
+            // Add note if we limited the results
+            if (allLigands.length > 10) {
+                const note = document.createElement('p');
+                note.style.fontSize = '12px';
+                note.style.color = '#666';
+                note.style.fontStyle = 'italic';
+                note.style.marginTop = '10px';
+                note.textContent = `Showing first 10 of ${allLigands.length} similar ligands`;
+                table.parentNode.appendChild(note);
             }
 
             // Show table and add all button
