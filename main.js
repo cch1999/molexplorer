@@ -537,13 +537,12 @@ class MoleculeManager {
         return row;
     }
 
-    // Load 2D structure image from RCSB PDB CDN
+    // Load 2D structure image from PDBe static files
     async load2DStructure(ligandCode, container) {
         try {
-            // RCSB PDB provides 2D structure images at this CDN endpoint
-            // Format: https://cdn.rcsb.org/images/ccd/unlabeled/{first_letter}/{code}.svg
-            const firstLetter = ligandCode.charAt(0).toUpperCase();
-            const imageUrl = `https://cdn.rcsb.org/images/ccd/unlabeled/${firstLetter}/${ligandCode.toUpperCase()}.svg`;
+            // PDBe provides 2D structure images at this static endpoint
+            // Format: https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/{code}_200.svg
+            const imageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligandCode.toUpperCase()}_200.svg`;
 
             const img = document.createElement('img');
             img.src = imageUrl;
@@ -556,7 +555,7 @@ class MoleculeManager {
 
             img.onerror = () => {
                 // Try with lowercase code as fallback
-                const altImageUrl = `https://cdn.rcsb.org/images/ccd/unlabeled/${firstLetter}/${ligandCode.toLowerCase()}.svg`;
+                const altImageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligandCode.toLowerCase()}_200.svg`;
                 const altImg = document.createElement('img');
                 altImg.src = altImageUrl;
                 altImg.alt = `2D structure of ${ligandCode}`;
