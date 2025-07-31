@@ -235,6 +235,10 @@ class MoleculeManager {
             e.stopPropagation();
             this.confirmDelete(ligandCode);
         });
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.confirmDelete(ligandCode);
+        });
         card.appendChild(deleteBtn);
 
         const content = document.createElement('div');
@@ -422,31 +426,41 @@ class MoleculeManager {
 
             const ligandInfo = ligandData[0];
 
+            let allLigands = [];
+
             // Add stereoisomers
             if (ligandInfo.stereoisomers && ligandInfo.stereoisomers.length > 0) {
-                ligandInfo.stereoisomers.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('stereoisomer', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.stereoisomers.map(l => ({ ...l, type: 'stereoisomer' })));
             }
 
             // Add same scaffold ligands
             if (ligandInfo.same_scaffold && ligandInfo.same_scaffold.length > 0) {
-                ligandInfo.same_scaffold.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('scaffold', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.same_scaffold.map(l => ({ ...l, type: 'scaffold' })));
             }
 
             // Add similar ligands (>60% similarity)
             if (ligandInfo.similar_ligands && ligandInfo.similar_ligands.length > 0) {
-                ligandInfo.similar_ligands.forEach(ligand => {
-                    const row = this.createSimilarLigandRow('similar', ligand);
-                    tbody.appendChild(row);
-                    this.currentSimilarLigands.push(ligand);
-                });
+                allLigands.push(...ligandInfo.similar_ligands.map(l => ({ ...l, type: 'similar' })));
+            }
+
+            // Limit to the top 10 most relevant ligands
+            const limitedLigands = allLigands.slice(0, 10);
+
+            limitedLigands.forEach(ligand => {
+                const row = this.createSimilarLigandRow(ligand.type, ligand);
+                tbody.appendChild(row);
+                this.currentSimilarLigands.push(ligand);
+            });
+
+            // Add note if we limited the results
+            if (allLigands.length > 10) {
+                const note = document.createElement('p');
+                note.style.fontSize = '12px';
+                note.style.color = '#666';
+                note.style.fontStyle = 'italic';
+                note.style.marginTop = '10px';
+                note.textContent = `Showing first 10 of ${allLigands.length} similar ligands`;
+                table.parentNode.appendChild(note);
             }
 
             // Show table and add all button
@@ -1392,8 +1406,225 @@ class MoleculeManager {
     }
 }
 
+class FragmentManager {
+    constructor() {
+        this.fragments = [];
+        this.grid = null;
+        this.searchInput = null;
+        this.sourceFilter = null;
+        this.ccdToggle = null;
+    }
+
+    init() {
+        this.grid = document.getElementById('fragment-grid');
+        this.searchInput = document.getElementById('fragment-search');
+        this.sourceFilter = document.getElementById('fragment-filter-source');
+        this.ccdToggle = document.getElementById('ccd-toggle');
+
+        this.addEventListeners();
+        return this;
+    }
+
+    addEventListeners() {
+        this.searchInput.addEventListener('input', () => this.renderFragments());
+        this.sourceFilter.addEventListener('change', () => this.renderFragments());
+        this.ccdToggle.addEventListener('change', () => this.renderFragments());
+    }
+
+    async loadFragments() {
+        try {
+            const response = await fetch('data/fragment_library_ccd.tsv');
+            const tsvData = await response.text();
+
+            const rows = tsvData.split('\n').slice(1); // Skip header
+            this.fragments = rows.map(row => {
+                const columns = row.split('\t');
+                if (columns.length < 10) return null;
+                return {
+                    id: columns[0],
+                    name: columns[1],
+                    kind: columns[2],
+                    query: columns[3],
+                    description: columns[4],
+                    comment: columns[5],
+                    url: columns[6],
+                    source: columns[7],
+                    ccd: columns[8],
+                    in_ccd: columns[9].trim() === 'True'
+                };
+            }).filter(Boolean); // remove nulls from empty lines
+
+            this.renderFragments();
+        } catch (error) {
+            console.error('Failed to load fragment library:', error);
+            this.grid.innerHTML = '<p>Error loading fragment library.</p>';
+        }
+    }
+
+    renderFragments() {
+        this.grid.innerHTML = '';
+
+        const searchTerm = this.searchInput.value.toLowerCase();
+        const source = this.sourceFilter.value;
+        const onlyInCCD = this.ccdToggle.checked;
+
+        const filteredFragments = this.fragments.filter(fragment => {
+            const nameMatch = fragment.name.toLowerCase().includes(searchTerm);
+            const sourceMatch = source === 'all' || fragment.source === source;
+            const ccdMatch = !onlyInCCD || fragment.in_ccd;
+            return nameMatch && sourceMatch && ccdMatch;
+        });
+
+        if (filteredFragments.length === 0) {
+            this.grid.innerHTML = '<p>No fragments match your criteria.</p>';
+            return;
+        }
+
+        filteredFragments.forEach(fragment => {
+            const card = this.createFragmentCard(fragment);
+            this.grid.appendChild(card);
+        });
+    }
+
+    createFragmentCard(fragment) {
+        const card = document.createElement('div');
+        card.className = 'molecule-card fragment-card';
+
+        const title = document.createElement('h3');
+        title.textContent = fragment.name;
+        card.appendChild(title);
+
+        const canvasContainer = document.createElement('div');
+        canvasContainer.className = 'viewer-container';
+        card.appendChild(canvasContainer);
+
+        const info = document.createElement('div');
+        info.className = 'fragment-info';
+
+        let ccdText = 'No';
+        if (fragment.in_ccd && fragment.ccd) {
+            const ccdCode = fragment.ccd.split(',')[0].trim();
+            ccdText = `Yes (<a href="#" class="ccd-link" data-ccd="${ccdCode}">${ccdCode}</a>)`;
+        }
+
+        info.innerHTML = `
+            <p><strong>Source:</strong> ${fragment.source}</p>
+            <p><strong>In CCD:</strong> ${ccdText}</p>
+            <p><strong>Type:</strong> ${fragment.kind}</p>
+        `;
+        card.appendChild(info);
+
+        // Add event listener for the CCD link
+        const ccdLink = info.querySelector('.ccd-link');
+        if (ccdLink) {
+            ccdLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const ccd = e.target.dataset.ccd;
+                moleculeManager.showMoleculeDetails(ccd);
+            });
+        }
+
+        // Add "Add to library" button if in CCD
+        if (fragment.in_ccd && fragment.ccd) {
+            const ccdCode = fragment.ccd.split(',')[0].trim();
+            const alreadyExists = moleculeManager.getMolecule(ccdCode);
+
+            const addButton = document.createElement('button');
+            addButton.textContent = alreadyExists ? 'In library' : 'Add to library';
+            addButton.className = 'add-to-library-btn';
+            if (alreadyExists) {
+                addButton.disabled = true;
+                addButton.classList.add('added');
+            }
+
+            addButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const success = moleculeManager.addMolecule(ccdCode);
+                if (success) {
+                    showNotification(`Adding molecule ${ccdCode} to library...`, 'success');
+                    addButton.textContent = 'Added to library';
+                    addButton.disabled = true;
+                    addButton.classList.add('added');
+                } else {
+                    // This case is for safety, though the initial check should handle it
+                    showNotification(`Molecule ${ccdCode} already exists.`, 'info');
+                    addButton.textContent = 'In library';
+                    addButton.disabled = true;
+                    addButton.classList.add('added');
+                }
+            });
+            card.appendChild(addButton);
+        }
+
+        // Defer rendering smile
+        setTimeout(() => {
+            if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 150;
+                canvasContainer.appendChild(canvas);
+
+                try {
+                    const sanitizedQuery = this.sanitizeSMILES(fragment.query);
+                    // Use the parser with error callback for robustness
+                    SmilesDrawer.parse(sanitizedQuery, function (tree) {
+                        let options = { width: 200, height: 150 };
+                        let smilesDrawer = new SmilesDrawer.Drawer(options);
+                        smilesDrawer.draw(tree, canvas, 'light', false);
+                    }, function (err) {
+                        console.error("Error parsing SMILES for " + fragment.name, err);
+                        canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
+                    });
+                } catch (ex) {
+                    console.error("General error rendering SMILES for " + fragment.name, ex);
+                    canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
+                }
+
+            } else {
+                canvasContainer.innerHTML = `<p class="render-error">Cannot render type: ${fragment.kind || 'N/A'}</p>`;
+            }
+        }, 50);
+
+        return card;
+    }
+
+    addFragment(fragmentData) {
+        // Basic validation
+        if (!fragmentData.name || !fragmentData.query) {
+            showNotification('Fragment name and SMILES/SMARTS query are required.', 'error');
+            return false;
+        }
+
+        // Add to the start of the fragments array
+        this.fragments.unshift({
+            id: `custom-${Date.now()}`,
+            name: fragmentData.name,
+            kind: 'SMILES', // Assume SMILES for now
+            query: fragmentData.query,
+            description: fragmentData.description,
+            comment: 'Custom fragment',
+            url: '',
+            source: fragmentData.source || 'custom',
+            ccd: '',
+            in_ccd: false
+        });
+
+        // Re-render the fragments view
+        this.renderFragments();
+        showNotification(`Fragment "${fragmentData.name}" added successfully!`, 'success');
+        return true;
+    }
+
+    sanitizeSMILES(smiles) {
+        if (!smiles) return '';
+        // Remove any characters that are not part of the standard SMILES alphabet
+        return smiles.replace(/[^A-Za-z0-9\(\)\[\]\.\-=#$:@\/\\]/g, '');
+    }
+}
+
 // Global molecule manager instance
 const moleculeManager = new MoleculeManager();
+const fragmentManager = new FragmentManager();
 
 // Initialize when page loads
 window.onload = async () => {
@@ -1425,8 +1656,11 @@ function showDisclaimerModal() {
 // Function to initialize the main application
 async function initializeApp() {
     moleculeManager.init();
+    fragmentManager.init();
     await moleculeManager.loadAllMolecules();
+    await fragmentManager.loadFragments();
     initializeModal();
+    initializeTabs();
 }
 
 // Modal functionality
@@ -1443,6 +1677,13 @@ function initializeModal() {
     // Details Modal
     const detailsModal = document.getElementById('molecule-details-modal');
     const closeDetailsBtn = document.getElementById('close-details-modal');
+
+    // Add Fragment Modal elements
+    const addFragmentModal = document.getElementById('add-fragment-modal');
+    const addFragmentBtn = document.getElementById('add-fragment-btn');
+    const closeFragmentModalBtn = document.getElementById('close-fragment-modal');
+    const cancelFragmentBtn = document.getElementById('cancel-add-fragment-btn');
+    const confirmFragmentBtn = document.getElementById('confirm-add-fragment-btn');
 
     // Open add modal
     addBtn.addEventListener('click', () => {
@@ -1461,9 +1702,38 @@ function initializeModal() {
         detailsModal.style.display = 'none';
     };
 
+    // Open add fragment modal
+    addFragmentBtn.addEventListener('click', () => {
+        addFragmentModal.style.display = 'block';
+        document.getElementById('fragment-name').focus();
+    });
+
+    // Close add fragment modal functions
+    const closeFragmentModal = () => {
+        addFragmentModal.style.display = 'none';
+        // Clear form fields
+        document.getElementById('fragment-name').value = '';
+        document.getElementById('fragment-query').value = '';
+        document.getElementById('fragment-description').value = '';
+        document.getElementById('fragment-source').value = 'custom';
+    };
+
     closeBtn.addEventListener('click', closeAddModal);
     cancelBtn.addEventListener('click', closeAddModal);
     closeDetailsBtn.addEventListener('click', closeDetailsModal);
+    closeFragmentModalBtn.addEventListener('click', closeFragmentModal);
+    cancelFragmentBtn.addEventListener('click', closeFragmentModal);
+
+    // Handle confirm add fragment
+    confirmFragmentBtn.addEventListener('click', () => {
+        const name = document.getElementById('fragment-name').value;
+        const query = document.getElementById('fragment-query').value;
+        const source = document.getElementById('fragment-source').value;
+        const description = document.getElementById('fragment-description').value;
+
+        fragmentManager.addFragment({ name, query, source, description });
+        closeFragmentModal();
+    });
 
     // Close modals when clicking outside
     window.addEventListener('click', (event) => {
@@ -1472,6 +1742,9 @@ function initializeModal() {
         }
         if (event.target === detailsModal) {
             closeDetailsModal();
+        }
+        if (event.target === addFragmentModal) {
+            closeFragmentModal();
         }
     });
 
@@ -1537,6 +1810,36 @@ function initializeModal() {
         if (event.target === pdbDetailsModal) {
             closePDBDetailsModal();
         }
+    });
+}
+
+function initializeTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const moleculeHeader = document.querySelector('.database-header');
+    const moleculeGrid = document.getElementById('molecule-grid');
+    const fragmentContent = document.getElementById('fragment-library-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Deactivate all tabs
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            // Activate clicked tab
+            button.classList.add('active');
+
+            // Hide all content panels
+            moleculeHeader.style.display = 'none';
+            moleculeGrid.style.display = 'none';
+            fragmentContent.style.display = 'none';
+
+            // Show the correct one
+            if (button.textContent === 'Molecules') {
+                moleculeHeader.style.display = 'flex';
+                moleculeGrid.style.display = 'grid';
+            } else if (button.textContent === 'Fragments') {
+                fragmentContent.style.display = 'block';
+            }
+            // Other tabs can be handled here later
+        });
     });
 }
 

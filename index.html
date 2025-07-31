@@ -41,6 +41,7 @@
     <main>
         <div class="tabs">
             <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Fragments</button>
             <button class="tab-button">Patterns</button>
             <button class="tab-button">Reactions</button>
         </div>
@@ -52,8 +53,61 @@
             <div id="molecule-grid" class="molecule-grid">
                 <div class="loading-indicator">Loading molecules...</div>
             </div>
+            <div id="fragment-library-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Fragment Library</h2>
+                    <button id="add-fragment-btn" class="add-btn" title="Add new fragment">+</button>
+                </div>
+                <div class="fragment-controls">
+                    <input type="text" id="fragment-search" placeholder="Search fragments...">
+                    <select id="fragment-filter-source">
+                        <option value="all">All Sources</option>
+                        <option value="PDBe">PDBe</option>
+                        <option value="ENAMINE">ENAMINE</option>
+                        <option value="DSI">DSI</option>
+                    </select>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="ccd-toggle" class="toggle-switch-checkbox">
+                        <label class="toggle-switch-label" for="ccd-toggle">
+                            <span class="toggle-switch-inner"></span>
+                            <span class="toggle-switch-switch"></span>
+                        </label>
+                        <span>Only in CCD</span>
+                    </div>
+                </div>
+                <div id="fragment-grid" class="molecule-grid">
+                    <!-- Fragment cards will be populated here -->
+                </div>
+            </div>
         </div>
     </main>
+
+    <!-- Add Fragment Modal -->
+    <div id="add-fragment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Fragment</h3>
+                <span class="close" id="close-fragment-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="fragment-name">Fragment Name:</label>
+                <input type="text" id="fragment-name" placeholder="e.g., My Custom Fragment">
+
+                <label for="fragment-query">SMILES/SMARTS:</label>
+                <input type="text" id="fragment-query" placeholder="e.g., c1ccccc1">
+
+                <label for="fragment-source">Source:</label>
+                <input type="text" id="fragment-source" placeholder="e.g., My Library" value="custom">
+
+                <label for="fragment-description">Description:</label>
+                <textarea id="fragment-description" placeholder="Enter a short description"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-fragment-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-add-fragment-btn" class="btn-primary">Add Fragment</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Add Molecule Modal -->
     <div id="add-molecule-modal" class="modal">
@@ -111,6 +165,28 @@
                 </div>
 
                 <div class="details-section">
+                    <h4>PDB Entries</h4>
+                    <div id="pdb-entries-container">
+                        <p>Loading PDB entries...</p>
+                    </div>
+                    <div id="pdb-entries-table-container" style="display: none;">
+                        <table id="pdb-entries-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>PDB ID</th>
+                                    <th>Title</th>
+                                    <th>Resolution (Å)</th>
+                                    <th>Release Date</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pdb-entries-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="details-section">
                     <div class="section-header">
                         <h4>Similar Ligands</h4>
                         <button id="add-all-similar-btn" class="add-all-btn" style="display: none;">Add All</button>
@@ -132,28 +208,6 @@
                         <tbody id="similar-ligands-tbody">
                         </tbody>
                     </table>
-                </div>
-
-                <div class="details-section">
-                    <h4>PDB Entries</h4>
-                    <div id="pdb-entries-container">
-                        <p>Loading PDB entries...</p>
-                    </div>
-                    <div id="pdb-entries-table-container" style="display: none;">
-                        <table id="pdb-entries-table" class="pdb-entries-table">
-                            <thead>
-                                <tr>
-                                    <th>PDB ID</th>
-                                    <th>Title</th>
-                                    <th>Resolution (Å)</th>
-                                    <th>Release Date</th>
-                                    <th>View Structure</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pdb-entries-tbody">
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
 
                 <div class="details-section">
@@ -218,6 +272,7 @@
     </div>
 
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
     <script type="module" src="main.js"></script>
 </body>
 
