@@ -9,6 +9,30 @@
 </head>
 
 <body>
+    <!-- Disclaimer Modal - appears on launch -->
+    <div id="launch-disclaimer-modal" class="modal disclaimer-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Disclaimer</h3>
+            </div>
+            <div class="modal-body">
+                <p><strong>This application was vibe coded with AI purely for demonstration purposes.</strong></p>
+                <p>It is not high quality, nor was it intended for serious scientific research and should be used for
+                    educational and illustrative purposes only. Data and calculations may not be accurate or complete.
+                </p>
+                <p>That being said, if you have any suggestions for improvements, feel free to write an issue at <a
+                        href="https://github.com/cch1999/molexplorer/issues"
+                        target="_blank">github.com/cch1999/molexplorer/issues</a> and I will endeavour to blindly paste
+                    this as a prompt into Cursor Agent Mode.</p>
+                <p><em>Best - Charlie</em></p>
+            </div>
+            <div class="modal-footer">
+                <button id="accept-disclaimer-btn" class="btn-primary">I Understand - Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
     <header>
         <h1>ChemLogic Interface</h1>
         <p>Molecular Data Visualization and Pattern Analysis</p>
