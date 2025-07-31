@@ -732,14 +732,14 @@ class MoleculeManager {
     createDetailedPDBEntryRow(pdbId, details) {
         const row = document.createElement('tr');
 
-        // PDB ID (clickable)
+        // PDB ID (clickable to open modal)
         const idCell = document.createElement('td');
         const idSpan = document.createElement('span');
         idSpan.className = 'pdb-id';
         idSpan.textContent = pdbId.toUpperCase();
-        idSpan.title = `Click to view ${pdbId.toUpperCase()} on RCSB PDB`;
+        idSpan.title = `Click to view details for ${pdbId.toUpperCase()}`;
         idSpan.addEventListener('click', () => {
-            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+            this.showPDBDetailsModal(pdbId);
         });
         idCell.appendChild(idSpan);
 
@@ -748,6 +748,7 @@ class MoleculeManager {
         titleCell.className = 'pdb-title';
         if (details && details.struct && details.struct.title) {
             titleCell.textContent = details.struct.title;
+            titleCell.title = details.struct.title;
         } else {
             titleCell.textContent = 'N/A';
         }
@@ -1043,6 +1044,132 @@ class MoleculeManager {
         // Show table
         table.style.display = 'table';
     }
+
+    // Show PDB entry details in a modal
+    async showPDBDetailsModal(pdbId) {
+        const modal = document.getElementById('pdb-details-modal');
+        const title = document.getElementById('pdb-details-title');
+        const body = document.getElementById('pdb-details-body');
+        const viewerContainer = document.getElementById('pdb-viewer-container');
+
+        title.textContent = `PDB Entry Details: ${pdbId.toUpperCase()}`;
+        body.innerHTML = '<div class="properties-loading">Loading PDB entry details...</div>';
+        viewerContainer.innerHTML = '';
+        viewerContainer.style.display = 'none';
+        modal.style.display = 'block';
+
+        try {
+            const response = await fetch(`https://www.ebi.ac.uk/pdbe/search/pdb/select?q=%20pdb_id:${pdbId}&wt=json`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const doc = data.response.docs[0];
+
+            if (!doc) {
+                throw new Error('No data found for this PDB entry.');
+            }
+
+            body.innerHTML = this.createPDBDetailsHTML(doc);
+
+            // Add event listeners for the new buttons
+            document.getElementById('open-rcsb-btn').addEventListener('click', () => {
+                window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+            });
+            document.getElementById('open-pdbe-btn').addEventListener('click', () => {
+                window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+            });
+
+            // Fetch PDB data and initialize 3Dmol.js viewer
+            viewerContainer.style.display = 'block';
+            viewerContainer.innerHTML = '<p class="properties-loading">Loading 3D structure...</p>';
+
+            const pdbResponse = await fetch(`https://files.rcsb.org/download/${pdbId}.pdb`);
+            if (!pdbResponse.ok) {
+                throw new Error('Could not fetch PDB file for 3D view.');
+            }
+            const pdbData = await pdbResponse.text();
+
+            setTimeout(() => {
+                try {
+                    const viewer = $3Dmol.createViewer(viewerContainer, {
+                        backgroundColor: 'white',
+                        width: '100%',
+                        height: '100%'
+                    });
+                    viewer.addModel(pdbData, 'pdb');
+                    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                    viewer.zoomTo();
+                    viewer.render();
+                } catch (e) {
+                    console.error('Error creating 3Dmol viewer:', e);
+                    viewerContainer.innerHTML = '<div class="no-pdb-entries">Could not render 3D structure.</div>';
+                }
+            }, 100);
+
+        } catch (error) {
+            console.error('Error fetching PDB details:', error);
+            body.innerHTML = '<div class="no-pdb-entries">Could not load details for this PDB entry.</div>';
+            viewerContainer.style.display = 'none';
+        }
+    }
+
+    // Create HTML for PDB details modal
+    createPDBDetailsHTML(data) {
+        const title = data.title || 'Not available';
+        const authors = data.all_authors ? data.all_authors.join(', ') : 'Not available';
+        const releaseDate = data.release_date ? new Date(data.release_date).toLocaleDateString() : 'Not available';
+        const resolution = data.resolution ? `${data.resolution.toFixed(2)} Å` : 'N/A';
+        const method = data.experimental_method ? data.experimental_method.join(', ') : 'N/A';
+        const organism = data.organism_scientific_name ? data.organism_scientific_name.join(', ') : 'Not available';
+        const pdbId = data.pdb_id;
+
+        return `
+            <div class="details-section" style="padding-bottom: 0;">
+                <div class="pdb-details-grid" style="grid-template-columns: repeat(5, 1fr);">
+                    <div class="pdb-info-item">
+                        <div class="pdb-info-label">PDB ID</div>
+                        <div class="pdb-info-value">${pdbId.toUpperCase()}</div>
+                    </div>
+                    <div class="pdb-info-item">
+                        <div class="pdb-info-label">Organism</div>
+                        <div class="pdb-info-value">${organism}</div>
+                    </div>
+                    <div class="pdb-info-item">
+                        <div class="pdb-info-label">Method</div>
+                        <div class="pdb-info-value">${method}</div>
+                    </div>
+                    <div class="pdb-info-item">
+                        <div class="pdb-info-label">Resolution</div>
+                        <div class="pdb-info-value">${resolution}</div>
+                    </div>
+                    <div class="pdb-info-item">
+                        <div class="pdb-info-label">Release Date</div>
+                        <div class="pdb-info-value">${releaseDate}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="details-section" style="padding-top: 0;">
+                 <div class="pdb-details-grid">
+                    <div class="pdb-info-item" style="grid-column: 1 / -1;">
+                        <div class="pdb-info-label">Title</div>
+                        <div class="pdb-info-value" title="${title}">${title}</div>
+                    </div>
+                    <div class="pdb-info-item" style="grid-column: 1 / -1;">
+                        <div class="pdb-info-label">Authors</div>
+                        <div class="pdb-info-value">${authors}</div>
+                    </div>
+                </div>
+                <div class="pdb-external-links">
+                    <button id="open-rcsb-btn" class="view-structure-btn rcsb-btn">Open on RCSB PDB</button>
+                    <button id="open-pdbe-btn" class="view-structure-btn pdbe-btn">Open on PDBe</button>
+                </div>
+            </div>
+            <div class="details-section">
+                <h4>Interactive Molecular Structure</h4>
+            </div>
+        `;
+    }
 }
 
 // Global molecule manager instance
@@ -1132,6 +1259,22 @@ function initializeModal() {
     };
 
     confirmBtn.addEventListener('click', addMolecule);
+
+    // PDB Details Modal
+    const pdbDetailsModal = document.getElementById('pdb-details-modal');
+    const closePDBDetailsBtn = document.getElementById('close-pdb-details-modal');
+
+    const closePDBDetailsModal = () => {
+        if (pdbDetailsModal) pdbDetailsModal.style.display = 'none';
+    };
+    if (closePDBDetailsBtn) closePDBDetailsBtn.onclick = closePDBDetailsModal;
+
+    // Also add window click listener for PDB details modal
+    window.addEventListener('click', (event) => {
+        if (event.target === pdbDetailsModal) {
+            closePDBDetailsModal();
+        }
+    });
 }
 
 // Simple notification system

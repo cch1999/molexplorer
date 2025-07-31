@@ -148,6 +148,23 @@
         </div>
     </div>
 
+    <!-- PDB Details Modal -->
+    <div id="pdb-details-modal" class="modal">
+        <div class="modal-content details-modal pdb-details-modal styled-like-ligand">
+            <div class="modal-header">
+                <h3 id="pdb-details-title">PDB Entry Details</h3>
+                <span class="close" id="close-pdb-details-modal">&times;</span>
+            </div>
+            <div id="pdb-details-body" class="modal-body details-body">
+                <!-- Content will be populated by JavaScript -->
+                <div class="properties-loading">Loading PDB entry details...</div>
+            </div>
+            <div id="pdb-viewer-container" class="details-viewer" style="display: none;">
+                <!-- 3Dmol.js viewer will be inserted here -->
+            </div>
+        </div>
+    </div>
+
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script type="module" src="main.js"></script>
 </body>

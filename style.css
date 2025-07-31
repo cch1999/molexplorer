@@ -844,3 +844,120 @@ main {
     font-size: 18px;
     color: #888;
 }
+
+.pdb-details-modal {
+    max-width: 900px;
+    width: 90%;
+}
+
+.pdb-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+#pdb-viewer-container {
+    height: 400px;
+    margin-top: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    position: relative;
+}
+
+.pdb-info-column,
+.pdb-abstract-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pdb-info-item {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 3px solid #2e7d32;
+}
+
+.pdb-info-label {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.pdb-info-value,
+.pdb-abstract-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.pdb-info-value a {
+    color: #6e45e2;
+    text-decoration: none;
+}
+
+.pdb-info-value a:hover {
+    text-decoration: underline;
+}
+
+.pdb-abstract-text {
+    text-align: justify;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-top: 5px;
+}
+
+.tag-item {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.styled-like-ligand .modal-header {
+    background: linear-gradient(45deg, #6e45e2, #88d3ce);
+    color: white;
+}
+
+.styled-like-ligand .details-section h4,
+.styled-like-ligand .pdb-info-label {
+    color: #6e45e2;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.styled-like-ligand .pdb-info-item {
+    background: none;
+    padding: 0;
+    border-left: none;
+}
+
+.styled-like-ligand .pdb-info-value {
+    background: white;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-top: 4px;
+    font-size: 14px;
+}
+
+.styled-like-ligand .pdb-details-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px 20px;
+}
+
+.pdb-external-links {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
