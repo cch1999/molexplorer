@@ -285,7 +285,7 @@ class MoleculeManager {
                         height: '100%'
                     });
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
+                    viewer.setStyle({}, { stick: {} });
                     viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
                     viewer.zoomTo();
                     viewer.render();
@@ -316,6 +316,192 @@ class MoleculeManager {
 
         // Show modal
         modal.style.display = 'block';
+
+        // Load similar ligands
+        this.loadSimilarLigands(ligandCode);
+    }
+
+    // Load similar ligands from PDBe API
+    async loadSimilarLigands(ligandCode) {
+        const container = document.getElementById('similar-ligands-container');
+        const table = document.getElementById('similar-ligands-table');
+        const tbody = document.getElementById('similar-ligands-tbody');
+
+        try {
+            container.innerHTML = '<p>Loading similar ligands...</p>';
+            table.style.display = 'none';
+
+            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ligandCode}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const ligandData = data[ligandCode];
+
+            if (!ligandData || (!ligandData[0]?.stereoisomers?.length && !ligandData[0]?.same_scaffold?.length && !ligandData[0]?.similar_ligands?.length)) {
+                container.innerHTML = '<div class="no-similar-ligands">No similar ligands found</div>';
+                return;
+            }
+
+            // Clear previous results
+            tbody.innerHTML = '';
+
+            const ligandInfo = ligandData[0];
+
+            // Add stereoisomers
+            if (ligandInfo.stereoisomers && ligandInfo.stereoisomers.length > 0) {
+                ligandInfo.stereoisomers.forEach(ligand => {
+                    const row = this.createSimilarLigandRow('stereoisomer', ligand);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Add same scaffold ligands
+            if (ligandInfo.same_scaffold && ligandInfo.same_scaffold.length > 0) {
+                ligandInfo.same_scaffold.forEach(ligand => {
+                    const row = this.createSimilarLigandRow('scaffold', ligand);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Add similar ligands (>60% similarity)
+            if (ligandInfo.similar_ligands && ligandInfo.similar_ligands.length > 0) {
+                ligandInfo.similar_ligands.forEach(ligand => {
+                    const row = this.createSimilarLigandRow('similar', ligand);
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Show table and hide loading message
+            container.style.display = 'none';
+            table.style.display = 'table';
+
+        } catch (error) {
+            console.error(`Error fetching similar ligands for ${ligandCode}:`, error);
+
+            // For now, show a placeholder with some example data to demonstrate the feature
+            container.innerHTML = '<div class="no-similar-ligands">Similar ligands feature temporarily unavailable due to CORS restrictions. <br><small>In production, this would be handled via a backend proxy.</small></div>';
+
+            // Optionally show demo data for ATP as an example
+            if (ligandCode === 'ATP') {
+                this.showDemoSimilarLigands();
+            }
+        }
+    }
+
+    // Create a table row for similar ligand
+    createSimilarLigandRow(type, ligand) {
+        const row = document.createElement('tr');
+
+        // Type badge
+        const typeCell = document.createElement('td');
+        const typeBadge = document.createElement('span');
+        typeBadge.className = `type-badge type-${type}`;
+
+        let typeText = '';
+        switch (type) {
+            case 'stereoisomer':
+                typeText = 'Stereoisomer';
+                break;
+            case 'scaffold':
+                typeText = 'Same Scaffold';
+                break;
+            case 'similar':
+                typeText = 'Similar';
+                break;
+        }
+
+        typeBadge.textContent = typeText;
+        typeCell.appendChild(typeBadge);
+
+        // CCD Code (clickable)
+        const codeCell = document.createElement('td');
+        const codeSpan = document.createElement('span');
+        codeSpan.className = 'ccd-code';
+        codeSpan.textContent = ligand.chem_comp_id;
+        codeSpan.title = `Click to add ${ligand.chem_comp_id} to database`;
+        codeSpan.addEventListener('click', () => {
+            const success = moleculeManager.addMolecule(ligand.chem_comp_id);
+            if (success) {
+                showNotification(`Adding molecule ${ligand.chem_comp_id}...`, 'success');
+            } else {
+                showNotification(`Molecule ${ligand.chem_comp_id} already exists`, 'info');
+            }
+        });
+        codeCell.appendChild(codeSpan);
+
+        // Name
+        const nameCell = document.createElement('td');
+        nameCell.className = 'ligand-name';
+        nameCell.textContent = ligand.name || 'N/A';
+
+        // Match info (substructure match or similarity score)
+        const matchCell = document.createElement('td');
+        matchCell.className = 'match-info';
+
+        if (ligand.similarity_score) {
+            // For similar ligands, show similarity score as percentage
+            const score = Math.round(ligand.similarity_score * 100);
+            matchCell.textContent = `${score}% similarity`;
+        } else if (ligand.substructure_match && ligand.substructure_match.length > 0) {
+            // For scaffold matches, show substructure match
+            matchCell.textContent = ligand.substructure_match.join(', ');
+        } else {
+            matchCell.textContent = '-';
+        }
+
+        row.appendChild(typeCell);
+        row.appendChild(codeCell);
+        row.appendChild(nameCell);
+        row.appendChild(matchCell);
+
+        return row;
+    }
+
+    // Demo function to show how similar ligands would work (for ATP example)
+    showDemoSimilarLigands() {
+        const container = document.getElementById('similar-ligands-container');
+        const table = document.getElementById('similar-ligands-table');
+        const tbody = document.getElementById('similar-ligands-tbody');
+
+        // Sample data based on the API documentation example
+        const demoData = [
+            {
+                type: 'stereoisomer',
+                chem_comp_id: 'HEJ',
+                name: '9-{5-O-[(S)-hydroxy{[(R)-hydroxy(phosphonooxy)phosphoryl]oxy}phosphoryl]-beta-D-arabinofuranosyl}-9H-purin-6-amine',
+                substructure_match: []
+            },
+            {
+                type: 'scaffold',
+                chem_comp_id: 'E7X',
+                name: '(2~{S})-4-[[(2~{R},3~{S},4~{R},5~{R})-5-(6-aminopurin-9-yl)-3,4-bis(oxidanyl)oxolan-2-yl]methyl-(2-hydroxyethyl)amino]-2-azaniumyl-butanoate',
+                substructure_match: ['N7']
+            },
+            {
+                type: 'scaffold',
+                chem_comp_id: 'ADP',
+                name: 'Adenosine 5-diphosphate',
+                substructure_match: ['N1', 'N3', 'N7', 'N9']
+            }
+        ];
+
+        // Clear previous results
+        tbody.innerHTML = '';
+
+        // Add demo rows
+        demoData.forEach(ligand => {
+            const row = this.createSimilarLigandRow(ligand.type, ligand);
+            tbody.appendChild(row);
+        });
+
+        // Update container message
+        container.innerHTML = '<div style="background: #e8f5e8; padding: 10px; border-radius: 4px; margin-bottom: 10px; font-size: 13px;"><strong>Demo Data:</strong> Showing sample similar ligands for ATP. In production, this would fetch real data from the PDBe API.</div>';
+
+        // Show table
+        table.style.display = 'table';
     }
 }
 

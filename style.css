@@ -342,6 +342,87 @@ main {
     word-wrap: break-word;
 }
 
+/* Similar Ligands Table */
+.similar-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.similar-table th,
+.similar-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+}
+
+.similar-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 2px solid #6e45e2;
+}
+
+.similar-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.similar-table .type-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.similar-table .type-stereoisomer {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.similar-table .type-scaffold {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.similar-table .type-similar {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+}
+
+.similar-table .ccd-code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 600;
+    color: #6e45e2;
+    cursor: pointer;
+}
+
+.similar-table .ccd-code:hover {
+    text-decoration: underline;
+}
+
+.similar-table .ligand-name {
+    max-width: 300px;
+    word-wrap: break-word;
+    line-height: 1.3;
+}
+
+.similar-table .match-info {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: #666;
+}
+
+.no-similar-ligands {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .details-modal {
@@ -355,6 +436,19 @@ main {
 
     .details-viewer {
         height: 250px;
+    }
+
+    .similar-table {
+        font-size: 12px;
+    }
+
+    .similar-table th,
+    .similar-table td {
+        padding: 8px 4px;
+    }
+
+    .similar-table .ligand-name {
+        max-width: 200px;
     }
 }
 
