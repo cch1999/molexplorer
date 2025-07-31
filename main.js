@@ -9,8 +9,9 @@ class MoleculeManager {
             { code: 'ATP', status: 'pending' },
             { code: 'ADP', status: 'pending' },
             { code: '355', status: 'pending' },
-            { code: 'GPY', status: 'pending' },
-            { code: 'YQD', status: 'pending' }
+            { code: 'MPV', status: 'pending' },
+            { code: 'YQD', status: 'pending' },
+            { code: 'J9N', status: 'pending' }
         ];
         this.grid = null;
         this.loadingIndicator = null;
