@@ -1637,4 +1637,19 @@ function handleDragEnd(e) {
 }
 
 // Expose moleculeManager globally for console access and future UI integration
-window.moleculeManager = moleculeManager; 
+window.moleculeManager = moleculeManager;
+
+document.addEventListener('DOMContentLoaded', () => {
+    const disclaimerModal = document.getElementById('disclaimer-modal');
+    const acceptBtn = document.getElementById('accept-disclaimer-btn');
+
+    if (disclaimerModal && acceptBtn) {
+        // Show the modal
+        disclaimerModal.style.display = 'flex';
+
+        // Add event listener to the button
+        acceptBtn.addEventListener('click', () => {
+            disclaimerModal.style.display = 'none';
+        });
+    }
+}); 

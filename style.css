@@ -119,14 +119,24 @@ main {
 /* Modal Styles */
 .modal {
     display: none;
+    /* Hidden by default */
     position: fixed;
+    /* Stay in place */
     z-index: 1000;
+    /* Sit on top */
     left: 0;
     top: 0;
     width: 100%;
+    /* Full width */
     height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
     background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(2px);
+    /* Black w/ opacity */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .modal-content {
@@ -150,6 +160,17 @@ main {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+#disclaimer-modal .modal-content {
+    max-width: 500px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#disclaimer-modal p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    font-size: 15px;
 }
 
 .modal-header {

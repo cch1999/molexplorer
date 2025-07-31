@@ -53,6 +53,28 @@
         </div>
     </div>
 
+    <!-- Disclaimer Modal -->
+    <div id="disclaimer-modal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Disclaimer</h3>
+            </div>
+            <div class="modal-body">
+                <p>This application was vibe coded with AI purely for demonstration purposes.</p>
+                <p>It is not high quality, nor was it intended for serious scientific research and should be used for
+                    educational and illustrative purposes only. Data and calculations may not be accurate or complete.
+                </p>
+                <p>That being said, if you have any suggestion on improvements, feel free to write an issue at <a
+                        href="https://github.com/charlieharris/molexplorer/issues">github.com/charlieharris/molexplorer/issues</a>
+                    and I will endeavour to blindly
+                    paste this as a prompt into Cursor Agent Mode.</p>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-end;">
+                <button id="accept-disclaimer-btn" class="btn-primary">Accept & Continue</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Molecule Details Modal -->
     <div id="molecule-details-modal" class="modal">
         <div class="modal-content details-modal">
@@ -195,6 +217,7 @@
 
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script type="module" src="main.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
 </body>
 
 
