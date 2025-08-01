@@ -109,6 +109,24 @@ class MoleculeManager {
         return true;
     }
 
+    // Delete all molecules from the list and DOM
+    deleteAllMolecules() {
+        // Clear the molecules array
+        this.molecules = [];
+
+        // Remove all molecule cards from DOM
+        const allCards = document.querySelectorAll('.molecule-card');
+        allCards.forEach(card => card.remove());
+
+        // Show loading indicator if it exists
+        if (this.loadingIndicator) {
+            this.loadingIndicator.style.display = 'none';
+        }
+
+        showNotification('All molecules deleted successfully!', 'info');
+        return true;
+    }
+
     // Get molecule by code
     getMolecule(code) {
         return this.molecules.find(mol => mol.code === code);
@@ -2072,6 +2090,7 @@ function initializeModal() {
     // Add Molecule Modal
     const addModal = document.getElementById('add-molecule-modal');
     const addBtn = document.getElementById('add-molecule-btn');
+    const deleteAllBtn = document.getElementById('delete-all-btn');
     const closeBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const confirmBtn = document.getElementById('confirm-add-btn');
@@ -2093,6 +2112,20 @@ function initializeModal() {
     addBtn.addEventListener('click', () => {
         addModal.style.display = 'block';
         input.focus();
+    });
+
+    // Delete all molecules with confirmation
+    deleteAllBtn.addEventListener('click', () => {
+        const moleculeCount = moleculeManager.getAllMolecules().length;
+        if (moleculeCount === 0) {
+            showNotification('No molecules to delete!', 'info');
+            return;
+        }
+
+        const confirmed = confirm(`Are you sure you want to delete all ${moleculeCount} molecules? This action cannot be undone.`);
+        if (confirmed) {
+            moleculeManager.deleteAllMolecules();
+        }
     });
 
     // Close add modal functions
