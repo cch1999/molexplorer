@@ -41,7 +41,6 @@ const crystallizationAids = [
 const suggestedDepositionGroups = {
     'mPro': 'G_1002155',
     'NSP13': 'G_1002164',
-    'PLpro': 'G_1002003',
     'NSP15': 'G_1002165',
     'NSP16': 'G_1002166'
 };
