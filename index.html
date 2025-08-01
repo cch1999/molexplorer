@@ -42,8 +42,7 @@
         <div class="tabs">
             <button class="tab-button active">Molecules</button>
             <button class="tab-button">Fragments</button>
-            <button class="tab-button">Patterns</button>
-            <button class="tab-button">Reactions</button>
+            <button class="tab-button">Proteins</button>
         </div>
         <div class="content">
             <div class="database-header">
@@ -77,6 +76,51 @@
                 </div>
                 <div id="fragment-grid" class="molecule-grid">
                     <!-- Fragment cards will be populated here -->
+                </div>
+            </div>
+            <div id="protein-browser-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Protein Structure Browser</h2>
+                </div>
+                <div class="protein-controls">
+                    <select id="suggested-groups-dropdown">
+                        <option value="">Choose a common protein...</option>
+                        <option value="G_1002155">mPro (Main Protease)</option>
+                        <option value="G_1002164">NSP13 (Helicase)</option>
+                        <option value="G_1002003">PLpro (Papain-like Protease)</option>
+                        <option value="G_1002165">NSP15 (Endoribonuclease)</option>
+                        <option value="G_1002166">NSP16 (2'-O-Methyltransferase)</option>
+                    </select>
+                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID..." value="G_1002155">
+                    <button id="protein-group-search-btn" class="action-btn">Search</button>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="hide-aids-toggle" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="hide-aids-toggle"></label>
+                        <span>Hide Crystallization Aids</span>
+                    </div>
+                </div>
+                <div id="protein-results-container">
+                    <div id="protein-results-table-container" style="display: none;">
+                        <table id="protein-results-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>PDB ID</th>
+                                    <th>Title</th>
+                                    <th>Resolution (Å)</th>
+                                    <th>Release Date</th>
+                                    <th>Bound Ligands</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="protein-results-tbody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="no-protein-results-message" style="display: none;">No results found.</p>
+                    <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
+                        data...</div>
                 </div>
             </div>
         </div>
@@ -274,6 +318,21 @@
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
     <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
     <script type="module" src="main.js"></script>
+
+    <!-- Quick 3D View Modal -->
+    <div id="quick-view-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="quick-view-title">3D Structure</h3>
+                <span class="close" id="close-quick-view-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div id="quick-view-viewer" style="width: 100%; height: 300px; position: relative;">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 
