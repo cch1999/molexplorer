@@ -38,6 +38,9 @@ const crystallizationAids = [
     'ZN', 'MG', 'CA', 'NA', 'K', 'CL' // Common ions
 ];
 
+
+
+
 // A global variable to keep track of the currently displayed similar ligands
 let currentSimilarLigands = [];
 let currentBoundLigands = [];
@@ -141,30 +144,158 @@ class MoleculeManager {
     async loadMolecule(code) {
         try {
             this.updateMoleculeStatus(code, 'loading');
-            const response = await fetch(`https://files.rcsb.org/ligands/view/${code}_ideal.sdf`);
+
+            // First, try to find the molecule in local SDF file
+            const localSdfData = await this.findMoleculeInLocalSdf(code);
+            if (localSdfData) {
+                console.log(`Found ${code} in local SDF file`);
+                this.updateMoleculeStatus(code, 'loaded');
+                this.createMoleculeCard(localSdfData, code, 'sdf');
+                return;
+            }
+
+            // Second, try to find SMILES in local TSV file
+            const smilesData = await this.findMoleculeInLocalTsv(code);
+            if (smilesData) {
+                console.log(`Found ${code} in local TSV file with SMILES: ${smilesData}`);
+                this.updateMoleculeStatus(code, 'loaded');
+                this.createMoleculeCardFromSmiles(smilesData, code);
+                return;
+            }
+
+            // Last resort: try external fetch (this often fails due to CORS)
+            console.log(`Trying external fetch for ${code}`);
+            const response = await fetch(`/rcsb/ligands/view/${code.toUpperCase()}_ideal.sdf`);
 
             if (!response.ok) {
-                if (response.status === 404) {
-                    console.warn(`Ligand ${code} not found.`);
-                    this.updateMoleculeStatus(code, 'not_found');
-                    this.createNotFoundCard(code);
-                    return;
-                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const sdfData = await response.text();
+            if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
+                throw new Error('Received empty or invalid SDF data.');
+            }
+
             this.updateMoleculeStatus(code, 'loaded');
-            this.createMoleculeCard(sdfData, code);
+            this.createMoleculeCard(sdfData, code, 'sdf');
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
             this.updateMoleculeStatus(code, 'error');
-            this.createNotFoundCard(code, "Failed to load");
+            this.createNotFoundCard(code, `Failed to load: ${error.message}`);
         }
     }
 
+    // Find molecule in local SDF file
+    async findMoleculeInLocalSdf(code) {
+        try {
+            const response = await fetch('./data/Enamine_MiniFrag_Library_80cmpds_20250123.sdf');
+            if (!response.ok) return null;
+
+            const sdfContent = await response.text();
+            const molecules = sdfContent.split('$$$$');
+
+            for (const molecule of molecules) {
+                if (molecule.includes(`<Catalog ID>\n${code}`) ||
+                    molecule.includes(`<ID>\n${code}`) ||
+                    molecule.includes(`>${code}<`)) {
+                    return molecule + '$$$$';
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Error searching local SDF:', error);
+            return null;
+        }
+    }
+
+    // Find molecule SMILES in fragment library TSV file
+    async findMoleculeInLocalTsv(code) {
+        try {
+            const response = await fetch('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
+            if (!response.ok) return null;
+
+            const tsvContent = await response.text();
+            const lines = tsvContent.split('\n');
+
+            for (const line of lines) {
+                const columns = line.split('\t');
+                if (columns.length > 8 && columns[8] === code) { // CCD column (8th column)
+                    return columns[3]; // SMILES/query column (3rd column)
+                }
+            }
+            return null;
+        } catch (error) {
+            console.error('Error searching fragment library TSV:', error);
+            return null;
+        }
+    }
+
+    // Create molecule card from SMILES
+    createMoleculeCardFromSmiles(smiles, ligandCode) {
+        const card = document.createElement('div');
+        card.className = 'molecule-card';
+        card.draggable = true;
+        card.setAttribute('data-molecule-code', ligandCode);
+
+        // Add drag handle
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'drag-handle';
+        dragHandle.innerHTML = '⋯';
+        card.appendChild(dragHandle);
+
+        // Add delete button
+        const deleteBtn = document.createElement('div');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
+        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.deleteMolecule(ligandCode);
+        });
+        card.appendChild(deleteBtn);
+
+        // Add molecule code label
+        const codeLabel = document.createElement('div');
+        codeLabel.className = 'molecule-code';
+        codeLabel.textContent = ligandCode;
+        card.appendChild(codeLabel);
+
+        // Add 3D viewer container
+        const viewerContainer = document.createElement('div');
+        viewerContainer.className = 'molecule-viewer';
+        viewerContainer.id = `viewer-${ligandCode}`;
+        card.appendChild(viewerContainer);
+
+        // Add SMILES display
+        const smilesLabel = document.createElement('div');
+        smilesLabel.className = 'smiles-label';
+        smilesLabel.textContent = `SMILES: ${smiles}`;
+        smilesLabel.style.fontSize = '10px';
+        smilesLabel.style.color = '#666';
+        smilesLabel.style.marginTop = '5px';
+        card.appendChild(smilesLabel);
+
+        // Add to container
+        this.moleculeContainer.appendChild(card);
+
+        // Create simple 2D representation using SMILES
+        this.renderSmilesIn2D(smiles, viewerContainer);
+    }
+
+    // Simple 2D rendering from SMILES (placeholder for now)
+    renderSmilesIn2D(smiles, container) {
+        container.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px;">
+                <div style="text-align: center; padding: 10px;">
+                    <div style="font-size: 24px; margin-bottom: 5px;">🧪</div>
+                    <div style="font-size: 10px; color: #666;">SMILES</div>
+                </div>
+            </div>
+        `;
+    }
+
     // Create molecule card
-    createMoleculeCard(sdfData, ligandCode) {
+    createMoleculeCard(data, ligandCode, format = 'sdf') {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
@@ -191,7 +322,7 @@ class MoleculeManager {
         title.textContent = ligandCode;
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
-            this.showMoleculeDetails(ligandCode, sdfData);
+            this.showMoleculeDetails(ligandCode, data, format);
         });
         card.appendChild(title);
 
@@ -214,7 +345,7 @@ class MoleculeManager {
                 const viewer = $3Dmol.createViewer(viewerContainer, {
                     backgroundColor: 'white'
                 });
-                viewer.addModel(sdfData, 'sdf');
+                viewer.addModel(data, format);
                 viewer.setStyle({}, { stick: {} });
                 viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
                 viewer.zoomTo();
@@ -1440,15 +1571,15 @@ class FragmentManager {
 
     async loadFragments() {
         try {
-            const response = await fetch('/molexplorer/data/fragment_library_ccd.tsv');
+            const response = await fetch('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
             const tsvData = await response.text();
 
             const rows = tsvData.split('\n').slice(1); // Skip header
-            this.fragments = rows.map(row => {
+            this.fragments = rows.map((row, index) => {
                 const columns = row.split('\t');
                 if (columns.length < 10) return null;
                 return {
-                    id: columns[0],
+                    id: columns[0] || index, // Use the actual index from TSV, fallback to array index
                     name: columns[1],
                     kind: columns[2],
                     query: columns[3],
@@ -1818,11 +1949,49 @@ class ProteinManager {
         modal.style.display = 'block';
 
         try {
-            const response = await fetch(`https://files.rcsb.org/ligands/view/${ligandCode}_ideal.sdf`);
-            if (!response.ok) {
-                throw new Error('SDF file not found');
+            // First, try to find the molecule in local SDF file
+            const localSdfData = await moleculeManager.findMoleculeInLocalSdf(ligandCode);
+            if (localSdfData) {
+                console.log(`Quick view: Found ${ligandCode} in local SDF file`);
+                const glviewer = $3Dmol.createViewer(viewer, {
+                    backgroundColor: 'white'
+                });
+                glviewer.addModel(localSdfData, 'sdf');
+                glviewer.setStyle({}, {
+                    stick: {}
+                });
+                glviewer.zoomTo();
+                glviewer.render();
+                return;
             }
+
+            // Second, try to find SMILES in local TSV file
+            const smilesData = await moleculeManager.findMoleculeInLocalTsv(ligandCode);
+            if (smilesData) {
+                console.log(`Quick view: Found ${ligandCode} in local TSV file with SMILES: ${smilesData}`);
+                viewer.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa;">
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">🧪</div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">SMILES Structure</div>
+                            <div style="font-size: 14px; font-family: monospace; background: white; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">${smilesData}</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Last resort: try external fetch
+            console.log(`Quick view: Trying external fetch for ${ligandCode}`);
+            const response = await fetch(`/rcsb/ligands/view/${ligandCode.toUpperCase()}_ideal.sdf`);
+            if (!response.ok) {
+                throw new Error(`SDF file not found (${response.status})`);
+            }
+
             const sdfData = await response.text();
+            if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
+                throw new Error('Received empty or invalid SDF data.');
+            }
 
             const glviewer = $3Dmol.createViewer(viewer, {
                 backgroundColor: 'white'
@@ -1834,7 +2003,7 @@ class ProteinManager {
             glviewer.zoomTo();
             glviewer.render();
         } catch (error) {
-            viewer.innerHTML = '<p>Could not load 3D structure.</p>';
+            viewer.innerHTML = `<p>Could not load 3D structure: ${error.message}</p>`;
             console.error('Error fetching/rendering SDF for quick view:', error);
         }
     }
