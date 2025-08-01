@@ -25,6 +25,19 @@ const luckyDipCodes = [
     'CIT', 'Citrate ion, common buffer'
 ];
 
+const crystallizationAids = [
+    'SO4', 'PO4', 'CIT', 'EDO', 'GOL', '1PE', // Common buffers and solvents
+    'ACE', 'ACT', // Acetate
+    'BME', // Beta-mercaptoethanol
+    'DMS', // Dimethyl sulfoxide
+    'FMT', // Formate
+    'IMD', // Imidazole
+    'MES', // 2-(N-morpholino)ethanesulfonic acid
+    'PEG', 'PGE', // Polyethylene glycol variants
+    'TRS', // Tris buffer
+    'ZN', 'MG', 'CA', 'NA', 'K', 'CL' // Common ions
+];
+
 // A global variable to keep track of the currently displayed similar ligands
 let currentSimilarLigands = [];
 let currentBoundLigands = [];
@@ -1118,18 +1131,12 @@ class MoleculeManager {
         modal.style.display = 'block';
 
         try {
-            const response = await fetch(`https://www.ebi.ac.uk/pdbe/search/pdb/select?q=%20pdb_id:${pdbId}&wt=json`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            const doc = data.response.docs[0];
-
-            if (!doc) {
+            const details = await this.fetchRCSBDetails(pdbId);
+            if (!details) {
                 throw new Error('No data found for this PDB entry.');
             }
 
-            body.innerHTML = this.createPDBDetailsHTML(doc);
+            body.innerHTML = this.createPDBDetailsHTML(details);
 
             // Populate bound ligands table
             this.populateBoundLigands(pdbId);
@@ -1178,13 +1185,13 @@ class MoleculeManager {
 
     // Create HTML for PDB details modal
     createPDBDetailsHTML(data) {
-        const title = data.title || 'Not available';
-        const authors = data.all_authors ? data.all_authors.join(', ') : 'Not available';
-        const releaseDate = data.release_date ? new Date(data.release_date).toLocaleDateString() : 'Not available';
-        const resolution = data.resolution ? `${data.resolution.toFixed(2)} Å` : 'N/A';
-        const method = data.experimental_method ? data.experimental_method.join(', ') : 'N/A';
-        const organism = data.organism_scientific_name ? data.organism_scientific_name.join(', ') : 'Not available';
-        const pdbId = data.pdb_id;
+        const title = data.struct?.title || 'Not available';
+        const authors = data.citation?.[0]?.rcsb_authors?.join(', ') || 'Not available';
+        const releaseDate = data.rcsb_accession_info?.initial_release_date ? new Date(data.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'Not available';
+        const resolution = data.rcsb_entry_info?.resolution_combined?.[0]?.toFixed(2) ? `${data.rcsb_entry_info.resolution_combined[0].toFixed(2)} Å` : 'N/A';
+        const method = data.exptl?.[0]?.method || 'N/A';
+        const organism = data.entity_src_gen?.[0]?.pdbx_host_org_scientific_name || 'Not available';
+        const pdbId = data.rcsb_id;
 
         return `
             <div class="details-section" style="padding-bottom: 0;">
@@ -1622,9 +1629,221 @@ class FragmentManager {
     }
 }
 
+class ProteinManager {
+    constructor() {
+        this.searchBtn = document.getElementById('protein-group-search-btn');
+        this.searchInput = document.getElementById('protein-group-search');
+        this.resultsContainer = document.getElementById('protein-results-table-container');
+        this.resultsBody = document.getElementById('protein-results-tbody');
+        this.loadingIndicator = document.getElementById('protein-loading-indicator');
+        this.noResultsMessage = document.getElementById('no-protein-results-message');
+        this.hideAidsToggle = document.getElementById('hide-aids-toggle');
+        this.currentProteinDetails = []; // To store current search results
+    }
+
+    init() {
+        this.searchBtn.addEventListener('click', () => {
+            const groupId = this.searchInput.value.trim();
+            if (groupId) {
+                this.fetchProteinGroup(groupId);
+            } else {
+                showNotification('Please enter a Group ID.', 'info');
+            }
+        });
+
+        this.hideAidsToggle.addEventListener('change', () => {
+            if (this.currentProteinDetails.length > 0) {
+                this.displayResults(this.currentProteinDetails);
+            }
+        });
+    }
+
+    async fetchProteinGroup(groupId) {
+        this.loadingIndicator.style.display = 'block';
+        this.resultsContainer.style.display = 'none';
+        this.noResultsMessage.style.display = 'none';
+
+        const url = `https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Group not found or API error: ${response.status}`);
+            }
+            const data = await response.json();
+            const memberIds = data.rcsb_group_container_identifiers.group_member_ids;
+
+            this.currentProteinDetails = await this.fetchMemberDetails(memberIds);
+            this.displayResults(this.currentProteinDetails);
+
+        } catch (error) {
+            console.error('Error fetching protein group:', error);
+            this.noResultsMessage.textContent = 'Could not fetch data for the given Group ID.';
+            this.noResultsMessage.style.display = 'block';
+        } finally {
+            this.loadingIndicator.style.display = 'none';
+        }
+    }
+
+    async fetchMemberDetails(pdbIds) {
+        const details = [];
+        for (const pdbId of pdbIds) {
+            try {
+                const response = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    details.push(data);
+                } else {
+                    details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
+                }
+            } catch (error) {
+                details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
+            }
+        }
+        return details;
+    }
+
+    async fetchBoundLigands(pdbId) {
+        try {
+            const response = await fetch(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`);
+            if (!response.ok) {
+                return [];
+            }
+            const data = await response.json();
+            return data[pdbId.toLowerCase()] || [];
+        } catch (error) {
+            console.error(`Error fetching bound ligands for ${pdbId}:`, error);
+            return [];
+        }
+    }
+
+    async displayResults(proteinDetails) {
+        this.resultsBody.innerHTML = '';
+        if (proteinDetails && proteinDetails.length > 0) {
+            const hideAids = this.hideAidsToggle.checked;
+
+            for (const detail of proteinDetails) {
+                const row = this.resultsBody.insertRow();
+                const pdbId = detail.rcsb_id;
+                const title = detail.struct?.title || 'N/A';
+                const resolution = detail.rcsb_entry_info?.resolution_combined?.[0]?.toFixed(2) || 'N/A';
+                const releaseDate = detail.rcsb_accession_info?.initial_release_date ? new Date(detail.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'N/A';
+                const imageUrl = `https://cdn.rcsb.org/images/structures/${pdbId.toLowerCase()}_assembly-1.jpeg`;
+
+                let boundLigands = await this.fetchBoundLigands(pdbId);
+
+                if (hideAids) {
+                    boundLigands = boundLigands.filter(ligand => !crystallizationAids.includes(ligand.chem_comp_id));
+                }
+
+                row.innerHTML = `
+                    <td><img src="${imageUrl}" alt="${pdbId} thumbnail" class="protein-thumbnail"></td>
+                    <td><a href="#" class="pdb-id-link" data-pdb-id="${pdbId}">${pdbId}</a></td>
+                    <td>${title}</td>
+                    <td>${resolution}</td>
+                    <td>${releaseDate}</td>
+                    <td class="bound-ligands-cell">
+                        <div class="bound-ligands-container">
+                            ${boundLigands.slice(0, 5).map(ligand => `
+                                <div class="ligand-img-container">
+                                    <img src="https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligand.chem_comp_id}_200.svg" 
+                                         alt="${ligand.chem_comp_id}" 
+                                         title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" 
+                                         class="bound-ligand-img">
+                                    <div class="ligand-img-overlay">
+                                        <button class="ligand-action-btn add-ligand" data-ligand-code="${ligand.chem_comp_id}">+</button>
+                                        <button class="ligand-action-btn quick-view" data-ligand-code="${ligand.chem_comp_id}">👁️</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${boundLigands.length > 5 ? `<span class="more-ligands-indicator" title="${boundLigands.length - 5} more ligands">+${boundLigands.length - 5}</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="view-buttons-cell">
+                        <button class="view-structure-btn rcsb-btn" data-pdb-id="${pdbId}">RCSB PDB</button>
+                        <button class="view-structure-btn pdbe-btn" data-pdb-id="${pdbId}">PDBe</button>
+                    </td>
+                `;
+            }
+
+            this.resultsContainer.style.display = 'block';
+            this.noResultsMessage.style.display = 'none';
+
+            document.querySelectorAll('.pdb-id-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    moleculeManager.showPDBDetailsModal(e.target.dataset.pdbId);
+                });
+            });
+
+            document.querySelectorAll('.view-structure-btn.rcsb-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    window.open(`https://www.rcsb.org/structure/${e.target.dataset.pdbId}`, '_blank');
+                });
+            });
+            document.querySelectorAll('.view-structure-btn.pdbe-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${e.target.dataset.pdbId.toLowerCase()}`, '_blank');
+                });
+            });
+
+            document.querySelectorAll('.add-ligand').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const ligandCode = e.target.dataset.ligandCode;
+                    moleculeManager.addMolecule(ligandCode);
+                    showNotification(`Added ${ligandCode} to library`, 'success');
+                });
+            });
+
+            document.querySelectorAll('.quick-view').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const ligandCode = e.target.dataset.ligandCode;
+                    this.showQuickViewModal(ligandCode);
+                });
+            });
+
+        } else {
+            this.noResultsMessage.textContent = 'No PDB entries found in this group.';
+            this.noResultsMessage.style.display = 'block';
+            this.resultsContainer.style.display = 'none';
+        }
+    }
+
+    async showQuickViewModal(ligandCode) {
+        const modal = document.getElementById('quick-view-modal');
+        const title = document.getElementById('quick-view-title');
+        const viewer = document.getElementById('quick-view-viewer');
+
+        title.textContent = `3D Structure: ${ligandCode}`;
+        viewer.innerHTML = '<p>Loading...</p>';
+        modal.style.display = 'block';
+
+        try {
+            const response = await fetch(`https://files.rcsb.org/ligands/view/${ligandCode}_ideal.sdf`);
+            if (!response.ok) {
+                throw new Error('SDF file not found');
+            }
+            const sdfData = await response.text();
+
+            const glviewer = $3Dmol.createViewer(viewer, {
+                backgroundColor: 'white'
+            });
+            glviewer.addModel(sdfData, 'sdf');
+            glviewer.setStyle({}, {
+                stick: {}
+            });
+            glviewer.zoomTo();
+            glviewer.render();
+        } catch (error) {
+            viewer.innerHTML = '<p>Could not load 3D structure.</p>';
+            console.error('Error fetching/rendering SDF for quick view:', error);
+        }
+    }
+}
+
 // Global molecule manager instance
 const moleculeManager = new MoleculeManager();
 const fragmentManager = new FragmentManager();
+const proteinManager = new ProteinManager();
 
 // Initialize when page loads
 window.onload = async () => {
@@ -1657,6 +1876,7 @@ function showDisclaimerModal() {
 async function initializeApp() {
     moleculeManager.init();
     fragmentManager.init();
+    proteinManager.init();
     await moleculeManager.loadAllMolecules();
     await fragmentManager.loadFragments();
     initializeModal();
@@ -1800,15 +2020,29 @@ function initializeModal() {
     const pdbDetailsModal = document.getElementById('pdb-details-modal');
     const closePDBDetailsBtn = document.getElementById('close-pdb-details-modal');
 
+    // Quick View Modal
+    const quickViewModal = document.getElementById('quick-view-modal');
+    const closeQuickViewBtn = document.getElementById('close-quick-view-modal');
+
     const closePDBDetailsModal = () => {
         if (pdbDetailsModal) pdbDetailsModal.style.display = 'none';
     };
     if (closePDBDetailsBtn) closePDBDetailsBtn.onclick = closePDBDetailsModal;
 
+    const closeQuickViewModal = () => {
+        if (quickViewModal) quickViewModal.style.display = 'none';
+        const viewer = document.getElementById('quick-view-viewer');
+        viewer.innerHTML = ''; // Clear viewer content
+    };
+    if (closeQuickViewBtn) closeQuickViewBtn.onclick = closeQuickViewModal;
+
     // Also add window click listener for PDB details modal
     window.addEventListener('click', (event) => {
         if (event.target === pdbDetailsModal) {
             closePDBDetailsModal();
+        }
+        if (event.target === quickViewModal) {
+            closeQuickViewModal();
         }
     });
 }
@@ -1818,6 +2052,7 @@ function initializeTabs() {
     const moleculeHeader = document.querySelector('.database-header');
     const moleculeGrid = document.getElementById('molecule-grid');
     const fragmentContent = document.getElementById('fragment-library-content');
+    const proteinContent = document.getElementById('protein-browser-content');
 
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -1830,6 +2065,7 @@ function initializeTabs() {
             moleculeHeader.style.display = 'none';
             moleculeGrid.style.display = 'none';
             fragmentContent.style.display = 'none';
+            proteinContent.style.display = 'none';
 
             // Show the correct one
             if (button.textContent === 'Molecules') {
@@ -1837,8 +2073,9 @@ function initializeTabs() {
                 moleculeGrid.style.display = 'grid';
             } else if (button.textContent === 'Fragments') {
                 fragmentContent.style.display = 'block';
+            } else if (button.textContent === 'Proteins') {
+                proteinContent.style.display = 'block';
             }
-            // Other tabs can be handled here later
         });
     });
 }

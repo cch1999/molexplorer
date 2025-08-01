@@ -149,6 +149,13 @@ main {
     cursor: not-allowed;
 }
 
+.protein-thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
 .render-error {
     text-align: center;
     color: #999;
@@ -580,6 +587,12 @@ main {
     word-wrap: break-word;
 }
 
+#protein-results-table .pdb-title {
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 13px;
+}
+
 /* Similar Ligands Table */
 .similar-table {
     width: 100%;
@@ -716,7 +729,7 @@ main {
 
 .pdb-entries-table th,
 .pdb-entries-table td {
-    padding: 12px 8px;
+    padding: 6px 4px;
     text-align: left;
     border-bottom: 1px solid #e0e0e0;
     vertical-align: middle;
@@ -734,26 +747,62 @@ main {
 }
 
 /* PDB ID */
-.pdb-entries-table th:nth-child(2) {
+#pdb-entries-table th:nth-child(2) {
     width: 48%;
 }
 
 /* Title */
-.pdb-entries-table th:nth-child(3) {
+#pdb-entries-table th:nth-child(3) {
     width: 12%;
 }
 
 /* Resolution */
-.pdb-entries-table th:nth-child(4) {
+#pdb-entries-table th:nth-child(4) {
     width: 13%;
 }
 
 /* Release Date */
-.pdb-entries-table th:nth-child(5) {
+#pdb-entries-table th:nth-child(5) {
     width: 15%;
 }
 
 /* View Structure */
+
+/* Protein Results Table specific widths */
+#protein-results-table th:nth-child(1) {
+    width: 5%;
+    /* Image */
+}
+
+#protein-results-table th:nth-child(2) {
+    width: 5%;
+    /* PDB ID */
+}
+
+#protein-results-table th:nth-child(3) {
+    width: 20%;
+    /* Title */
+}
+
+#protein-results-table th:nth-child(4) {
+    width: 10%;
+    /* Resolution */
+}
+
+#protein-results-table th:nth-child(5) {
+    width: 10%;
+    /* Release Date */
+}
+
+#protein-results-table th:nth-child(6) {
+    width: 15%;
+    /* View Structure */
+}
+
+#protein-results-table th:nth-child(7) {
+    width: 30%;
+    /* Bound Ligands */
+}
 
 .pdb-entries-table tbody tr:hover {
     background-color: #f8f9fa;
@@ -769,6 +818,95 @@ main {
 
 .pdb-entries-table .pdb-id:hover {
     text-decoration: underline;
+}
+
+#protein-results-table .pdb-id-link {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 600;
+    color: #6e45e2;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+#protein-results-table .pdb-id-link:hover {
+    text-decoration: underline;
+}
+
+.bound-ligands-cell {
+    vertical-align: middle;
+}
+
+.bound-ligands-container {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 5px;
+}
+
+.bound-ligand-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: white;
+    transition: transform 0.2s;
+}
+
+.bound-ligand-img:hover {
+    transform: scale(2.5);
+    z-index: 10;
+    position: relative;
+}
+
+.ligand-img-container {
+    position: relative;
+    display: inline-block;
+}
+
+.ligand-img-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.ligand-img-container:hover .ligand-img-overlay {
+    opacity: 1;
+}
+
+.ligand-action-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    cursor: pointer;
+    margin: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+.more-ligands-indicator {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    background-color: #f0f0f0;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: default;
 }
 
 .pdb-entries-table .pdb-title {
@@ -835,15 +973,15 @@ main {
 .view-structure-btn {
     border: none;
     border-radius: 3px;
-    padding: 3px 6px;
-    font-size: 9px;
+    padding: 2px 4px;
+    font-size: 8px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
     flex: 1;
     text-align: center;
-    max-width: 75px;
+    max-width: 60px;
 }
 
 .rcsb-btn {
