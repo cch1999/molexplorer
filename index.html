@@ -83,6 +83,14 @@
                     <h2>Protein Structure Browser</h2>
                 </div>
                 <div class="protein-controls">
+                    <select id="suggested-groups-dropdown">
+                        <option value="">Choose a common protein...</option>
+                        <option value="G_1002155">mPro (Main Protease)</option>
+                        <option value="G_1002164">NSP13 (Helicase)</option>
+                        <option value="G_1002003">PLpro (Papain-like Protease)</option>
+                        <option value="G_1002165">NSP15 (Endoribonuclease)</option>
+                        <option value="G_1002166">NSP16 (2'-O-Methyltransferase)</option>
+                    </select>
                     <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID..." value="G_1002155">
                     <button id="protein-group-search-btn" class="action-btn">Search</button>
                     <div class="toggle-switch">

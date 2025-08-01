@@ -38,8 +38,13 @@ const crystallizationAids = [
     'ZN', 'MG', 'CA', 'NA', 'K', 'CL' // Common ions
 ];
 
-
-
+const suggestedDepositionGroups = {
+    'mPro': 'G_1002155',
+    'NSP13': 'G_1002164',
+    'PLpro': 'G_1002003',
+    'NSP15': 'G_1002165',
+    'NSP16': 'G_1002166'
+};
 
 // A global variable to keep track of the currently displayed similar ligands
 let currentSimilarLigands = [];
@@ -1764,6 +1769,7 @@ class ProteinManager {
     constructor() {
         this.searchBtn = document.getElementById('protein-group-search-btn');
         this.searchInput = document.getElementById('protein-group-search');
+        this.suggestedDropdown = document.getElementById('suggested-groups-dropdown');
         this.resultsContainer = document.getElementById('protein-results-table-container');
         this.resultsBody = document.getElementById('protein-results-tbody');
         this.loadingIndicator = document.getElementById('protein-loading-indicator');
@@ -1785,6 +1791,16 @@ class ProteinManager {
         this.hideAidsToggle.addEventListener('change', () => {
             if (this.currentProteinDetails.length > 0) {
                 this.displayResults(this.currentProteinDetails);
+            }
+        });
+
+        // Handle suggested groups dropdown selection
+        this.suggestedDropdown.addEventListener('change', () => {
+            const selectedGroupId = this.suggestedDropdown.value;
+            if (selectedGroupId) {
+                this.searchInput.value = selectedGroupId;
+                // Optionally auto-search when selection is made
+                this.fetchProteinGroup(selectedGroupId);
             }
         });
     }

@@ -96,6 +96,28 @@ main {
     font-size: 14px;
 }
 
+.protein-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.protein-controls input[type="text"],
+.protein-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.protein-controls select {
+    min-width: 200px;
+}
+
 .fragment-card {
     display: flex;
     flex-direction: column;
