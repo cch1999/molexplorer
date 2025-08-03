@@ -133,8 +133,8 @@ class PdbDetailsModal {
                     </div>
                 </div>
                 <div class="pdb-external-links">
-                    <button id="open-rcsb-btn" class="view-structure-btn rcsb-btn">Open on RCSB PDB</button>
-                    <button id="open-pdbe-btn" class="view-structure-btn pdbe-btn">Open on PDBe</button>
+                    <button id="open-rcsb-btn" class="view-structure-btn rcsb-btn">RCSB PDB</button>
+                    <button id="open-pdbe-btn" class="view-structure-btn pdbe-btn">PDBe</button>
                 </div>
             </div>
             <div class="details-section">
