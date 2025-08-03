@@ -1353,6 +1353,14 @@ function initializeModal() {
     const saveFileNameInput = document.getElementById('save-file-name');
     const saveFileFormat = document.getElementById('save-file-format');
 
+    // Load Molecules Modal elements
+    const loadModal = document.getElementById('load-molecules-modal');
+    const loadBtn = document.getElementById('load-molecules-btn');
+    const closeLoadModalBtn = document.getElementById('close-load-modal');
+    const cancelLoadBtn = document.getElementById('cancel-load-btn');
+    const confirmLoadBtn = document.getElementById('confirm-load-btn');
+    const loadFileInput = document.getElementById('load-file-input');
+
     // Open add modal
     addBtn.addEventListener('click', () => {
         addModal.style.display = 'block';
@@ -1363,6 +1371,13 @@ function initializeModal() {
     saveBtn.addEventListener('click', () => {
         saveModal.style.display = 'block';
         saveFileNameInput.focus();
+    });
+
+    // Open load modal
+    loadBtn.addEventListener('click', () => {
+        loadModal.style.display = 'block';
+        loadFileInput.value = '';
+        loadFileInput.focus();
     });
 
     // Delete all molecules with confirmation
@@ -1396,6 +1411,12 @@ function initializeModal() {
         saveFileNameInput.value = 'molecules';
     };
 
+    // Close load modal function
+    const closeLoadModal = () => {
+        loadModal.style.display = 'none';
+        loadFileInput.value = '';
+    };
+
     // Open add fragment modal
     addFragmentBtn.addEventListener('click', () => {
         addFragmentModal.style.display = 'block';
@@ -1419,6 +1440,8 @@ function initializeModal() {
     cancelFragmentBtn.addEventListener('click', closeFragmentModal);
     closeSaveModalBtn.addEventListener('click', closeSaveModal);
     cancelSaveBtn.addEventListener('click', closeSaveModal);
+    closeLoadModalBtn.addEventListener('click', closeLoadModal);
+    cancelLoadBtn.addEventListener('click', closeLoadModal);
 
     // Handle confirm add fragment
     confirmFragmentBtn.addEventListener('click', () => {
@@ -1444,6 +1467,9 @@ function initializeModal() {
         }
         if (event.target === saveModal) {
             closeSaveModal();
+        }
+        if (event.target === loadModal) {
+            closeLoadModal();
         }
     });
 
@@ -1494,6 +1520,44 @@ function initializeModal() {
     }
 
     confirmBtn.addEventListener('click', addMolecule);
+
+    // Load molecules function
+    confirmLoadBtn.addEventListener('click', () => {
+        const file = loadFileInput.files[0];
+        if (!file) {
+            showNotification('Please select a JSON file', 'info');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (Array.isArray(data)) {
+                    // Clear existing molecules without notification
+                    moleculeManager.molecules = [];
+                    document.querySelectorAll('.molecule-card').forEach(card => card.remove());
+                    if (moleculeManager.loadingIndicator) {
+                        moleculeManager.loadingIndicator.style.display = 'none';
+                    }
+
+                    data.forEach(mol => {
+                        if (mol.code) {
+                            moleculeManager.addMolecule(mol.code);
+                        }
+                    });
+                    showNotification('Molecules loaded!', 'success');
+                    closeLoadModal();
+                } else {
+                    showNotification('Invalid file format', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showNotification('Failed to load file', 'error');
+            }
+        };
+        reader.readAsText(file);
+    });
 
     // Save molecules function
     confirmSaveBtn.addEventListener('click', () => {
