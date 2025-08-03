@@ -48,6 +48,32 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('BAD').status, 'error');
   });
 
+  it('loadAllMolecules only processes pending entries', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'AAA', status: 'pending' },
+      { code: 'BBB', status: 'loaded' },
+      { code: 'CCC', status: 'error' },
+      { code: 'DDD', status: 'pending' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+
+    const loadStub = mock.method(loader, 'loadMolecule', async (code) => {
+      repo.updateMoleculeStatus(code, 'loaded');
+    });
+
+    await loader.loadAllMolecules();
+
+    assert.strictEqual(loadStub.mock.callCount(), 2);
+    assert.deepStrictEqual(
+      loadStub.mock.calls.map(c => c.arguments[0]).sort(),
+      ['AAA', 'DDD']
+    );
+    assert.strictEqual(repo.getMolecule('AAA').status, 'loaded');
+    assert.strictEqual(repo.getMolecule('DDD').status, 'loaded');
+    assert.strictEqual(repo.getMolecule('BBB').status, 'loaded');
+    assert.strictEqual(repo.getMolecule('CCC').status, 'error');
+  });
+
   it('findMoleculeInLocalTsv returns SMILES', async () => {
     const repo = new MoleculeRepository();
     const loader = new MoleculeLoader(repo, cardUI);
