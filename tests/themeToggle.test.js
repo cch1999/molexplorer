@@ -1,17 +1,17 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM, Element } from './domStub.js';
-import { toggleDarkMode } from '../src/utils/themeToggle.js';
+import { toggleDarkMode, MOON_ICON, SUN_ICON } from '../src/utils/themeToggle.js';
 
 describe('toggleDarkMode', () => {
-  it('toggles dark-mode class on body, updates button text, and resets viewer backgrounds', () => {
+  it('toggles dark-mode class on body, updates button icon, and resets viewer backgrounds', () => {
     const dom = new JSDOM();
     const { document } = dom.window;
     document.body = new Element('body');
     document.body.className = '';
     const btn = new Element('button');
     btn.id = 'theme-toggle';
-    btn.textContent = 'Dark Mode';
+    btn.innerHTML = MOON_ICON;
     document.registerElement('theme-toggle', btn);
     document.body.appendChild(btn);
 
@@ -28,12 +28,12 @@ describe('toggleDarkMode', () => {
 
     toggleDarkMode(document);
     assert.equal(document.body.className, 'dark-mode');
-    assert.equal(btn.textContent, 'Light Mode');
-    assert.equal(viewer.color, '#1e1e1e');
+    assert.equal(btn.innerHTML, SUN_ICON);
+    assert.equal(viewer.color, '#bbbbbb');
 
     toggleDarkMode(document);
     assert.equal(document.body.className, '');
-    assert.equal(btn.textContent, 'Dark Mode');
+    assert.equal(btn.innerHTML, MOON_ICON);
     assert.equal(viewer.color, 'white');
   });
 });

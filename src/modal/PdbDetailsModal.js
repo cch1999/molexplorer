@@ -61,11 +61,15 @@ class PdbDetailsModal {
 
             setTimeout(() => {
                 try {
+                    const isDark = document.body.classList
+                        ? document.body.classList.contains('dark-mode')
+                        : document.body.className.split(' ').includes('dark-mode');
                     const viewer = $3Dmol.createViewer(viewerContainer, {
-                        backgroundColor: 'white',
+                        backgroundColor: isDark ? '#bbbbbb' : 'white',
                         width: '100%',
                         height: '100%'
                     });
+                    viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
                     viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
                     viewer.zoomTo();

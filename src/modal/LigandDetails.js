@@ -59,11 +59,15 @@ class LigandDetails {
         if (sdfData) {
             setTimeout(() => {
                 try {
+                    const isDark = document.body.classList
+                        ? document.body.classList.contains('dark-mode')
+                        : document.body.className.split(' ').includes('dark-mode');
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
-                        backgroundColor: 'white',
+                        backgroundColor: isDark ? '#bbbbbb' : 'white',
                         width: '100%',
                         height: '100%'
                     });
+                    this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
                     viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
                     viewer.setStyle({ elem: 'H' }, {});

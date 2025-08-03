@@ -122,8 +122,10 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const isDarkMode = document.body.classList.contains('dark-mode');
-                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: isDarkMode ? '#1e1e1e' : 'white' });
+                const isDarkMode = document.body.classList
+                    ? document.body.classList.contains('dark-mode')
+                    : document.body.className.split(' ').includes('dark-mode');
+                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: isDarkMode ? '#bbbbbb' : 'white' });
                 viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
                 viewer.setStyle({}, { stick: {} });

@@ -38,13 +38,17 @@ header .theme-toggle-btn {
     position: absolute;
     top: 15px;
     right: 20px;
-    padding: 6px 12px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     background: #ffffff;
     color: #333;
-    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 body.dark-mode {
@@ -106,7 +110,11 @@ body.dark-mode .smiles-label {
 }
 
 body.dark-mode .molecule-card .viewer-container,
-body.dark-mode .molecule-card .molecule-viewer,
+body.dark-mode .molecule-card .molecule-viewer {
+    border-color: #777;
+    background-color: #bbbbbb;
+}
+
 body.dark-mode .smiles-placeholder {
     border-color: #555;
     background-color: #1e1e1e;
@@ -114,6 +122,12 @@ body.dark-mode .smiles-placeholder {
 
 body.dark-mode .smiles-placeholder .label {
     color: #ccc;
+}
+
+body.dark-mode .details-viewer {
+    background: #bbbbbb;
+    border-color: #777;
+    color: #333;
 }
 
 body.dark-mode .molecule-card .drag-handle,
