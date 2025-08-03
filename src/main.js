@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import TourGuide from './components/TourGuide.js';
 
 class MoleculeManager {
     constructor() {
@@ -198,6 +199,17 @@ const fragmentLibrary = new FragmentLibrary(moleculeManager, {
 fragmentLibrary.loadFragments();
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+
+const tour = new TourGuide([
+    { selector: '#add-molecule-btn', text: 'Add a molecule to your library.' },
+    { selector: '.tab-button:nth-child(2)', text: 'Browse the fragment library.' },
+    { selector: '.tab-button:nth-child(3)', text: 'Explore protein structures.' }
+]);
+
+const startTourBtn = document.getElementById('start-tour-btn');
+if (startTourBtn) {
+    startTourBtn.addEventListener('click', () => tour.start());
+}
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
