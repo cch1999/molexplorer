@@ -1199,6 +1199,45 @@ main {
     pointer-events: none;
 }
 
+.download-btn {
+    position: absolute;
+    top: 8px;
+    right: 40px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    user-select: none;
+    z-index: 10;
+    opacity: 0.5;
+    background-color: transparent;
+    color: #757575;
+}
+
+.download-btn:hover {
+    opacity: 1;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    transform: scale(1.1);
+}
+
+.download-btn:active {
+    transform: scale(0.9);
+    background-color: #bbdefb;
+}
+
+.molecule-card:hover .download-btn {
+    opacity: 0.7;
+}
+
+.download-btn svg {
+    pointer-events: none;
+}
+
 .molecule-card.dragging {
     opacity: 0.5;
     transform: rotate(5deg);

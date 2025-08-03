@@ -29,6 +29,16 @@ class MoleculeCard {
         });
         card.appendChild(deleteBtn);
 
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as PDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadAsPDF(ccdCode);
+        });
+        card.appendChild(downloadBtn);
+
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
         codeLabel.textContent = ccdCode;
@@ -85,6 +95,16 @@ class MoleculeCard {
         });
         card.appendChild(deleteBtn);
 
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as PDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadAsPDF(ccdCode);
+        });
+        card.appendChild(downloadBtn);
+
         const title = document.createElement('h3');
         title.textContent = ccdCode;
         title.style.cursor = 'pointer';
@@ -137,6 +157,16 @@ class MoleculeCard {
             if (this.onDelete) this.onDelete(ccdCode);
         });
         card.appendChild(deleteBtn);
+
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as PDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadAsPDF(ccdCode);
+        });
+        card.appendChild(downloadBtn);
 
         const content = document.createElement('div');
         content.className = 'not-found-content';
@@ -194,6 +224,20 @@ class MoleculeCard {
     handleDragEnd(e) {
         e.currentTarget.classList.remove('dragging');
         this.draggedElement = null;
+    }
+
+    downloadAsPDF(text) {
+        const content = `BT /F1 24 Tf 50 100 Td (${text}) Tj ET`;
+        const pdf = `%PDF-1.3\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 144]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n4 0 obj<</Length ${content.length}>>stream\n${content}\nendstream\nendobj\n5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\nxref\n0 6\n0000000000 65535 f \n0000000010 00000 n \n0000000053 00000 n \n0000000102 00000 n \n0000000224 00000 n \n0000000309 00000 n \ntrailer<</Size 6/Root 1 0 R>>\nstartxref\n363\n%%EOF`;
+        const blob = new Blob([pdf], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${text}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     clearAll() {
