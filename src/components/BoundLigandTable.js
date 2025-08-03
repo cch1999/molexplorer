@@ -55,6 +55,12 @@ class BoundLigandTable {
                 noLigandsMessage.style.display = 'block';
                 noLigandsMessage.textContent = 'Could not load bound ligand data.';
                 addAllBtn.style.display = 'none';
+                const msg = error.status && error.url
+                    ? `Failed to load bound ligands (status ${error.status}) from ${error.url}`
+                    : 'Failed to load bound ligand data.';
+                if (typeof showNotification === 'function') {
+                    showNotification(msg, 'error');
+                }
             });
     }
 

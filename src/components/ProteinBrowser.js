@@ -79,6 +79,12 @@ class ProteinBrowser {
             console.error('Error fetching protein group:', error);
             this.noResultsMessage.textContent = 'Could not fetch data for the given Group ID.';
             this.noResultsMessage.style.display = 'block';
+            const msg = error.status && error.url
+                ? `Failed to fetch protein group (status ${error.status}) from ${error.url}`
+                : 'Failed to fetch protein group data.';
+            if (typeof showNotification === 'function') {
+                showNotification(msg, 'error');
+            }
         } finally {
             this.loadingIndicator.style.display = 'none';
         }
