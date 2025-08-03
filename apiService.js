@@ -67,6 +67,7 @@ export default class ApiService {
    * // tsv.split('\n')[0] => 'ccd\tsmiles'
    */
   static getFragmentLibraryTsv() {
+    // Fetch fragment library TSV from GitHub
     return this.fetchText('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
   }
 
