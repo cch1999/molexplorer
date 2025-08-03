@@ -5,6 +5,7 @@ import LigandDetails from '../src/modal/LigandDetails.js';
 import SimilarLigandTable from '../src/modal/SimilarLigandTable.js';
 import PdbEntryList from '../src/modal/PdbEntryList.js';
 import PropertyCalculator from '../src/utils/propertyCalculator.js';
+import ApiService from '../src/utils/apiService.js';
 
 describe('LigandModal orchestrator', () => {
   it('delegates to subcomponents', () => {
@@ -21,6 +22,7 @@ describe('LigandModal orchestrator', () => {
     const load2DSpy = mock.method(SimilarLigandTable.prototype, 'load2DStructure', () => {});
     const loadPdbSpy = mock.method(PdbEntryList.prototype, 'load', () => {});
     mock.method(PropertyCalculator, 'getProperties', async () => null);
+    mock.method(ApiService, 'getPubChemMetadata', async () => null);
 
     const lm = new LigandModal({});
     lm.show('ATP', 'sdf');
@@ -56,12 +58,11 @@ describe('LigandModal properties panel', () => {
     mock.method(SimilarLigandTable.prototype, 'load', () => {});
     mock.method(PdbEntryList.prototype, 'load', () => {});
     mock.method(PropertyCalculator, 'getProperties', async () => ({ molecularWeight: 55, formula: 'C2H6O' }));
+    mock.method(ApiService, 'getPubChemMetadata', async () => ({ properties: null, synonyms: [], link: null }));
 
     const lm = new LigandModal({});
     lm.show('ETH', 'sdf');
-
-    await Promise.resolve();
-    await Promise.resolve();
+    await new Promise(setImmediate);
     assert.ok(propsEl.innerHTML.includes('55'));
     assert.ok(propsEl.innerHTML.includes('C2H6O'));
 
@@ -82,13 +83,45 @@ describe('LigandModal properties panel', () => {
     mock.method(SimilarLigandTable.prototype, 'load', () => {});
     mock.method(PdbEntryList.prototype, 'load', () => {});
     mock.method(PropertyCalculator, 'getProperties', async () => { throw new Error('fail'); });
+    mock.method(ApiService, 'getPubChemMetadata', async () => { throw new Error('fail'); });
 
     const lm = new LigandModal({});
     lm.show('BAD', 'sdf');
-
-    await Promise.resolve();
-    await Promise.resolve();
+    await new Promise(setImmediate);
     assert.strictEqual(propsEl.textContent, 'Properties unavailable');
+
+    mock.restoreAll();
+    delete global.document;
+    delete global.window;
+  });
+});
+
+describe('LigandModal metadata retrieval', () => {
+  const makeEl = () => ({ style: {}, addEventListener: () => {}, innerHTML: '', textContent: '' });
+
+  it('renders synonyms and link from ApiService', async () => {
+    const propsEl = makeEl();
+    global.document = {
+      getElementById: (id) => (id === 'ligand-properties' ? propsEl : makeEl()),
+      querySelectorAll: () => [makeEl(), makeEl()]
+    };
+    global.window = { addEventListener: () => {} };
+
+    mock.method(LigandDetails.prototype, 'show', () => {});
+    mock.method(SimilarLigandTable.prototype, 'load', () => {});
+    mock.method(PdbEntryList.prototype, 'load', () => {});
+    mock.method(PropertyCalculator, 'getProperties', async () => null);
+    mock.method(ApiService, 'getPubChemMetadata', async () => ({
+      synonyms: ['Foo', 'Bar'],
+      properties: { MolecularWeight: 10, MolecularFormula: 'H2O' },
+      link: 'https://pubchem.ncbi.nlm.nih.gov/compound/123'
+    }));
+
+    const lm = new LigandModal({});
+    lm.show('WAT', 'sdf');
+    await new Promise(setImmediate);
+    assert.ok(propsEl.innerHTML.includes('Foo'));
+    assert.ok(propsEl.innerHTML.includes('PubChem Entry'));
 
     mock.restoreAll();
     delete global.document;
