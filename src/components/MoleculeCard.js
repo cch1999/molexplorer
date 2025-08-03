@@ -6,6 +6,7 @@ class MoleculeCard {
         this.repository = repository;
         this.onDelete = callbacks.onDelete;
         this.onShowDetails = callbacks.onShowDetails;
+        this.onCompare = callbacks.onCompare;
         this.draggedElement = null;
     }
 
