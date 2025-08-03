@@ -43,7 +43,7 @@ class MoleculeManager {
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
         this.ligandModal = new LigandModal(this);
         this.boundLigandTable = new BoundLigandTable(
-            code => this.addMolecule(code),
+            molecule => this.addMolecule(molecule),
             code => this.showMoleculeDetails(code),
             this.ligandModal
         );
@@ -86,10 +86,10 @@ class MoleculeManager {
         return this;
     }
 
-    addMolecule(code) {
-        const added = this.repository.addMolecule(code);
+    addMolecule(molecule) {
+        const added = this.repository.addMolecule(molecule);
         if (added) {
-            this.loader.loadMolecule(code);
+            this.loader.loadMolecule(molecule);
         }
         return added;
     }

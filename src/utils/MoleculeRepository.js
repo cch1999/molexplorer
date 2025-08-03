@@ -3,11 +3,16 @@ class MoleculeRepository {
         this.molecules = [...initial];
     }
 
-    addMolecule(code) {
+    addMolecule(data) {
+        const code = typeof data === 'string' ? data : data.code;
         if (this.molecules.find(m => m.code === code)) {
             return false;
         }
-        this.molecules.push({ code, status: 'pending' });
+        const molecule = { code, status: 'pending' };
+        if (data && typeof data === 'object') {
+            Object.assign(molecule, data);
+        }
+        this.molecules.push(molecule);
         return true;
     }
 
