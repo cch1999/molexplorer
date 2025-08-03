@@ -1,3 +1,7 @@
+export const luckyDepCodes = [
+    'ATP', 'NAG', 'FAD', 'HEM', 'NAD', 'ADP', 'SAM', 'FMN', 'GDP', 'GTP'
+];
+
 class AddMoleculeModal {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
@@ -42,24 +46,10 @@ class AddMoleculeModal {
             this.confirmBtn.addEventListener('click', () => this.handleSubmit());
         }
         if (this.luckyBtn) {
-            fetch('data/fragment_library_ccd.tsv')
-                .then(res => res.text())
-                .then(text => {
-                    const lines = text.trim().split('\n').slice(1);
-                    this.luckyCodes = [];
-                    for (const line of lines) {
-                        const cols = line.split('\t');
-                        const code = cols[8];
-                        const inCCD = cols[9] === 'True';
-                        if (inCCD && code) {
-                            this.luckyCodes.push(code);
-                        }
-                    }
-                    if (this.luckyCodes.length > 0) {
-                        this.luckyBtn.addEventListener('click', () => this.handleLucky());
-                    }
-                })
-                .catch(() => {});
+            this.luckyCodes = luckyDepCodes;
+            if (this.luckyCodes.length > 0) {
+                this.luckyBtn.addEventListener('click', () => this.handleLucky());
+            }
         }
     }
 

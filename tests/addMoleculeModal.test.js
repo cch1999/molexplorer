@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM, Element } from './domStub.js';
-import AddMoleculeModal from '../src/modal/AddMoleculeModal.js';
+import AddMoleculeModal, { luckyDepCodes } from '../src/modal/AddMoleculeModal.js';
 
 let dom;
 let manager;
@@ -62,22 +62,14 @@ describe('AddMoleculeModal lucky button', () => {
     delete global.showNotification;
   });
 
-  it('enables lucky button and adds random molecule', async () => {
-    const tsv = '\tname\tkind\tquery\tdescription\tcomment\turl\tsource\tccd\tin_ccd\n' +
-      '0\tFoo\tSMILES\t\t\t\thttp://x\tPDBe\tAAA\tTrue\n' +
-      '1\tBar\tSMILES\t\t\t\thttp://x\tPDBe\tBBB\tFalse\n' +
-      '2\tBaz\tSMILES\t\t\t\thttp://x\tPDBe\tCCC\tTrue';
-    mock.method(global, 'fetch', async () => ({ text: async () => tsv }));
-
+  it('adds random molecule from luckyDepCodes', () => {
     const modal = new AddMoleculeModal(manager);
-    await new Promise(r => setImmediate(r));
 
-    assert.strictEqual(luckyBtn.disabled, false);
     modal.handleLucky();
 
     assert.strictEqual(manager.addMolecule.mock.callCount(), 1);
     const code = manager.addMolecule.mock.calls[0].arguments[0];
-    assert.ok(['AAA', 'CCC'].includes(code));
+    assert.ok(luckyDepCodes.includes(code));
     assert.deepStrictEqual(showNotification.mock.calls[0].arguments, [`Adding molecule ${code}...`, 'success']);
   });
 });
