@@ -118,6 +118,27 @@ main {
     min-width: 200px;
 }
 
+#protein-group-suggestions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ddd;
+    max-height: 150px;
+    overflow-y: auto;
+    background: #fff;
+    position: absolute;
+    z-index: 10;
+}
+
+#protein-group-suggestions li {
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+#protein-group-suggestions li:hover {
+    background-color: #f0f0f0;
+}
+
 .fragment-card {
     display: flex;
     flex-direction: column;
