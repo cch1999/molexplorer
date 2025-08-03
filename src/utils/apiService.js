@@ -41,7 +41,10 @@ export default class ApiService {
 
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const error = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.url = url;
+      throw error;
     }
     const parsed = await parser(response);
     responseCache.set(url, parsed);

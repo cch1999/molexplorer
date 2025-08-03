@@ -16,15 +16,36 @@ describe('ApiService', () => {
     assert.strictEqual(global.fetch.mock.calls[0].arguments[0], '/file.txt');
   });
 
-  it('fetchText throws on http error', async () => {
+  it('fetchText throws error with status and url', async () => {
     global.fetch = mock.fn(async () => ({ ok: false, status: 500 }));
-    await assert.rejects(() => ApiService.fetchText('/bad'), /HTTP error/);
+    await assert.rejects(
+      () => ApiService.fetchText('/bad'),
+      (err) => {
+        assert.strictEqual(err.status, 500);
+        assert.strictEqual(err.url, '/bad');
+        assert.match(err.message, /HTTP error/);
+        return true;
+      }
+    );
   });
 
   it('fetchJson returns parsed data', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, json: async () => ({ id: 1 }) }));
     const data = await ApiService.fetchJson('/data.json');
     assert.deepStrictEqual(data, { id: 1 });
+  });
+
+  it('fetchJson propagates errors with status and url', async () => {
+    global.fetch = mock.fn(async () => ({ ok: false, status: 404 }));
+    await assert.rejects(
+      () => ApiService.fetchJson('/missing.json'),
+      (err) => {
+        assert.strictEqual(err.status, 404);
+        assert.strictEqual(err.url, '/missing.json');
+        assert.match(err.message, /HTTP error/);
+        return true;
+      }
+    );
   });
 
   it('getCcdSdf uppercases code and fetches', async () => {

@@ -79,6 +79,12 @@ class PdbDetailsModal {
             console.error('Error fetching PDB details:', error);
             body.innerHTML = '<div class="no-pdb-entries">Could not load details for this PDB entry.</div>';
             viewerContainer.style.display = 'none';
+            const msg = error.status && error.url
+                ? `Failed to load PDB details (status ${error.status}) from ${error.url}`
+                : 'Failed to load PDB entry details.';
+            if (typeof showNotification === 'function') {
+                showNotification(msg, 'error');
+            }
         }
     }
 
