@@ -1,3 +1,5 @@
+import ApiService from '../utils/apiService.js';
+
 class AddMoleculeModal {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
@@ -8,6 +10,23 @@ class AddMoleculeModal {
         this.cancelBtn = document.getElementById('cancel-btn');
         this.closeBtn = document.getElementById('close-modal');
         this.luckyBtn = document.getElementById('feeling-lucky-btn');
+
+        // Create datalist for CCD code suggestions
+        if (this.codeInput) {
+            this.suggestionsList = document.createElement('datalist');
+            this.suggestionsList.id = 'ccd-suggestions';
+            // Tie datalist to input when possible
+            if (this.codeInput.setAttribute) {
+                this.codeInput.setAttribute('list', 'ccd-suggestions');
+            } else {
+                this.codeInput.list = 'ccd-suggestions';
+            }
+            // Append datalist near the input if DOM structure allows
+            const parent = this.codeInput.parentNode || this.codeInput.parentElement || document.body;
+            if (parent && parent.appendChild) {
+                parent.appendChild(this.suggestionsList);
+            }
+        }
 
         this.pdbIdInput = document.getElementById('pdb-id');
         this.authSeqIdInput = document.getElementById('auth-seq-id');
@@ -84,7 +103,7 @@ class AddMoleculeModal {
         }
     }
 
-    handleInput() {
+    async handleInput() {
         let value = this.codeInput.value.toUpperCase();
         this.codeInput.value = value;
         const isValid = /^[A-Z0-9]{3}$/.test(value);
@@ -93,6 +112,38 @@ class AddMoleculeModal {
         }
         if (this.confirmBtn) {
             this.confirmBtn.disabled = !isValid;
+        }
+
+        // Fetch CCD code suggestions for the current prefix
+        if (value) {
+            try {
+                const suggestions = await ApiService.searchCcdCodes(value);
+                if (this.suggestionsList) {
+                    this.suggestionsList.innerHTML = '';
+                    suggestions.forEach(code => {
+                        const option = document.createElement('option');
+                        option.value = code;
+                        this.suggestionsList.appendChild(option);
+                    });
+                }
+                if (this.luckyBtn) {
+                    this.luckyBtn.disabled = suggestions.length === 0;
+                }
+            } catch (e) {
+                if (this.suggestionsList) {
+                    this.suggestionsList.innerHTML = '';
+                }
+                if (this.luckyBtn) {
+                    this.luckyBtn.disabled = true;
+                }
+            }
+        } else {
+            if (this.suggestionsList) {
+                this.suggestionsList.innerHTML = '';
+            }
+            if (this.luckyBtn) {
+                this.luckyBtn.disabled = true;
+            }
         }
     }
 

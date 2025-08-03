@@ -191,6 +191,42 @@ export default class ApiService {
   }
 
   /**
+   * Search for chemical component codes matching a prefix.
+   *
+   * Queries external databases for CCD codes that begin with the provided
+   * prefix. The exact API used is subject to change; currently this utilises
+   * the RCSB search service. Returns an array of matching codes in
+   * uppercase. On failure an empty array is returned.
+   *
+   * @param {string} prefix - Partial CCD code to search for
+   * @returns {Promise<string[]>} Array of matching CCD codes
+   */
+  static async searchCcdCodes(prefix) {
+    const query = prefix ? prefix.toUpperCase() : '';
+    if (!query) return [];
+    try {
+      const json = encodeURIComponent(JSON.stringify({
+        query: {
+          type: 'terminal',
+          service: 'text',
+          parameters: {
+            attribute: 'chem_comp.id',
+            operator: 'startswith',
+            value: query
+          }
+        },
+        return_type: 'chem_comp',
+        request_options: { paginate: { start: 0, rows: 20 } }
+      }));
+      const data = await this.fetchJson(`https://search.rcsb.org/rcsbsearch/v1/query?json=${json}`);
+      return (data.result_set || []).map(r => r.identifier.toUpperCase());
+    } catch (e) {
+      console.error('CCD search failed', e);
+      return [];
+    }
+  }
+
+  /**
    * Fetch detailed PDB entry information from RCSB API
    *
    * Retrieves comprehensive information about a specific PDB entry including
