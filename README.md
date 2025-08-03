@@ -1,6 +1,6 @@
-# ChemLogic Interface
+# Ligand Surfer
 
-ChemLogic Interface is a demo application for exploring molecular structures, fragments and proteins. It combines local fragment libraries with live data from the PDBe and RCSB APIs to provide quick visualisations and analysis.
+Ligand Surfer is a demo application for exploring molecular structures, fragments and proteins. It combines local fragment libraries with live data from the PDBe and RCSB APIs to provide quick visualisations and analysis.
 
 ## Requirements
 - Node.js 18 or later
@@ -29,7 +29,7 @@ npm test
 
 It is not high quality, nor was it intended for serious scientific research and should be used for educational and illustrative purposes only. Data and calculations may not be accurate or complete.
 
-If you have any suggestions for improvements, feel free to write an issue at [github.com/cch1999/molexplorer/issues](https://github.com/cch1999/molexplorer/issues) and the author will endeavour to blindly paste this as a prompt into Cursor Agent Mode.
+If you have any suggestions for improvements, feel free to write an issue at [github.com/cch1999/ligand-surfer/issues](https://github.com/cch1999/ligand-surfer/issues) and the author will endeavour to blindly paste this as a prompt into Cursor Agent Mode.
 
 *Best - Charlie*
 
