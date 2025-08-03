@@ -32,7 +32,11 @@ describe('MoleculeLoader', () => {
     const repo = new MoleculeRepository([{ code: 'ZZZ', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
     mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
-    mock.method(ApiService, 'getCcdSdf', async () => 'sdfdata');
+    mock.method(
+      ApiService,
+      'getCcdSdf',
+      async () => 'name\n\n\n  1  0  0  0  0  0 0  0  0  0  0  0  0  0\n'
+    );
     await loader.loadMolecule('ZZZ');
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('ZZZ').status, 'loaded');
@@ -44,11 +48,47 @@ describe('MoleculeLoader', () => {
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
     mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
-    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    mock.method(
+      ApiService,
+      'getInstanceSdf',
+      async () => 'name\n\n\n  1  0  0  0  0  0 0  0  0  0  0  0  0  0\n'
+    );
     await loader.loadMolecule(repo.getMolecule('CCC'));
     assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.deepStrictEqual(ApiService.getInstanceSdf.mock.calls[0].arguments, [
+      '1ABC',
+      '5',
+      'A',
+      'CCC',
+    ]);
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
+  });
+
+  it('handles invalid instance SDF responses', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'BAD', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(ApiService, 'getInstanceSdf', async () => '<model_server_result />');
+    await loader.loadMolecule(repo.getMolecule('BAD'));
+    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('BAD').status, 'error');
+  });
+
+  it('treats zero atom counts as errors', async () => {
+    const repo = new MoleculeRepository([{ code: 'EMP', status: 'pending' }]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(
+      ApiService,
+      'getCcdSdf',
+      async () => 'name\n\n\n  0  0  0  0  0  0 0  0  0  0  0  0  0  0\n'
+    );
+    await loader.loadMolecule('EMP');
+    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('EMP').status, 'error');
   });
 
   it('handles errors from remote fetch', async () => {

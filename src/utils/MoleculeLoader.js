@@ -27,11 +27,25 @@ class MoleculeLoader {
             }
             let sdfData;
             if (pdbId && authSeqId && labelAsymId) {
-                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
+                sdfData = await ApiService.getInstanceSdf(
+                    pdbId,
+                    authSeqId,
+                    labelAsymId,
+                    code
+                );
             } else {
                 sdfData = await ApiService.getCcdSdf(code);
             }
-            if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
+            const lower = sdfData.toLowerCase();
+            const countsLine = sdfData.split('\n')[3] || '';
+            const atomCount = parseInt(countsLine.slice(0, 3));
+            if (
+                !sdfData ||
+                sdfData.trim() === '' ||
+                lower.includes('<html') ||
+                lower.includes('<model_server_result') ||
+                !atomCount
+            ) {
                 throw new Error('Received empty or invalid SDF data.');
             }
             this.repository.updateMoleculeStatus(code, 'loaded');

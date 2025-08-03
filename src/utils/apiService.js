@@ -110,11 +110,12 @@ export default class ApiService {
    * @param {string} pdbId - The 4-character PDB ID
    * @param {string|number} authSeqId - Author provided residue/sequence number
    * @param {string} labelAsymId - Chain identifier
+   * @param {string} compId - Chemical component identifier
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
-  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
+  static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
     return this.fetchText(
-      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&auth_comp_id=${compId.toUpperCase()}&encoding=sdf`
     );
   }
   /**
