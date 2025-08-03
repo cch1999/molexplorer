@@ -283,6 +283,13 @@ main {
     align-items: center;
 }
 
+#molecule-search {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
 .delete-all-btn {
     background: #e74c3c;
     color: white;
@@ -1158,6 +1165,45 @@ main {
     color: #757575;
 }
 
+.edit-btn {
+    position: absolute;
+    top: 8px;
+    right: 36px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    user-select: none;
+    z-index: 10;
+    opacity: 0.5;
+    background-color: transparent;
+    color: #757575;
+}
+
+.edit-btn:hover {
+    opacity: 1;
+    background-color: #e3f2fd;
+    color: #1976d2;
+    transform: scale(1.1);
+}
+
+.edit-btn:active {
+    transform: scale(0.9);
+    background-color: #bbdefb;
+}
+
+.molecule-card:hover .edit-btn {
+    opacity: 0.7;
+}
+
+.edit-btn svg {
+    pointer-events: none;
+}
+
 .delete-btn:hover {
     opacity: 1;
     background-color: #ffebee;
@@ -1222,6 +1268,25 @@ main {
     margin: 10px 0 0;
     font-size: 14px;
     color: #666;
+}
+
+.molecule-card .annotations {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #555;
+}
+
+.molecule-card .annotations .tags {
+    margin-top: 4px;
+}
+
+.molecule-card .annotations .tag {
+    display: inline-block;
+    background: #eee;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-right: 4px;
+    font-size: 10px;
 }
 
 .loading-indicator {

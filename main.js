@@ -54,28 +54,101 @@ let currentBoundLigands = [];
 class MoleculeManager {
     constructor() {
         this.molecules = [
-            { code: 'HEM', status: 'pending' },
-            { code: 'NAD', status: 'pending' },
-            { code: 'FAD', status: 'pending' },
-            { code: 'COA', status: 'pending' },
-            { code: 'ATP', status: 'pending' },
-            { code: 'ADP', status: 'pending' },
-            { code: '355', status: 'pending' },
-            { code: 'MPV', status: 'pending' },
-            { code: 'YQD', status: 'pending' },
-            { code: 'J9N', status: 'pending' },
-            { code: 'VIA', status: 'pending' },
+            { code: 'HEM', status: 'pending', notes: '', tags: [] },
+            { code: 'NAD', status: 'pending', notes: '', tags: [] },
+            { code: 'FAD', status: 'pending', notes: '', tags: [] },
+            { code: 'COA', status: 'pending', notes: '', tags: [] },
+            { code: 'ATP', status: 'pending', notes: '', tags: [] },
+            { code: 'ADP', status: 'pending', notes: '', tags: [] },
+            { code: '355', status: 'pending', notes: '', tags: [] },
+            { code: 'MPV', status: 'pending', notes: '', tags: [] },
+            { code: 'YQD', status: 'pending', notes: '', tags: [] },
+            { code: 'J9N', status: 'pending', notes: '', tags: [] },
+            { code: 'VIA', status: 'pending', notes: '', tags: [] },
         ];
         this.grid = null;
         this.loadingIndicator = null;
+        this.searchInput = null;
         this.ligandModal = new LigandModal(this);
+        this.loadFromStorage();
     }
 
     // Initialize the manager with DOM elements
     init() {
         this.grid = document.getElementById('molecule-grid');
         this.loadingIndicator = document.querySelector('.loading-indicator');
+        this.searchInput = document.getElementById('molecule-search');
+        if (this.searchInput) {
+            this.searchInput.addEventListener('input', () => this.filterMolecules());
+        }
         return this;
+    }
+
+    saveToStorage() {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('molecules', JSON.stringify(this.molecules));
+        }
+    }
+
+    loadFromStorage() {
+        if (typeof localStorage !== 'undefined') {
+            const data = localStorage.getItem('molecules');
+            if (data) {
+                try {
+                    this.molecules = JSON.parse(data);
+                } catch (e) {
+                    console.error('Failed to parse stored molecules', e);
+                }
+            }
+        }
+    }
+
+    filterMolecules() {
+        if (!this.searchInput || !this.grid) return;
+        const term = this.searchInput.value.toLowerCase();
+        const cards = this.grid.querySelectorAll('.molecule-card');
+        cards.forEach(card => {
+            const code = card.getAttribute('data-molecule-code');
+            const molecule = this.getMolecule(code);
+            const notes = molecule?.notes || '';
+            const tags = (molecule?.tags || []).join(' ');
+            const combined = `${code} ${notes} ${tags}`.toLowerCase();
+            card.style.display = combined.includes(term) ? '' : 'none';
+        });
+    }
+
+    updateCardAnnotations(card, molecule) {
+        const notesEl = card.querySelector('.annotations .notes');
+        const tagsEl = card.querySelector('.annotations .tags');
+        if (notesEl) {
+            notesEl.textContent = molecule.notes || '';
+        }
+        if (tagsEl) {
+            tagsEl.innerHTML = '';
+            (molecule.tags || []).forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = tag;
+                tagsEl.appendChild(span);
+            });
+        }
+    }
+
+    editAnnotations(code, card) {
+        const molecule = this.getMolecule(code);
+        if (!molecule) return;
+        const newNotes = prompt('Enter notes', molecule.notes || '');
+        if (newNotes !== null) {
+            molecule.notes = newNotes;
+        }
+        const currentTags = molecule.tags ? molecule.tags.join(', ') : '';
+        const newTags = prompt('Enter tags (comma-separated)', currentTags);
+        if (newTags !== null) {
+            molecule.tags = newTags.split(',').map(t => t.trim()).filter(Boolean);
+        }
+        this.updateCardAnnotations(card, molecule);
+        this.saveToStorage();
+        this.filterMolecules();
     }
 
     // Add a new molecule to the list
@@ -86,8 +159,10 @@ class MoleculeManager {
             return false;
         }
 
-        this.molecules.push({ code: code, status: 'pending' });
+        this.molecules.push({ code: code, status: 'pending', notes: '', tags: [] });
+        this.saveToStorage();
         this.loadMolecule(code);
+        this.filterMolecules();
         return true;
     }
 
@@ -108,6 +183,9 @@ class MoleculeManager {
             card.remove();
         }
 
+        this.saveToStorage();
+        this.filterMolecules();
+
         return true;
     }
 
@@ -124,6 +202,9 @@ class MoleculeManager {
         if (this.loadingIndicator) {
             this.loadingIndicator.style.display = 'none';
         }
+
+        this.saveToStorage();
+        this.filterMolecules();
 
         showNotification('All molecules deleted successfully!', 'info');
         return true;
@@ -266,6 +347,17 @@ class MoleculeManager {
         });
         card.appendChild(deleteBtn);
 
+        // Add edit button
+        const editBtn = document.createElement('div');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>';
+        editBtn.title = `Edit annotations for ${ccdCode}`;
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.editAnnotations(ccdCode, card);
+        });
+        card.appendChild(editBtn);
+
         // Add molecule code label
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
@@ -287,8 +379,32 @@ class MoleculeManager {
         smilesLabel.style.marginTop = '5px';
         card.appendChild(smilesLabel);
 
+        const molecule = this.getMolecule(ccdCode) || {};
+        const annotations = document.createElement('div');
+        annotations.className = 'annotations';
+
+        const notesEl = document.createElement('div');
+        notesEl.className = 'notes';
+        notesEl.textContent = molecule.notes || '';
+        annotations.appendChild(notesEl);
+
+        const tagsEl = document.createElement('div');
+        tagsEl.className = 'tags';
+        if (molecule.tags && molecule.tags.length) {
+            molecule.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = tag;
+                tagsEl.appendChild(span);
+            });
+        }
+        annotations.appendChild(tagsEl);
+
+        card.appendChild(annotations);
+
         // Add to container
         this.moleculeContainer.appendChild(card);
+        this.filterMolecules();
 
         // Create simple 2D representation using SMILES
         this.renderSmilesIn2D(smiles, viewerContainer);
@@ -330,6 +446,17 @@ class MoleculeManager {
         });
         card.appendChild(deleteBtn);
 
+        // Add edit button
+        const editBtn = document.createElement('div');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>';
+        editBtn.title = `Edit annotations for ${ccdCode}`;
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.editAnnotations(ccdCode, card);
+        });
+        card.appendChild(editBtn);
+
         const title = document.createElement('h3');
         title.textContent = ccdCode;
         title.style.cursor = 'pointer';
@@ -343,6 +470,30 @@ class MoleculeManager {
         viewerContainer.className = 'viewer-container';
         card.appendChild(viewerContainer);
 
+        const molecule = this.getMolecule(ccdCode) || {};
+
+        const annotations = document.createElement('div');
+        annotations.className = 'annotations';
+
+        const notesEl = document.createElement('div');
+        notesEl.className = 'notes';
+        notesEl.textContent = molecule.notes || '';
+        annotations.appendChild(notesEl);
+
+        const tagsEl = document.createElement('div');
+        tagsEl.className = 'tags';
+        if (molecule.tags && molecule.tags.length) {
+            molecule.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = tag;
+                tagsEl.appendChild(span);
+            });
+        }
+        annotations.appendChild(tagsEl);
+
+        card.appendChild(annotations);
+
         // Add drag event listeners
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragover', handleDragOver);
@@ -350,6 +501,7 @@ class MoleculeManager {
         card.addEventListener('dragend', handleDragEnd);
 
         this.grid.appendChild(card);
+        this.filterMolecules();
 
         // Wait a bit for the DOM to be ready
         setTimeout(() => {
@@ -391,11 +543,18 @@ class MoleculeManager {
             e.stopPropagation();
             this.confirmDelete(ccdCode);
         });
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.confirmDelete(ccdCode);
-        });
         card.appendChild(deleteBtn);
+
+        // Add edit button
+        const editBtn = document.createElement('div');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>';
+        editBtn.title = `Edit annotations for ${ccdCode}`;
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.editAnnotations(ccdCode, card);
+        });
+        card.appendChild(editBtn);
 
         const content = document.createElement('div');
         content.innerHTML = `<h3>${ccdCode}</h3><p>${message}</p>`;
@@ -409,6 +568,29 @@ class MoleculeManager {
 
         card.appendChild(content);
 
+        const molecule = this.getMolecule(ccdCode) || {};
+        const annotations = document.createElement('div');
+        annotations.className = 'annotations';
+
+        const notesEl = document.createElement('div');
+        notesEl.className = 'notes';
+        notesEl.textContent = molecule.notes || '';
+        annotations.appendChild(notesEl);
+
+        const tagsEl = document.createElement('div');
+        tagsEl.className = 'tags';
+        if (molecule.tags && molecule.tags.length) {
+            molecule.tags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = tag;
+                tagsEl.appendChild(span);
+            });
+        }
+        annotations.appendChild(tagsEl);
+
+        card.appendChild(annotations);
+
         // Add drag event listeners
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragover', handleDragOver);
@@ -416,6 +598,7 @@ class MoleculeManager {
         card.addEventListener('dragend', handleDragEnd);
 
         this.grid.appendChild(card);
+        this.filterMolecules();
     }
 
     // Confirm delete with user
