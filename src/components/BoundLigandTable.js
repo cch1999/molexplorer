@@ -1,8 +1,8 @@
-import ApiService from '../utils/apiService.js';
 import { EXCLUDED_LIGANDS, ADD_LIGAND_DELAY_MS } from '../utils/constants.js';
 
 class BoundLigandTable {
-    constructor(addMolecule, showMoleculeDetails, ligandModal) {
+    constructor(apiService, addMolecule, showMoleculeDetails, ligandModal) {
+        this.apiService = apiService;
         this.addMolecule = addMolecule;
         this.showMoleculeDetails = showMoleculeDetails;
         this.ligandModal = ligandModal;
@@ -17,7 +17,7 @@ class BoundLigandTable {
 
         tableBody.innerHTML = '';
 
-        ApiService.getLigandMonomers(pdbId)
+        this.apiService.getLigandMonomers(pdbId)
             .then(data => {
                 const ligands = data[pdbId.toLowerCase()];
 

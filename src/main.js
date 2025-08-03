@@ -2,6 +2,7 @@ import MoleculeLoader from './utils/MoleculeLoader.js';
 import MoleculeRepository from './utils/MoleculeRepository.js';
 import { DEFAULT_MOLECULE_CODES } from './utils/constants.js';
 import BoundLigandTable from './components/BoundLigandTable.js';
+import apiService from './utils/apiService.js';
 import FragmentLibrary from './components/FragmentLibrary.js';
 import LigandModal from './modal/LigandModal.js';
 import MoleculeCard from './components/MoleculeCard.js';
@@ -36,6 +37,7 @@ class MoleculeManager {
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
         this.ligandModal = new LigandModal(this);
         this.boundLigandTable = new BoundLigandTable(
+            apiService,
             molecule => this.addMolecule(molecule),
             code => this.showMoleculeDetails(code),
             this.ligandModal
