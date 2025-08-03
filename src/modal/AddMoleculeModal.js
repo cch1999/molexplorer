@@ -9,6 +9,11 @@ class AddMoleculeModal {
         this.closeBtn = document.getElementById('close-modal');
         this.luckyBtn = document.getElementById('feeling-lucky-btn');
 
+        this.pdbIdInput = document.getElementById('pdb-id');
+        this.authSeqIdInput = document.getElementById('auth-seq-id');
+        this.labelAsymIdInput = document.getElementById('label-asym-id');
+        this.instanceError = document.getElementById('instance-error');
+
         if (this.cancelBtn) {
             this.cancelBtn.addEventListener('click', () => this.close());
         }
@@ -23,6 +28,15 @@ class AddMoleculeModal {
 
         if (this.codeInput) {
             this.codeInput.addEventListener('input', () => this.handleInput());
+        }
+        if (this.pdbIdInput) {
+            this.pdbIdInput.addEventListener('input', () => this.handleInstanceInput());
+        }
+        if (this.authSeqIdInput) {
+            this.authSeqIdInput.addEventListener('input', () => this.handleInstanceInput());
+        }
+        if (this.labelAsymIdInput) {
+            this.labelAsymIdInput.addEventListener('input', () => this.handleInstanceInput());
         }
         if (this.confirmBtn) {
             this.confirmBtn.addEventListener('click', () => this.handleSubmit());
@@ -53,6 +67,18 @@ class AddMoleculeModal {
         if (this.errorText) {
             this.errorText.textContent = '';
         }
+        if (this.instanceError) {
+            this.instanceError.textContent = '';
+        }
+        if (this.pdbIdInput) {
+            this.pdbIdInput.value = '';
+        }
+        if (this.authSeqIdInput) {
+            this.authSeqIdInput.value = '';
+        }
+        if (this.labelAsymIdInput) {
+            this.labelAsymIdInput.value = '';
+        }
         if (this.confirmBtn) {
             this.confirmBtn.disabled = true;
         }
@@ -70,13 +96,43 @@ class AddMoleculeModal {
         }
     }
 
+    handleInstanceInput() {
+        if (this.instanceError) {
+            this.instanceError.textContent = '';
+        }
+    }
+
     handleSubmit() {
         const code = this.codeInput.value.toUpperCase();
-        const success = this.moleculeManager.addMolecule(code);
-        if (success) {
-            window.showNotification(`Adding molecule ${code}...`, 'success');
+        const pdbId = this.pdbIdInput.value.trim().toUpperCase();
+        const authSeqId = this.authSeqIdInput.value.trim();
+        const labelAsymId = this.labelAsymIdInput.value.trim().toUpperCase();
+
+        if (pdbId || authSeqId || labelAsymId) {
+            if (!(pdbId && authSeqId && labelAsymId)) {
+                if (this.instanceError) {
+                    this.instanceError.textContent = 'PDB ID, residue number and chain are required.';
+                }
+                return;
+            }
+            const success = this.moleculeManager.addPdbInstance({
+                code,
+                pdbId,
+                authSeqId,
+                labelAsymId
+            });
+            if (success) {
+                window.showNotification(`Adding ligand ${code} from ${pdbId}...`, 'success');
+            } else {
+                window.showNotification(`Ligand ${code} instance already exists`, 'info');
+            }
         } else {
-            window.showNotification(`Molecule ${code} already exists`, 'info');
+            const success = this.moleculeManager.addMolecule(code);
+            if (success) {
+                window.showNotification(`Adding molecule ${code}...`, 'success');
+            } else {
+                window.showNotification(`Molecule ${code} already exists`, 'info');
+            }
         }
         this.close();
     }

@@ -1,14 +1,27 @@
 class MoleculeRepository {
     constructor(initial = []) {
-        this.molecules = [...initial];
+        this.molecules = initial.map(m => ({ ...m, id: this.generateId(m) }));
+    }
+
+    generateId(data) {
+        if (typeof data === 'string') return data;
+        const { code, pdbId, authSeqId, labelAsymId } = data;
+        if (pdbId && authSeqId && labelAsymId) {
+            return `${pdbId}_${labelAsymId}_${authSeqId}_${code}`;
+        }
+        return code;
     }
 
     addMolecule(data) {
-        const code = typeof data === 'string' ? data : data.code;
-        if (this.molecules.find(m => m.code === code)) {
+        const id = this.generateId(data);
+        if (this.molecules.find(m => m.id === id)) {
             return false;
         }
-        const molecule = { code, status: 'pending' };
+        const molecule = {
+            code: typeof data === 'string' ? data : data.code,
+            status: 'pending',
+            id,
+        };
         if (data && typeof data === 'object') {
             Object.assign(molecule, data);
         }
@@ -16,8 +29,10 @@ class MoleculeRepository {
         return true;
     }
 
-    removeMolecule(code) {
-        const index = this.molecules.findIndex(m => m.code === code);
+    removeMolecule(identifier) {
+        const index = this.molecules.findIndex(
+            m => m.id === identifier || m.code === identifier
+        );
         if (index === -1) return false;
         this.molecules.splice(index, 1);
         return true;
@@ -27,12 +42,14 @@ class MoleculeRepository {
         this.molecules = [];
     }
 
-    getMolecule(code) {
-        return this.molecules.find(m => m.code === code);
+    getMolecule(identifier) {
+        return this.molecules.find(
+            m => m.id === identifier || m.code === identifier
+        );
     }
 
-    updateMoleculeStatus(code, status) {
-        const molecule = this.getMolecule(code);
+    updateMoleculeStatus(identifier, status) {
+        const molecule = this.getMolecule(identifier);
         if (molecule) {
             molecule.status = status;
         }
