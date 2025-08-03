@@ -42,7 +42,24 @@ class AddMoleculeModal {
             this.confirmBtn.addEventListener('click', () => this.handleSubmit());
         }
         if (this.luckyBtn) {
-            this.luckyBtn.disabled = true;
+            fetch('data/fragment_library_ccd.tsv')
+                .then(res => res.text())
+                .then(text => {
+                    const lines = text.trim().split('\n').slice(1);
+                    this.luckyCodes = [];
+                    for (const line of lines) {
+                        const cols = line.split('\t');
+                        const code = cols[8];
+                        const inCCD = cols[9] === 'True';
+                        if (inCCD && code) {
+                            this.luckyCodes.push(code);
+                        }
+                    }
+                    if (this.luckyCodes.length > 0) {
+                        this.luckyBtn.addEventListener('click', () => this.handleLucky());
+                    }
+                })
+                .catch(() => {});
         }
     }
 
@@ -100,6 +117,27 @@ class AddMoleculeModal {
         if (this.instanceError) {
             this.instanceError.textContent = '';
         }
+    }
+
+    handleLucky() {
+        if (!this.luckyCodes || this.luckyCodes.length === 0) {
+            return;
+        }
+
+        let code;
+        let attempts = 0;
+        do {
+            code = this.luckyCodes[Math.floor(Math.random() * this.luckyCodes.length)];
+            attempts++;
+        } while (this.moleculeManager.getMolecule(code) && attempts < 10);
+
+        const success = this.moleculeManager.addMolecule(code);
+        if (success) {
+            window.showNotification(`Adding molecule ${code}...`, 'success');
+        } else {
+            window.showNotification(`Molecule ${code} already exists`, 'info');
+        }
+        this.close();
     }
 
     handleSubmit() {
