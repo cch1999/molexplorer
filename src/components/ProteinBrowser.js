@@ -1,4 +1,4 @@
-import ApiService from '../apiService.js';
+import ApiService from '../utils/apiService.js';
 
 const crystallizationAids = [
     'SO4', 'PO4', 'CIT', 'EDO', 'GOL', '1PE',
