@@ -4,32 +4,48 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
 
 jobs:
-  build-and-deploy:
+  build:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '18'
-
       - name: Install dependencies
         run: npm install
-
       - name: Build
         run: npm run build
-
-      - name: Deploy preview
-        uses: peaceiris/actions-gh-pages@v3
+      - uses: actions/upload-pages-artifact@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          destination_dir: pr-preview/${{ github.event.number }}
-          keep_files: true
+          path: ./dist
+
+  deploy:
+    needs: build
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v2
+      - name: Comment preview URL
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `Preview: ${process.env.DEPLOY_URL}`
+            })
+        env:
+          DEPLOY_URL: ${{ steps.deployment.outputs.page_url }}
+
