@@ -19,7 +19,9 @@ import {
   PD_BE_SUMMARY_BASE_URL,
   RCSB_PDB_DOWNLOAD_BASE_URL,
   PD_BE_LIGAND_MONOMERS_BASE_URL,
-  RCSB_GROUP_BASE_URL
+  RCSB_GROUP_BASE_URL,
+  PUBCHEM_COMPOUND_BASE_URL,
+  PUBCHEM_COMPOUND_LINK_BASE
 } from './constants.js';
 
 // In-memory cache for URL -> parsed response pairs
@@ -284,6 +286,53 @@ export default class ApiService {
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch compound synonyms from PubChem.
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<string[]>} Array of synonym strings.
+   */
+  static async getPubChemSynonyms(name) {
+    const url = `${PUBCHEM_COMPOUND_BASE_URL}/name/${encodeURIComponent(name)}/synonyms/JSON`;
+    const data = await this.fetchJson(url);
+    return data?.InformationList?.Information?.[0]?.Synonym ?? [];
+  }
+
+  /**
+   * Fetch compound properties from PubChem.
+   *
+   * Retrieves basic chemical properties for a compound such as formula and
+   * molecular weight.
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<Object|null>} Properties object or null if unavailable.
+   */
+  static async getPubChemProperties(name) {
+    const url = `${PUBCHEM_COMPOUND_BASE_URL}/name/${encodeURIComponent(name)}/property/MolecularFormula,MolecularWeight,IUPACName,CanonicalSMILES/JSON`;
+    const data = await this.fetchJson(url);
+    return data?.PropertyTable?.Properties?.[0] ?? null;
+  }
+
+  /**
+   * Fetch combined compound metadata from PubChem (synonyms, properties, link).
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<{synonyms: string[], properties: Object|null, link: string|null}>}
+   *   Metadata including synonyms, properties, and a PubChem entry link.
+   */
+  static async getPubChemMetadata(name) {
+    const [synonyms, properties] = await Promise.all([
+      this.getPubChemSynonyms(name).catch(() => []),
+      this.getPubChemProperties(name).catch(() => null)
+    ]);
+    const cid = properties?.CID;
+    return {
+      synonyms,
+      properties,
+      link: cid ? `${PUBCHEM_COMPOUND_LINK_BASE}/${cid}` : null
+    };
   }
 
   /**
