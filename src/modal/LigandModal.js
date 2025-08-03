@@ -31,9 +31,13 @@ class LigandModal {
                     let html = '';
                     const weight = meta?.properties?.MolecularWeight ?? calcProps?.molecularWeight;
                     const formula = meta?.properties?.MolecularFormula ?? calcProps?.formula;
+                    const smiles = meta?.properties?.CanonicalSMILES;
                     if (weight || formula) {
                         html += `<div>Molecular Weight: ${weight ?? 'N/A'}</div>`;
                         html += `<div>Formula: ${formula ?? 'N/A'}</div>`;
+                    }
+                    if (smiles) {
+                        html += `<div>SMILES: ${smiles}</div>`;
                     }
                     if (meta?.properties?.IUPACName) {
                         html += `<div>IUPAC Name: ${meta.properties.IUPACName}</div>`;

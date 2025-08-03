@@ -99,7 +99,7 @@ describe('LigandModal properties panel', () => {
 describe('LigandModal metadata retrieval', () => {
   const makeEl = () => ({ style: {}, addEventListener: () => {}, innerHTML: '', textContent: '' });
 
-  it('renders synonyms and link from ApiService', async () => {
+  it('renders SMILES, synonyms and link from ApiService', async () => {
     const propsEl = makeEl();
     global.document = {
       getElementById: (id) => (id === 'ligand-properties' ? propsEl : makeEl()),
@@ -113,7 +113,7 @@ describe('LigandModal metadata retrieval', () => {
     mock.method(PropertyCalculator, 'getProperties', async () => null);
     mock.method(ApiService, 'getPubChemMetadata', async () => ({
       synonyms: ['Foo', 'Bar'],
-      properties: { MolecularWeight: 10, MolecularFormula: 'H2O' },
+      properties: { MolecularWeight: 10, MolecularFormula: 'H2O', CanonicalSMILES: 'C1CCCCC1' },
       link: 'https://pubchem.ncbi.nlm.nih.gov/compound/123'
     }));
 
@@ -121,6 +121,7 @@ describe('LigandModal metadata retrieval', () => {
     lm.show('WAT', 'sdf');
     await new Promise(setImmediate);
     assert.ok(propsEl.innerHTML.includes('Foo'));
+    assert.ok(propsEl.innerHTML.includes('C1CCCCC1'));
     assert.ok(propsEl.innerHTML.includes('PubChem Entry'));
 
     mock.restoreAll();
