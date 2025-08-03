@@ -1,6 +1,7 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import ApiService from '../utils/apiService.js';
+import { RCSB_LIGANDS_URL } from '../utils/constants.js';
 
 describe('ApiService', () => {
   afterEach(() => {
@@ -31,7 +32,7 @@ describe('ApiService', () => {
     const txt = await ApiService.getCcdSdf('atp');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      'https://files.rcsb.org/ligands/view/ATP_ideal.sdf'
+      `${RCSB_LIGANDS_URL}ATP_ideal.sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });

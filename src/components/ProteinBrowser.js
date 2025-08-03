@@ -1,10 +1,11 @@
 import ApiService from '../utils/apiService.js';
-
-const crystallizationAids = [
-    'SO4', 'PO4', 'CIT', 'EDO', 'GOL', '1PE',
-    'ACE', 'ACT', 'BME', 'DMS', 'FMT', 'IMD', 'MES',
-    'PEG', 'PGE', 'TRS'
-];
+import {
+    PDBe_CHEM_IMAGE_URL,
+    RCSB_STRUCTURE_IMAGE_URL,
+    RCSB_STRUCTURE_URL,
+    PDBe_ENTRY_BASE_URL,
+    CRYSTALLIZATION_AIDS
+} from '../utils/constants.js';
 
 class ProteinBrowser {
     constructor(moleculeManager) {
@@ -112,7 +113,7 @@ class ProteinBrowser {
         }
         const ligandHtml = ligands.slice(0, 5).map(ligand => `
             <div class="ligand-img-container">
-                <img src="https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
+                <img src="${PDBe_CHEM_IMAGE_URL}${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
                 <div class="ligand-img-overlay">
                     <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}">+</button>
                 </div>
@@ -132,11 +133,11 @@ class ProteinBrowser {
                 const title = detail.struct?.title || 'N/A';
                 const resolution = detail.rcsb_entry_info?.resolution_combined?.[0]?.toFixed(2) || 'N/A';
                 const releaseDate = detail.rcsb_accession_info?.initial_release_date ? new Date(detail.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'N/A';
-                const imageUrl = `https://cdn.rcsb.org/images/structures/${pdbId.toLowerCase()}_assembly-1.jpeg`;
+                const imageUrl = `${RCSB_STRUCTURE_IMAGE_URL}${pdbId.toLowerCase()}_assembly-1.jpeg`;
 
                 let boundLigands = await this.fetchBoundLigands(pdbId);
                 if (hideAids) {
-                    boundLigands = boundLigands.filter(ligand => !crystallizationAids.includes(ligand.chem_comp_id));
+                    boundLigands = boundLigands.filter(ligand => !CRYSTALLIZATION_AIDS.includes(ligand.chem_comp_id));
                 }
 
                 row.innerHTML = `
@@ -164,12 +165,12 @@ class ProteinBrowser {
             });
             document.querySelectorAll('.view-structure-btn.rcsb-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    window.open(`https://www.rcsb.org/structure/${e.target.dataset.pdbId}`, '_blank');
+                    window.open(`${RCSB_STRUCTURE_URL}${e.target.dataset.pdbId}`, '_blank');
                 });
             });
             document.querySelectorAll('.view-structure-btn.pdbe-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${e.target.dataset.pdbId.toLowerCase()}`, '_blank');
+                    window.open(`${PDBe_ENTRY_BASE_URL}${e.target.dataset.pdbId.toLowerCase()}`, '_blank');
                 });
             });
             document.querySelectorAll('.add-ligand').forEach(button => {
