@@ -45,10 +45,11 @@
             <button class="tab-button">Proteins</button>
         </div>
         <div class="content">
-            <div class="database-header">
-                <h2>Molecular Database</h2>
-                <div class="header-buttons">
+                <div class="database-header">
+                    <h2>Molecular Database</h2>
+                    <div class="header-buttons">
                     <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
+                    <button id="save-molecules-btn" class="save-btn" title="Save molecules">💾</button>
                     <button id="delete-all-btn" class="delete-all-btn" title="Delete all molecules">
                         <svg viewBox="0 0 24 24" width="18" height="18">
                             <path fill="currentColor"
@@ -179,6 +180,28 @@
                     <button id="cancel-btn" class="btn-secondary">Cancel</button>
                     <button id="confirm-add-btn" class="btn-primary">Add Molecule</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Molecules Modal -->
+    <div id="save-molecules-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Save Molecules</h3>
+                <span class="close" id="close-save-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="save-file-name">File Name:</label>
+                <input type="text" id="save-file-name" placeholder="molecules" value="molecules">
+                <label for="save-file-format">Format:</label>
+                <select id="save-file-format">
+                    <option value="json">JSON</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-save-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-save-btn" class="btn-primary">Save</button>
             </div>
         </div>
     </div>
