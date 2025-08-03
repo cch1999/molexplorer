@@ -5,6 +5,7 @@ import ApiService from '../apiService.js';
 describe('ApiService', () => {
   afterEach(() => {
     mock.restoreAll();
+    ApiService.clearCache();
   });
 
   it('fetchText returns text on success', async () => {
@@ -30,5 +31,22 @@ describe('ApiService', () => {
     const txt = await ApiService.getCcdSdf('atp');
     assert.strictEqual(global.fetch.mock.calls[0].arguments[0], '/rcsb/ligands/view/ATP_ideal.sdf');
     assert.strictEqual(txt, 'sdf');
+  });
+
+  it('fetchText caches responses', async () => {
+    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'cached' }));
+    const first = await ApiService.fetchText('/file.txt');
+    const second = await ApiService.fetchText('/file.txt');
+    assert.strictEqual(first, 'cached');
+    assert.strictEqual(second, 'cached');
+    assert.strictEqual(global.fetch.mock.callCount(), 1);
+  });
+
+  it('clearCache forces refetch', async () => {
+    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'again' }));
+    await ApiService.fetchText('/file.txt');
+    ApiService.clearCache();
+    await ApiService.fetchText('/file.txt');
+    assert.strictEqual(global.fetch.mock.callCount(), 2);
   });
 });
