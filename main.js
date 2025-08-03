@@ -1,3 +1,5 @@
+import { LigandModal } from './ligandModal.js';
+
 // A list of interesting CCD codes for the "I'm Feeling Lucky" feature
 const luckyDipCodes = [
     'STI', 'Imatinib (Gleevec), cancer drug',
@@ -45,8 +47,7 @@ const suggestedDepositionGroups = {
     'NSP16': 'G_1002166'
 };
 
-// A global variable to keep track of the currently displayed similar ligands
-let currentSimilarLigands = [];
+// Global array to track currently displayed bound ligands
 let currentBoundLigands = [];
 
 // Molecule Manager Class
@@ -344,7 +345,7 @@ class MoleculeManager {
         title.textContent = ligandCode;
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
-            this.showMoleculeDetails(ligandCode, data, format);
+            ligandModal.show(ligandCode, data);
         });
         card.appendChild(title);
 
@@ -414,7 +415,7 @@ class MoleculeManager {
         const title = content.querySelector('h3');
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
-            this.showMoleculeDetails(ligandCode, null);
+            ligandModal.show(ligandCode);
         });
 
         card.appendChild(content);
@@ -455,107 +456,6 @@ class MoleculeManager {
         await this.loadAllMolecules();
     }
 
-    // Show molecule details in a modal
-    showMoleculeDetails(ligandCode, sdfData) {
-        const modal = document.getElementById('molecule-details-modal');
-        const detailsTitle = document.getElementById('details-title');
-        const detailsCode = document.getElementById('details-code');
-        const detailsSource = document.getElementById('details-source');
-        const detailsType = document.getElementById('details-type');
-        const detailsViewer = document.getElementById('details-viewer-container');
-        const detailsJSON = document.getElementById('details-json');
-
-        // Update basic information
-        detailsTitle.textContent = `Molecule Details: ${ligandCode}`;
-        detailsCode.textContent = ligandCode;
-
-        // Get molecule info
-        const molecule = this.getMolecule(ligandCode);
-        const isAminoAcid = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'].includes(ligandCode);
-
-        detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
-        detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
-
-        // Clear and setup 3D viewer
-        detailsViewer.innerHTML = '<p>Loading structure...</p>';
-
-        if (sdfData) {
-            setTimeout(() => {
-                try {
-                    const viewer = $3Dmol.createViewer(detailsViewer, {
-                        backgroundColor: 'white',
-                        width: '100%',
-                        height: '100%'
-                    });
-                    viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
-                    viewer.setStyle({ elem: 'H' }, {}); // Hide hydrogen atoms
-                    viewer.zoomTo();
-                    viewer.render();
-                } catch (e) {
-                    console.error(`Error initializing details viewer for ${ligandCode}:`, e);
-                    detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
-                }
-            }, 100);
-        } else {
-            detailsViewer.innerHTML = '<p style="color: #666;">Structure data not available</p>';
-        }
-
-        // Update JSON representation
-        const jsonData = {
-            molecule_id: `mol_${ligandCode.toLowerCase()}`,
-            ccd_code: ligandCode,
-            source: isAminoAcid ? 'building_blocks' : 'reagents',
-            type: isAminoAcid ? 'building_block' : 'reagent',
-            structure_data: sdfData ? sdfData.substring(0, 100) + '...' : 'N/A',
-            properties: {
-                molecular_weight: null,
-                formula: null,
-                status: molecule ? molecule.status : 'unknown'
-            }
-        };
-
-        detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
-
-        // Show modal
-        modal.style.display = 'block';
-
-        // Clear any cached data from previous molecule views
-        this.clearPreviousModalData();
-
-        // Load similar ligands and PDB entries
-        this.loadSimilarLigands(ligandCode);
-        this.loadPDBEntries(ligandCode);
-    }
-
-    // Clear any cached data from previous molecule modal views
-    clearPreviousModalData() {
-        // Clear similar ligands data
-        this.currentSimilarLigands = [];
-        const similarTable = document.getElementById('similar-ligands-table');
-        const similarTbody = document.getElementById('similar-ligands-tbody');
-        const similarContainer = document.getElementById('similar-ligands-container');
-        const addAllBtn = document.getElementById('add-all-similar-btn');
-
-        if (similarTable) similarTable.style.display = 'none';
-        if (similarTbody) similarTbody.innerHTML = '';
-        if (similarContainer) similarContainer.innerHTML = '<p>Loading similar ligands...</p>';
-        if (addAllBtn) addAllBtn.style.display = 'none';
-
-        // Clear PDB entries data
-        const pdbTable = document.getElementById('pdb-entries-table-container');
-        const pdbTbody = document.getElementById('pdb-entries-tbody');
-        const pdbContainer = document.getElementById('pdb-entries-container');
-
-        if (pdbTable) {
-            pdbTable.style.display = 'none';
-            // Remove any existing notes
-            const existingNotes = pdbTable.querySelectorAll('p[style*="font-size: 12px"]');
-            existingNotes.forEach(note => note.remove());
-        }
-        if (pdbTbody) pdbTbody.innerHTML = '';
-        if (pdbContainer) pdbContainer.innerHTML = '<p>Loading PDB entries...</p>';
-    }
 
     // Load similar ligands from PDBe API
     async loadSimilarLigands(ligandCode) {
@@ -745,7 +645,7 @@ class MoleculeManager {
         codeSpan.title = `Click to add ${ligand.chem_comp_id} to database`;
         codeSpan.addEventListener('click', () => {
             document.getElementById('close-details-modal').click();
-            this.showMoleculeDetails(ligand.chem_comp_id);
+            ligandModal.show(ligand.chem_comp_id);
         });
         codeCell.appendChild(codeSpan);
 
@@ -1472,7 +1372,7 @@ class MoleculeManager {
         codeSpan.title = `Click to add ${ligand.chem_comp_id} to database`;
         codeSpan.addEventListener('click', () => {
             document.getElementById('close-pdb-details-modal').click();
-            this.showMoleculeDetails(ligand.chem_comp_id);
+            ligandModal.show(ligand.chem_comp_id);
         });
         codeCell.appendChild(codeSpan);
 
@@ -1680,7 +1580,7 @@ class FragmentManager {
             ccdLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 const ccd = e.target.dataset.ccd;
-                moleculeManager.showMoleculeDetails(ccd);
+                ligandModal.show(ccd);
             });
         }
 
@@ -2042,8 +1942,13 @@ class ProteinManager {
     }
 }
 
-// Global molecule manager instance
+// Global manager instances
 const moleculeManager = new MoleculeManager();
+const ligandModal = new LigandModal({
+    loadSimilarLigands: (code) => moleculeManager.loadSimilarLigands(code),
+    loadPDBEntries: (code) => moleculeManager.loadPDBEntries(code),
+    getMolecule: (code) => moleculeManager.getMolecule(code)
+});
 const fragmentManager = new FragmentManager();
 const proteinManager = new ProteinManager();
 
