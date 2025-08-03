@@ -1,4 +1,5 @@
 import ApiService from '../utils/apiService.js';
+import { IGNORED_LIGANDS } from '../utils/constants.js';
 
 class BoundLigandTable {
     constructor(addMolecule, showMoleculeDetails, ligandModal) {
@@ -21,7 +22,7 @@ class BoundLigandTable {
                 const ligands = data[pdbId.toLowerCase()];
 
                 if (ligands && ligands.length > 0) {
-                    const significantLigands = ligands.filter(l => !['HOH', 'ZN', 'MG', 'CA', 'NA', 'K', 'CL'].includes(l.chem_comp_id));
+                    const significantLigands = ligands.filter(l => !IGNORED_LIGANDS.includes(l.chem_comp_id));
                     const ligandsToShow = significantLigands.length > 0 ? significantLigands : ligands;
 
                     section.style.display = 'block';

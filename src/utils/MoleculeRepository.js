@@ -1,3 +1,5 @@
+import { STATUS } from './constants.js';
+
 class MoleculeRepository {
     constructor(initial = []) {
         this.molecules = [...initial];
@@ -7,7 +9,7 @@ class MoleculeRepository {
         if (this.molecules.find(m => m.code === code)) {
             return false;
         }
-        this.molecules.push({ code, status: 'pending' });
+        this.molecules.push({ code, status: STATUS.PENDING });
         return true;
     }
 

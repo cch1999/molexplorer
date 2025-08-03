@@ -9,6 +9,19 @@
  * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
  */
 
+import {
+  LOCAL_SDF_LIBRARY_PATH,
+  FRAGMENT_LIBRARY_TSV_URL,
+  RCSB_LIGANDS_URL,
+  PDBe_COMPOUND_SIMILARITY_URL,
+  PDBe_COMPOUND_IN_PDB_URL,
+  RCSB_ENTRY_URL,
+  PDBe_PDB_SUMMARY_URL,
+  RCSB_PDB_DOWNLOAD_URL,
+  PDBe_LIGAND_MONOMERS_URL,
+  RCSB_ENTRY_GROUPS_URL,
+} from './constants.js';
+
 // In-memory cache for URL -> parsed response pairs
 const responseCache = new Map();
 
@@ -81,10 +94,10 @@ export default class ApiService {
    * - Chemical components are standardized molecular entities in the CCD
    *
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for API documentation
-   */
+  */
   static getCcdSdf(ccdCode) {
     return this.fetchText(
-      `https://files.rcsb.org/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`
+      `${RCSB_LIGANDS_URL}${ccdCode.toUpperCase()}_ideal.sdf`
     );
   }
 
@@ -111,9 +124,9 @@ export default class ApiService {
    * - SDF files contain 3D molecular coordinates in MOL format
    * - Each molecule is separated by $$$$
    * - Used for 3D molecular visualization with 3Dmol.js
-   */
+  */
   static getLocalSdfLibrary() {
-    return this.fetchText('./data/Enamine_MiniFrag_Library_80cmpds_20250123.sdf');
+    return this.fetchText(LOCAL_SDF_LIBRARY_PATH);
   }
 
   /**
@@ -132,10 +145,10 @@ export default class ApiService {
    * - TSV format with tab-separated values
    * - Contains fragments from multiple sources (PDBe, ENAMINE, DSI)
    * - Used for fragment-based drug discovery workflows
-   */
+  */
   static getFragmentLibraryTsv() {
     // Fetch fragment library TSV from GitHub
-    return this.fetchText('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
+    return this.fetchText(FRAGMENT_LIBRARY_TSV_URL);
   }
 
   /**
@@ -159,7 +172,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for similarity search API
    */
   static getSimilarCcds(ccdCode) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ccdCode}`);
+    return this.fetchJson(`${PDBe_COMPOUND_SIMILARITY_URL}${ccdCode}`);
   }
 
   /**
@@ -183,7 +196,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDB search API
    */
   static getPdbEntriesForCcd(ccdCode) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb/${ccdCode}`);
+    return this.fetchJson(`${PDBe_COMPOUND_IN_PDB_URL}${ccdCode}`);
   }
 
   /**
@@ -207,7 +220,7 @@ export default class ApiService {
    * @see https://data.rcsb.org/redoc/index.html for RCSB API documentation
    */
   static getRcsbEntry(pdbId) {
-    return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toLowerCase()}`);
+    return this.fetchJson(`${RCSB_ENTRY_URL}${pdbId.toLowerCase()}`);
   }
 
   /**
@@ -231,7 +244,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
    */
   static getPdbSummary(pdbId) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
+    return this.fetchJson(`${PDBe_PDB_SUMMARY_URL}${pdbId}`);
   }
 
   /**
@@ -255,7 +268,7 @@ export default class ApiService {
    * @see https://www.wwpdb.org/data/file-format for mmCIF format specification
    */
   static getPdbFile(pdbId) {
-    return this.fetchText(`https://files.rcsb.org/download/${pdbId}.pdb`);
+    return this.fetchText(`${RCSB_PDB_DOWNLOAD_URL}${pdbId}.pdb`);
   }
 
   /**
@@ -279,7 +292,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for bound ligands API
    */
   static getLigandMonomers(pdbId) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`);
+    return this.fetchJson(`${PDBe_LIGAND_MONOMERS_URL}${pdbId}`);
   }
 
   /**
@@ -303,7 +316,7 @@ export default class ApiService {
    * @see https://data.rcsb.org/redoc/index.html for RCSB group API documentation
    */
   static getProteinGroup(groupId) {
-    return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`);
+    return this.fetchJson(`${RCSB_ENTRY_GROUPS_URL}${groupId}`);
   }
 
   /**

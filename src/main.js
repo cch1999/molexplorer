@@ -1,5 +1,11 @@
 import MoleculeLoader from './utils/MoleculeLoader.js';
 import MoleculeRepository from './utils/MoleculeRepository.js';
+import {
+    DEFAULT_MOLECULE_CODES,
+    STATUS,
+    NOTIFICATION_TIMEOUT,
+    NOTIFICATION_FADE_DURATION
+} from './utils/constants.js';
 import BoundLigandTable from './components/BoundLigandTable.js';
 import FragmentLibrary from './components/FragmentLibrary.js';
 import LigandModal from './modal/ligandModal.js';
@@ -9,19 +15,9 @@ import ProteinBrowser from './components/ProteinBrowser.js';
 
 class MoleculeManager {
     constructor() {
-        this.repository = new MoleculeRepository([
-            { code: 'HEM', status: 'pending' },
-            { code: 'NAD', status: 'pending' },
-            { code: 'FAD', status: 'pending' },
-            { code: 'COA', status: 'pending' },
-            { code: 'ATP', status: 'pending' },
-            { code: 'ADP', status: 'pending' },
-            { code: '355', status: 'pending' },
-            { code: 'MPV', status: 'pending' },
-            { code: 'YQD', status: 'pending' },
-            { code: 'J9N', status: 'pending' },
-            { code: 'VIA', status: 'pending' }
-        ]);
+        this.repository = new MoleculeRepository(
+            DEFAULT_MOLECULE_CODES.map(code => ({ code, status: STATUS.PENDING }))
+        );
         this.grid = null;
         this.loadingIndicator = null;
         this.cardUI = null;
@@ -204,8 +200,8 @@ function showNotification(message, type = 'info') {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
-        }, 300);
-    }, 3000);
+        }, NOTIFICATION_FADE_DURATION);
+    }, NOTIFICATION_TIMEOUT);
 }
 
 window.moleculeManager = moleculeManager;

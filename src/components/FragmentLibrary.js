@@ -1,4 +1,5 @@
 import ApiService from '../utils/apiService.js';
+import { SMILES_CANVAS_WIDTH, SMILES_CANVAS_HEIGHT } from '../utils/constants.js';
 
 class FragmentLibrary {
     constructor(moleculeManager) {
@@ -157,14 +158,14 @@ class FragmentLibrary {
         setTimeout(() => {
             if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
                 const canvas = document.createElement('canvas');
-                canvas.width = 200;
-                canvas.height = 150;
+                canvas.width = SMILES_CANVAS_WIDTH;
+                canvas.height = SMILES_CANVAS_HEIGHT;
                 canvasContainer.appendChild(canvas);
 
                 try {
                     const sanitizedQuery = this.sanitizeSMILES(fragment.query);
                     SmilesDrawer.parse(sanitizedQuery, function (tree) {
-                        const options = { width: 200, height: 150 };
+                        const options = { width: SMILES_CANVAS_WIDTH, height: SMILES_CANVAS_HEIGHT };
                         const smilesDrawer = new SmilesDrawer.Drawer(options);
                         smilesDrawer.draw(tree, canvas, 'light', false);
                     }, function (err) {

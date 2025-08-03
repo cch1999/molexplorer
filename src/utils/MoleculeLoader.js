@@ -1,4 +1,5 @@
 import ApiService from './apiService.js';
+import { STATUS } from './constants.js';
 
 class MoleculeLoader {
     constructor(repository, cardUI) {
@@ -8,7 +9,7 @@ class MoleculeLoader {
 
     async loadAllMolecules() {
         for (const molecule of this.repository.getAllMolecules()) {
-            if (molecule.status === 'pending') {
+            if (molecule.status === STATUS.PENDING) {
                 await this.loadMolecule(molecule.code);
             }
         }
@@ -16,16 +17,16 @@ class MoleculeLoader {
 
     async loadMolecule(code) {
         try {
-            this.repository.updateMoleculeStatus(code, 'loading');
+            this.repository.updateMoleculeStatus(code, STATUS.LOADING);
             const localSdfData = await this.findMoleculeInLocalSdf(code);
             if (localSdfData) {
-                this.repository.updateMoleculeStatus(code, 'loaded');
+                this.repository.updateMoleculeStatus(code, STATUS.LOADED);
                 this.cardUI.createMoleculeCard(localSdfData, code, 'sdf');
                 return;
             }
             const smilesData = await this.findMoleculeInLocalTsv(code);
             if (smilesData) {
-                this.repository.updateMoleculeStatus(code, 'loaded');
+                this.repository.updateMoleculeStatus(code, STATUS.LOADED);
                 this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
                 return;
             }
@@ -33,11 +34,11 @@ class MoleculeLoader {
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
-            this.repository.updateMoleculeStatus(code, 'loaded');
+            this.repository.updateMoleculeStatus(code, STATUS.LOADED);
             this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
-            this.repository.updateMoleculeStatus(code, 'error');
+            this.repository.updateMoleculeStatus(code, STATUS.ERROR);
             this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`);
         }
     }
