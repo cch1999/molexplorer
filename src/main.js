@@ -55,6 +55,15 @@ class MoleculeManager {
             }
         });
 
+        const searchInput = document.getElementById('molecule-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', e => {
+                if (this.cardUI) {
+                    this.cardUI.filterMolecules(e.target.value);
+                }
+            });
+        }
+
         // Tab switching for Molecules, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [

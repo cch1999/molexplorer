@@ -251,6 +251,20 @@ class MoleculeCard {
         }
     }
 
+    filterMolecules(term) {
+        const search = term.trim().toLowerCase();
+        const cards = Array.from(this.grid.children).filter(c =>
+            (c.className || '').split(' ').includes('molecule-card')
+        );
+        cards.forEach(card => {
+            const code = card.dataset.moleculeCode?.toLowerCase() || '';
+            const name = card.dataset.moleculeName?.toLowerCase() || '';
+            const match = !search || code.includes(search) || name.includes(search);
+            if (!card.style) card.style = {};
+            card.style.display = match ? '' : 'none';
+        });
+    }
+
     clearAll() {
         const allCards = this.grid.querySelectorAll('.molecule-card');
         allCards.forEach(card => card.remove());

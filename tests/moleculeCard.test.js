@@ -51,3 +51,31 @@ describe('MoleculeCard downloadSdf', () => {
     assert.strictEqual(URL.revokeObjectURL.mock.callCount(), 1);
   });
 });
+
+describe('MoleculeCard filterMolecules', () => {
+  it('shows matching cards and hides others', () => {
+    const grid = new Element('div');
+    const cardA = new Element('div');
+    cardA.className = 'molecule-card';
+    cardA.dataset.moleculeCode = 'ATP';
+    cardA.dataset.moleculeName = 'Adenosine';
+    cardA.style = {};
+    const cardB = new Element('div');
+    cardB.className = 'molecule-card';
+    cardB.dataset.moleculeCode = 'GTP';
+    cardB.dataset.moleculeName = 'Guanosine';
+    cardB.style = {};
+    grid.appendChild(cardA);
+    grid.appendChild(cardB);
+
+    const ui = new MoleculeCard(grid, {});
+
+    ui.filterMolecules('atp');
+    assert.strictEqual(cardA.style.display, '');
+    assert.strictEqual(cardB.style.display, 'none');
+
+    ui.filterMolecules('');
+    assert.strictEqual(cardA.style.display, '');
+    assert.strictEqual(cardB.style.display, '');
+  });
+});
