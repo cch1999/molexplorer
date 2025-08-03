@@ -8,6 +8,10 @@
  *
  * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
  */
+
+// In-memory cache for URL -> parsed response pairs
+const responseCache = new Map();
+
 export default class ApiService {
   /**
    * Perform a fetch request and parse the response using the provided parser.
@@ -18,11 +22,17 @@ export default class ApiService {
    * @private
    */
   static async #fetchResource(url, parser) {
+    if (responseCache.has(url)) {
+      return responseCache.get(url);
+    }
+
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return parser(response);
+    const parsed = await parser(response);
+    responseCache.set(url, parsed);
+    return parsed;
   }
 
   /**
@@ -292,5 +302,13 @@ export default class ApiService {
    */
   static getProteinGroup(groupId) {
     return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`);
+  }
+
+  /**
+   * Clear the internal response cache.
+   * Useful for tests or debugging to force re-fetching resources.
+   */
+  static clearCache() {
+    responseCache.clear();
   }
 }
