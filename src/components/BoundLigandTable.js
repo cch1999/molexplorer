@@ -1,5 +1,6 @@
 import ApiService from '../utils/apiService.js';
 import { EXCLUDED_LIGANDS, ADD_LIGAND_DELAY_MS } from '../utils/constants.js';
+import addAllLigandsUtil from '../utils/addAllLigands.js';
 
 class BoundLigandTable {
     constructor(addMolecule, showMoleculeDetails, ligandModal) {
@@ -143,35 +144,20 @@ class BoundLigandTable {
         const addAllBtn = document.getElementById(`add-all-${type}-btn`);
         addAllBtn.disabled = true;
         addAllBtn.textContent = 'Adding...';
-        let addedCount = 0;
-        let skippedCount = 0;
-        ligandList.forEach((ligand, index) => {
-            setTimeout(() => {
-                const success = this.addMolecule({
-                    code: ligand.chem_comp_id,
-                    pdbId,
-                    labelAsymId: ligand.chain_id,
-                    authSeqId: ligand.author_residue_number
-                });
-                if (success) {
-                    addedCount++;
-                } else {
-                    skippedCount++;
-                }
-                if (index === ligandList.length - 1) {
-                    let message = '';
-                    if (addedCount > 0 && skippedCount > 0) {
-                        message = `Added ${addedCount} new molecules, ${skippedCount} already existed`;
-                    } else if (addedCount > 0) {
-                        message = `Added ${addedCount} new molecules`;
-                    } else {
-                        message = `All ${skippedCount} molecules already existed`;
-                    }
-                    showNotification(message, addedCount > 0 ? 'success' : 'info');
-                    addAllBtn.disabled = false;
-                    addAllBtn.textContent = `Add All (${ligandList.length})`;
-                }
-            }, index * ADD_LIGAND_DELAY_MS);
+
+        addAllLigandsUtil(
+            ligandList,
+            (ligand) => this.addMolecule({
+                code: ligand.chem_comp_id,
+                pdbId,
+                labelAsymId: ligand.chain_id,
+                authSeqId: ligand.author_residue_number
+            }),
+            showNotification,
+            ADD_LIGAND_DELAY_MS
+        ).then(() => {
+            addAllBtn.disabled = false;
+            addAllBtn.textContent = `Add All (${ligandList.length})`;
         });
     }
 }

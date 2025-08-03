@@ -1,5 +1,6 @@
 import ApiService from '../utils/apiService.js';
-import { PD_BE_STATIC_IMAGE_BASE_URL } from '../utils/constants.js';
+import { PD_BE_STATIC_IMAGE_BASE_URL, ADD_LIGAND_DELAY_MS } from '../utils/constants.js';
+import addAllLigands from '../utils/addAllLigands.js';
 
 class SimilarLigandTable {
     constructor(moleculeManager) {
@@ -72,33 +73,14 @@ class SimilarLigandTable {
         addAllBtn.disabled = true;
         addAllBtn.textContent = 'Adding...';
 
-        let addedCount = 0;
-        let skippedCount = 0;
-
-        this.currentSimilarLigands.forEach((ligand, index) => {
-            setTimeout(() => {
-                const success = this.moleculeManager.addMolecule(ligand.chem_comp_id);
-                if (success) {
-                    addedCount++;
-                } else {
-                    skippedCount++;
-                }
-
-                if (index === this.currentSimilarLigands.length - 1) {
-                    let message = '';
-                    if (addedCount > 0 && skippedCount > 0) {
-                        message = `Added ${addedCount} new molecules, ${skippedCount} already existed`;
-                    } else if (addedCount > 0) {
-                        message = `Added ${addedCount} new molecules`;
-                    } else {
-                        message = `All ${skippedCount} molecules already existed`;
-                    }
-
-                    showNotification(message, addedCount > 0 ? 'success' : 'info');
-                    addAllBtn.disabled = false;
-                    addAllBtn.textContent = `Add All (${this.currentSimilarLigands.length})`;
-                }
-            }, index * 100);
+        addAllLigands(
+            this.currentSimilarLigands,
+            (ligand) => this.moleculeManager.addMolecule(ligand.chem_comp_id),
+            showNotification,
+            ADD_LIGAND_DELAY_MS
+        ).then(() => {
+            addAllBtn.disabled = false;
+            addAllBtn.textContent = `Add All (${this.currentSimilarLigands.length})`;
         });
     }
 

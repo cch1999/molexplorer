@@ -116,7 +116,7 @@ describe('addAllLigands', () => {
     assert.deepStrictEqual(showNotification.mock.calls[0].arguments, ['No bound ligands to add', 'info']);
   });
 
-  it('adds ligands and reports summary', () => {
+  it('adds ligands and reports summary', async () => {
     const ligands = [
       { chem_comp_id: 'AAA', chain_id: 'A', author_residue_number: '1' },
       { chem_comp_id: 'BBB', chain_id: 'B', author_residue_number: '2' }
@@ -129,6 +129,7 @@ describe('addAllLigands', () => {
     addAllBtn.textContent = 'Add All (2)';
 
     table.addAllLigands(ligands, 'bound', '1ABC');
+    await new Promise(r => setImmediate(r));
 
     assert.strictEqual(addMoleculeStub.mock.callCount(), 2);
     assert.strictEqual(showNotification.mock.callCount(), 1);
