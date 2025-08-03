@@ -463,6 +463,12 @@ main {
     font-style: italic;
 }
 
+.error-text {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #f44336;
+}
+
 .modal-footer {
     display: flex;
     justify-content: space-between;
@@ -497,6 +503,11 @@ main {
 
 .btn-primary:hover {
     background: #5a37c7;
+}
+
+.btn-primary:disabled {
+    background: #bfaaf7;
+    cursor: not-allowed;
 }
 
 .btn-secondary {

@@ -6,6 +6,7 @@ import FragmentLibrary from './components/FragmentLibrary.js';
 import LigandModal from './modal/ligandModal.js';
 import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
+import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 
 class MoleculeManager {
@@ -20,6 +21,7 @@ class MoleculeManager {
         this.ligandModal = null;
         this.boundLigandTable = null;
         this.pdbDetailsModal = null;
+        this.addModal = null;
     }
 
     init() {
@@ -39,16 +41,11 @@ class MoleculeManager {
             this.ligandModal
         );
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
+        this.addModal = new AddMoleculeModal(this);
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
-            const code = prompt('Enter CCD Code').toUpperCase();
-            if (code) {
-                const success = this.addMolecule(code);
-                if (success) {
-                    showNotification(`Adding molecule ${code}...`, 'success');
-                } else {
-                    showNotification(`Molecule ${code} already exists`, 'info');
-                }
+            if (this.addModal) {
+                this.addModal.open();
             }
         });
 
