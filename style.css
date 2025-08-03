@@ -205,39 +205,95 @@ main {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease-out forwards;
     z-index: 1000;
 }
 
 .tour-tooltip {
     position: absolute;
     background: #fff;
-    padding: 10px 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    padding: 12px 18px;
+    border-radius: 6px;
+    border: 2px solid #6e45e2;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    color: #333;
+    line-height: 1.4;
+    max-width: 260px;
+    animation: fadeInUp 0.3s ease-out forwards;
     z-index: 1002;
+}
+
+.tour-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: #fff transparent transparent transparent;
 }
 
 .tour-tooltip button {
     margin-top: 10px;
+    background: #6e45e2;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.tour-tooltip button:hover {
+    background: #5a37c7;
 }
 
 .tour-highlight {
     position: relative;
     z-index: 1001;
-    box-shadow: 0 0 0 4px rgba(255, 255, 0, 0.6);
+    box-shadow: 0 0 0 4px rgba(110, 69, 226, 0.5), 0 0 12px rgba(136, 211, 206, 0.7);
+    border-radius: 4px;
+    transition: box-shadow 0.3s ease-in-out;
 }
 
 .tutorial-btn {
     position: absolute;
     top: 15px;
     left: 20px;
-    padding: 6px 10px;
+    padding: 6px 12px;
     border: none;
     border-radius: 4px;
-    background-color: rgba(0, 0, 0, 0.2);
-    color: white;
+    background: linear-gradient(90deg, #6e45e2 0%, #88d3ce 100%);
+    color: #fff;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tutorial-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .toggle-switch-label {
