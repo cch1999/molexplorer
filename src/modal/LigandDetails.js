@@ -1,3 +1,5 @@
+import ApiService from '../utils/apiService.js';
+
 class LigandDetails {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
@@ -56,7 +58,37 @@ class LigandDetails {
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
-        if (sdfData) {
+        if (isInstance) {
+            ApiService.getPdbFile(molecule.pdbId)
+                .then(pdbData => {
+                    setTimeout(() => {
+                        try {
+                            const viewer = $3Dmol.createViewer(this.detailsViewer, {
+                                backgroundColor: 'white',
+                                width: '100%',
+                                height: '100%'
+                            });
+                            viewer.addModel(pdbData, 'pdb');
+                            viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                            const selection = {
+                                chain: molecule.labelAsymId,
+                                resi: parseInt(molecule.authSeqId, 10)
+                            };
+                            viewer.setStyle(selection, { stick: { radius: 0.25, colorscheme: 'greenCarbon' } });
+                            viewer.zoomTo(selection);
+                            viewer.render();
+                            this.viewer = viewer;
+                        } catch (e) {
+                            console.error(`Error initializing PDB viewer for ${ccdCode}:`, e);
+                            this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
+                        }
+                    }, 100);
+                })
+                .catch(e => {
+                    console.error(`Error fetching PDB for ${ccdCode}:`, e);
+                    this.detailsViewer.innerHTML = '<p style="color: #666;">Structure data not available</p>';
+                });
+        } else if (sdfData) {
             setTimeout(() => {
                 try {
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
