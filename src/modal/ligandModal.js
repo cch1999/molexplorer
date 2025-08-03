@@ -1,4 +1,10 @@
 import ApiService from '../utils/apiService.js';
+import {
+    AMINO_ACIDS,
+    PDBe_CHEM_BASE_URL,
+    PDBe_ENTRY_BASE_URL,
+    RCSB_STRUCTURE_BASE_URL
+} from '../constants.js';
 
 class LigandModal {
     constructor(moleculeManager) {
@@ -29,7 +35,7 @@ class LigandModal {
         this.detailsTitle.textContent = `Molecule Details: ${ccdCode}`;
         this.detailsCode.textContent = ccdCode;
 
-        const isAminoAcid = ['ALA','ARG','ASN','ASP','CYS','GLN','GLU','GLY','HIS','ILE','LEU','LYS','MET','PHE','PRO','SER','THR','TRP','TYR','VAL'].includes(ccdCode);
+        const isAminoAcid = AMINO_ACIDS.includes(ccdCode);
         this.detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
         this.detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
 
@@ -303,7 +309,7 @@ class LigandModal {
 
     async load2DStructure(ccdCode, container) {
         try {
-            const imageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ccdCode.toUpperCase()}_200.svg`;
+            const imageUrl = `${PDBe_CHEM_BASE_URL}${ccdCode.toUpperCase()}_200.svg`;
             const img = document.createElement('img');
             img.src = imageUrl;
             img.alt = `2D structure of ${ccdCode}`;
@@ -312,7 +318,7 @@ class LigandModal {
                 container.appendChild(img);
             };
             img.onerror = () => {
-                const altImageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ccdCode.toLowerCase()}_200.svg`;
+                const altImageUrl = `${PDBe_CHEM_BASE_URL}${ccdCode.toLowerCase()}_200.svg`;
                 const altImg = document.createElement('img');
                 altImg.src = altImageUrl;
                 altImg.alt = `2D structure of ${ccdCode}`;
@@ -429,14 +435,14 @@ class LigandModal {
         rcsbButton.className = 'view-structure-btn rcsb-btn';
         rcsbButton.title = `View ${pdbId.toUpperCase()} on RCSB PDB`;
         rcsbButton.addEventListener('click', () => {
-            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+            window.open(`${RCSB_STRUCTURE_BASE_URL}${pdbId.toUpperCase()}`, '_blank');
         });
         const pdbeButton = document.createElement('button');
         pdbeButton.textContent = 'PDBe';
         pdbeButton.className = 'view-structure-btn pdbe-btn';
         pdbeButton.title = `View ${pdbId.toUpperCase()} on PDBe`;
         pdbeButton.addEventListener('click', () => {
-            window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+            window.open(`${PDBe_ENTRY_BASE_URL}${pdbId.toLowerCase()}`, '_blank');
         });
         viewCell.appendChild(rcsbButton);
         viewCell.appendChild(pdbeButton);
@@ -480,14 +486,14 @@ class LigandModal {
         rcsbButton.className = 'view-structure-btn rcsb-btn';
         rcsbButton.title = `View ${pdbId.toUpperCase()} on RCSB PDB`;
         rcsbButton.addEventListener('click', () => {
-            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+            window.open(`${RCSB_STRUCTURE_BASE_URL}${pdbId.toUpperCase()}`, '_blank');
         });
         const pdbeButton = document.createElement('button');
         pdbeButton.textContent = 'PDBe';
         pdbeButton.className = 'view-structure-btn pdbe-btn';
         pdbeButton.title = `View ${pdbId.toUpperCase()} on PDBe`;
         pdbeButton.addEventListener('click', () => {
-            window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+            window.open(`${PDBe_ENTRY_BASE_URL}${pdbId.toLowerCase()}`, '_blank');
         });
         viewCell.appendChild(rcsbButton);
         viewCell.appendChild(pdbeButton);

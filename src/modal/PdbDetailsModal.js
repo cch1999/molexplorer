@@ -1,4 +1,5 @@
 import ApiService from '../utils/apiService.js';
+import { PDBe_ENTRY_BASE_URL, RCSB_STRUCTURE_BASE_URL } from '../constants.js';
 
 class PdbDetailsModal {
     constructor(boundLigandTable) {
@@ -48,10 +49,10 @@ class PdbDetailsModal {
             }
 
             document.getElementById('open-rcsb-btn').addEventListener('click', () => {
-                window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+                window.open(`${RCSB_STRUCTURE_BASE_URL}${pdbId.toUpperCase()}`, '_blank');
             });
             document.getElementById('open-pdbe-btn').addEventListener('click', () => {
-                window.open(`https://www.ebi.ac.uk/pdbe/entry/pdb/${pdbId.toLowerCase()}`, '_blank');
+                window.open(`${PDBe_ENTRY_BASE_URL}${pdbId.toLowerCase()}`, '_blank');
             });
 
             viewerContainer.style.display = 'block';
