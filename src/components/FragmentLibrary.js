@@ -1,13 +1,20 @@
 import ApiService from '../utils/apiService.js';
 
 class FragmentLibrary {
-    constructor(moleculeManager) {
+    constructor(moleculeManager, {
+        notify = (typeof window !== 'undefined' && window.showNotification)
+            || (typeof showNotification === 'function' ? showNotification : () => {}),
+        smilesDrawer = (typeof window !== 'undefined' && window.SmilesDrawer)
+            || (typeof SmilesDrawer !== 'undefined' ? SmilesDrawer : undefined)
+    } = {}) {
         this.moleculeManager = moleculeManager;
         this.fragments = [];
         this.grid = null;
         this.searchInput = null;
         this.sourceFilter = null;
         this.ccdToggle = null;
+        this.notify = notify;
+        this.smilesDrawer = smilesDrawer;
     }
 
     init() {
@@ -143,12 +150,12 @@ class FragmentLibrary {
                 e.stopPropagation();
                 const success = this.moleculeManager.addMolecule(ccdCode);
                 if (success) {
-                    showNotification(`Adding molecule ${ccdCode} to library...`, 'success');
+                    this.notify(`Adding molecule ${ccdCode} to library...`, 'success');
                     addButton.textContent = 'Added to library';
                     addButton.disabled = true;
                     addButton.classList.add('added');
                 } else {
-                    showNotification(`Molecule ${ccdCode} already exists.`, 'info');
+                    this.notify(`Molecule ${ccdCode} already exists.`, 'info');
                     addButton.textContent = 'In library';
                     addButton.disabled = true;
                     addButton.classList.add('added');
@@ -166,11 +173,11 @@ class FragmentLibrary {
 
                 try {
                     const sanitizedQuery = this.sanitizeSMILES(fragment.query);
-                    SmilesDrawer.parse(sanitizedQuery, function (tree) {
+                    this.smilesDrawer.parse(sanitizedQuery, (tree) => {
                         const options = { width: 200, height: 150 };
-                        const smilesDrawer = new SmilesDrawer.Drawer(options);
-                        smilesDrawer.draw(tree, canvas, 'light', false);
-                    }, function (err) {
+                        const drawer = new this.smilesDrawer.Drawer(options);
+                        drawer.draw(tree, canvas, 'light', false);
+                    }, (err) => {
                         console.error('Error parsing SMILES for ' + fragment.name, err);
                         canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
                     });
@@ -188,7 +195,7 @@ class FragmentLibrary {
 
     addFragment(fragmentData) {
         if (!fragmentData.name || !fragmentData.query) {
-            showNotification('Fragment name and SMILES/SMARTS query are required.', 'error');
+            this.notify('Fragment name and SMILES/SMARTS query are required.', 'error');
             return false;
         }
 
@@ -206,7 +213,7 @@ class FragmentLibrary {
         });
 
         this.renderFragments();
-        showNotification(`Fragment "${fragmentData.name}" added successfully!`, 'success');
+        this.notify(`Fragment "${fragmentData.name}" added successfully!`, 'success');
         return true;
     }
 

@@ -24,13 +24,13 @@ const createDom = () => {
 describe('FragmentLibrary', () => {
   beforeEach(() => {
     createDom();
-    global.showNotification = () => {};
     const moleculeManager = {
       getMolecule: () => null,
       addMolecule: () => true,
       showMoleculeDetails: () => {}
     };
-    library = new FragmentLibrary(moleculeManager);
+    const smilesStub = { parse: () => {}, Drawer: class { draw() {} } };
+    library = new FragmentLibrary(moleculeManager, { notify: () => {}, smilesDrawer: smilesStub });
     library.init();
     // Stub createFragmentCard to simplify DOM interactions
     library.createFragmentCard = (fragment) => {

@@ -151,7 +151,10 @@ class MoleculeManager {
 const moleculeManager = new MoleculeManager().init();
 moleculeManager.loadAllMolecules();
 
-const fragmentLibrary = new FragmentLibrary(moleculeManager).init();
+const fragmentLibrary = new FragmentLibrary(moleculeManager, {
+    notify: showNotification,
+    smilesDrawer: window.SmilesDrawer
+}).init();
 fragmentLibrary.loadFragments();
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
