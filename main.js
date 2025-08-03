@@ -1,10 +1,10 @@
-import MoleculeRepository from './services/MoleculeRepository.js';
 import MoleculeLoader from './services/MoleculeLoader.js';
+import MoleculeRepository from './services/MoleculeRepository.js';
+import BoundLigandTable from './ui/BoundLigandTable.js';
+import FragmentLibrary from './ui/FragmentLibrary.js';
+import LigandModal from './ui/ligandModal.js';
 import MoleculeCard from './ui/MoleculeCard.js';
 import PdbDetailsModal from './ui/PdbDetailsModal.js';
-import BoundLigandTable from './ui/BoundLigandTable.js';
-import LigandModal from './ui/ligandModal.js';
-import FragmentLibrary from './ui/FragmentLibrary.js';
 import ProteinBrowser from './ui/ProteinBrowser.js';
 
 class MoleculeManager {
