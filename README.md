@@ -20,6 +20,21 @@ Run the test suite:
 npm test
 ```
 
+## Deployment
+The application assumes it is served from `/molexplorer/` by default. To deploy under a
+different repository name or a custom domain, set the `BASE_PATH` environment variable
+to the path where the site will be hosted and rebuild:
+
+```
+BASE_PATH=/my-other-repo/ npm run build
+```
+
+For a custom domain served from the root, use `/`:
+
+```
+BASE_PATH=/ npm run build
+```
+
 ## API References
 - [PDBe Graph API](https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/)
 - [RCSB PDB REST API](https://data.rcsb.org/redoc/index.html)
