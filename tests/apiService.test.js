@@ -1,6 +1,6 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import ApiService from '../utils/apiService.js';
+import ApiService from '../src/utils/apiService.js';
 
 describe('ApiService', () => {
   afterEach(() => {
