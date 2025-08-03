@@ -1,3 +1,5 @@
+import ApiService from '../utils/apiService.js';
+
 class MoleculeCard {
     constructor(grid, repository, callbacks = {}) {
         this.grid = grid;
@@ -28,6 +30,16 @@ class MoleculeCard {
             if (this.onDelete) this.onDelete(ccdCode);
         });
         card.appendChild(deleteBtn);
+
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as SDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadSdf(ccdCode);
+        });
+        card.appendChild(downloadBtn);
 
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
@@ -85,6 +97,16 @@ class MoleculeCard {
         });
         card.appendChild(deleteBtn);
 
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as SDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadSdf(ccdCode, data);
+        });
+        card.appendChild(downloadBtn);
+
         const title = document.createElement('h3');
         title.textContent = ccdCode;
         title.style.cursor = 'pointer';
@@ -137,6 +159,16 @@ class MoleculeCard {
             if (this.onDelete) this.onDelete(ccdCode);
         });
         card.appendChild(deleteBtn);
+
+        const downloadBtn = document.createElement('div');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
+        downloadBtn.title = `Download ${ccdCode} as SDF`;
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadSdf(ccdCode);
+        });
+        card.appendChild(downloadBtn);
 
         const content = document.createElement('div');
         content.className = 'not-found-content';
@@ -194,6 +226,29 @@ class MoleculeCard {
     handleDragEnd(e) {
         e.currentTarget.classList.remove('dragging');
         this.draggedElement = null;
+    }
+
+    async downloadSdf(ccdCode, sdfData) {
+        try {
+            let data = sdfData;
+            if (!data) {
+                data = await ApiService.getCcdSdf(ccdCode);
+            }
+            if (!data) {
+                throw new Error('No SDF data available');
+            }
+            const blob = new Blob([data], { type: 'chemical/x-mdl-sdfile' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${ccdCode}.sdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(`Failed to download SDF for ${ccdCode}:`, err);
+        }
     }
 
     clearAll() {
