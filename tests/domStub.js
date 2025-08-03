@@ -45,6 +45,13 @@ class Document {
   createElement(tag) { return new Element(tag); }
   createDocumentFragment() { return new DocumentFragment(); }
   registerElement(id, el) { this.elements[id] = el; }
+  querySelectorAll(selector) {
+    if (selector && selector.startsWith('.')) {
+      const cls = selector.slice(1);
+      return Object.values(this.elements).filter(e => (e.className || '').split(' ').includes(cls));
+    }
+    return [];
+  }
 }
 
 export class JSDOM {

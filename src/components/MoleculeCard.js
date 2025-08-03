@@ -54,9 +54,6 @@ class MoleculeCard {
         const smilesLabel = document.createElement('div');
         smilesLabel.className = 'smiles-label';
         smilesLabel.textContent = `SMILES: ${smiles}`;
-        smilesLabel.style.fontSize = '10px';
-        smilesLabel.style.color = '#666';
-        smilesLabel.style.marginTop = '5px';
         card.appendChild(smilesLabel);
 
         this.grid.appendChild(card);
@@ -66,10 +63,10 @@ class MoleculeCard {
 
     renderSmilesIn2D(smiles, container) {
         container.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;">
+            <div class="smiles-placeholder">
                 <div style="text-align:center;padding:10px;">
                     <div style="font-size:24px;margin-bottom:5px;">🧪</div>
-                    <div style="font-size:10px;color:#666;">SMILES</div>
+                    <div class="label">SMILES</div>
                 </div>
             </div>
         `;
@@ -125,7 +122,9 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: 'white' });
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: isDarkMode ? '#1e1e1e' : 'white' });
+                viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
                 viewer.setStyle({}, { stick: {} });
                 viewer.setStyle({ elem: 'H' }, {});

@@ -18,6 +18,15 @@ export function toggleDarkMode(doc = document) {
         body.className = classes.join(' ');
     }
     toggleBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+
+    const containers = doc.querySelectorAll ? doc.querySelectorAll('.viewer-container') : [];
+    containers.forEach(vc => {
+        const viewer = vc.viewer;
+        if (viewer && typeof viewer.setBackgroundColor === 'function') {
+            viewer.setBackgroundColor(isDark ? '#1e1e1e' : 'white');
+            if (typeof viewer.render === 'function') viewer.render();
+        }
+    });
 }
 
 export default function initThemeToggle(doc = document) {

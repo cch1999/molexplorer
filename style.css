@@ -88,6 +88,40 @@ body.dark-mode .tab-button {
     color: #bbb;
 }
 
+body.dark-mode .molecule-card {
+    background: #2a2a2a;
+    border-color: #444;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .molecule-card h3 {
+    color: #88d3ce;
+}
+
+body.dark-mode .molecule-card .formula,
+body.dark-mode .molecule-card .info,
+body.dark-mode .molecule-card p,
+body.dark-mode .smiles-label {
+    color: #ccc;
+}
+
+body.dark-mode .molecule-card .viewer-container,
+body.dark-mode .molecule-card .molecule-viewer,
+body.dark-mode .smiles-placeholder {
+    border-color: #555;
+    background-color: #1e1e1e;
+}
+
+body.dark-mode .smiles-placeholder .label {
+    color: #ccc;
+}
+
+body.dark-mode .molecule-card .drag-handle,
+body.dark-mode .molecule-card .delete-btn,
+body.dark-mode .molecule-card .download-btn {
+    color: #bbb;
+}
+
 main {
     padding: 20px;
 }
@@ -1348,6 +1382,27 @@ main {
     position: relative;
     border: 1px solid #eee;
     border-radius: 4px;
+}
+
+.smiles-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+}
+
+.smiles-placeholder .label {
+    font-size: 10px;
+    color: #666;
+}
+
+.smiles-label {
+    font-size: 10px;
+    color: #666;
+    margin-top: 5px;
 }
 
 .molecule-card .info {
