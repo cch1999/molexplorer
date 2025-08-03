@@ -11,6 +11,16 @@ class LigandModal {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.currentSimilarLigands = [];
+
+        const closeBtn = document.getElementById('close-details-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.close();
+            }
+        });
     }
 
     show(ccdCode, sdfData) {
@@ -63,6 +73,10 @@ class LigandModal {
         this.clearPreviousModalData();
         this.loadSimilarCcds(ccdCode);
         this.loadPdbEntries(ccdCode);
+    }
+
+    close() {
+        this.modal.style.display = 'none';
     }
 
     clearPreviousModalData() {
@@ -418,9 +432,9 @@ class LigandModal {
         const idSpan = document.createElement('span');
         idSpan.className = 'pdb-id';
         idSpan.textContent = pdbId.toUpperCase();
-        idSpan.title = `Click to view ${pdbId.toUpperCase()} on RCSB PDB`;
+        idSpan.title = `Click to view details for ${pdbId.toUpperCase()}`;
         idSpan.addEventListener('click', () => {
-            window.open(`https://www.rcsb.org/structure/${pdbId.toUpperCase()}`, '_blank');
+            this.moleculeManager.showPDBDetailsModal(pdbId);
         });
         idCell.appendChild(idSpan);
 
