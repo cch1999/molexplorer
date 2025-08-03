@@ -62,6 +62,32 @@ body.dark-mode header .theme-toggle-btn {
     color: #f5f5f5;
 }
 
+body.dark-mode .fragment-controls,
+body.dark-mode .protein-controls {
+    background-color: #2a2a2a;
+}
+
+body.dark-mode .fragment-controls input[type="text"],
+body.dark-mode .fragment-controls select,
+body.dark-mode .protein-controls input[type="text"],
+body.dark-mode .protein-controls select {
+    background-color: #333;
+    border-color: #555;
+    color: #f5f5f5;
+}
+
+body.dark-mode .fragment-info {
+    color: #ccc;
+}
+
+body.dark-mode .tabs {
+    border-bottom: 1px solid #444;
+}
+
+body.dark-mode .tab-button {
+    color: #bbb;
+}
+
 main {
     padding: 20px;
 }
