@@ -81,10 +81,13 @@ class FragmentLibrary {
             return;
         }
 
+        const fragmentContainer = document.createDocumentFragment();
         filtered.forEach(fragment => {
             const card = this.createFragmentCard(fragment);
-            this.grid.appendChild(card);
+            fragmentContainer.appendChild(card);
         });
+
+        this.grid.appendChild(fragmentContainer);
     }
 
     createFragmentCard(fragment) {
