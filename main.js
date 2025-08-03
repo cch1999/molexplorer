@@ -1,3 +1,5 @@
+import ApiService from './apiService.js';
+
 // A list of interesting CCD codes for the "I'm Feeling Lucky" feature
 const luckyDipCodes = [
     'STI', 'Imatinib (Gleevec), cancer drug',
@@ -187,13 +189,7 @@ class MoleculeManager {
 
             // Last resort: try external fetch (this often fails due to CORS)
             console.log(`Trying external fetch for ${code}`);
-            const response = await fetch(`/rcsb/ligands/view/${code.toUpperCase()}_ideal.sdf`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const sdfData = await response.text();
+            const sdfData = await ApiService.getCcdSdf(code);
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
@@ -210,10 +206,7 @@ class MoleculeManager {
     // Find molecule in local SDF file
     async findMoleculeInLocalSdf(code) {
         try {
-            const response = await fetch('./data/Enamine_MiniFrag_Library_80cmpds_20250123.sdf');
-            if (!response.ok) return null;
-
-            const sdfContent = await response.text();
+            const sdfContent = await ApiService.getLocalSdfLibrary();
             const molecules = sdfContent.split('$$$$');
 
             for (const molecule of molecules) {
@@ -233,10 +226,7 @@ class MoleculeManager {
     // Find molecule SMILES in fragment library TSV file
     async findMoleculeInLocalTsv(code) {
         try {
-            const response = await fetch('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
-            if (!response.ok) return null;
-
-            const tsvContent = await response.text();
+            const tsvContent = await ApiService.getFragmentLibraryTsv();
             const lines = tsvContent.split('\n');
 
             for (const line of lines) {
@@ -253,11 +243,11 @@ class MoleculeManager {
     }
 
     // Create molecule card from SMILES
-    createMoleculeCardFromSmiles(smiles, ligandCode) {
+    createMoleculeCardFromSmiles(smiles, ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
-        card.setAttribute('data-molecule-code', ligandCode);
+        card.setAttribute('data-molecule-code', ccdCode);
 
         // Add drag handle
         const dragHandle = document.createElement('div');
@@ -269,23 +259,23 @@ class MoleculeManager {
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.title = `Delete ${ccdCode}`;
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.deleteMolecule(ligandCode);
+            this.deleteMolecule(ccdCode);
         });
         card.appendChild(deleteBtn);
 
         // Add molecule code label
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
-        codeLabel.textContent = ligandCode;
+        codeLabel.textContent = ccdCode;
         card.appendChild(codeLabel);
 
         // Add 3D viewer container
         const viewerContainer = document.createElement('div');
         viewerContainer.className = 'molecule-viewer';
-        viewerContainer.id = `viewer-${ligandCode}`;
+        viewerContainer.id = `viewer-${ccdCode}`;
         card.appendChild(viewerContainer);
 
         // Add SMILES display
@@ -317,11 +307,11 @@ class MoleculeManager {
     }
 
     // Create molecule card
-    createMoleculeCard(data, ligandCode, format = 'sdf') {
+    createMoleculeCard(data, ccdCode, format = 'sdf') {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
-        card.setAttribute('data-molecule-code', ligandCode);
+        card.setAttribute('data-molecule-code', ccdCode);
 
         // Add drag handle
         const dragHandle = document.createElement('div');
@@ -333,23 +323,23 @@ class MoleculeManager {
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.title = `Delete ${ccdCode}`;
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.confirmDelete(ligandCode);
+            this.confirmDelete(ccdCode);
         });
         card.appendChild(deleteBtn);
 
         const title = document.createElement('h3');
-        title.textContent = ligandCode;
+        title.textContent = ccdCode;
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
-            this.showMoleculeDetails(ligandCode, data, format);
+            this.showMoleculeDetails(ccdCode, data, format);
         });
         card.appendChild(title);
 
         const viewerContainer = document.createElement('div');
-        viewerContainer.id = `viewer-${ligandCode}`;
+        viewerContainer.id = `viewer-${ccdCode}`;
         viewerContainer.className = 'viewer-container';
         card.appendChild(viewerContainer);
 
@@ -373,18 +363,18 @@ class MoleculeManager {
                 viewer.zoomTo();
                 viewer.render();
             } catch (e) {
-                console.error(`Error initializing 3Dmol viewer for ${ligandCode}:`, e);
+                console.error(`Error initializing 3Dmol viewer for ${ccdCode}:`, e);
                 viewerContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Render Error</p>';
             }
         }, 100);
     }
 
     // Create not found card
-    createNotFoundCard(ligandCode, message = "Not found") {
+    createNotFoundCard(ccdCode, message = "Not found") {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
-        card.setAttribute('data-molecule-code', ligandCode);
+        card.setAttribute('data-molecule-code', ccdCode);
 
         // Add drag handle
         const dragHandle = document.createElement('div');
@@ -396,25 +386,25 @@ class MoleculeManager {
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
         deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ligandCode}`;
+        deleteBtn.title = `Delete ${ccdCode}`;
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.confirmDelete(ligandCode);
+            this.confirmDelete(ccdCode);
         });
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.confirmDelete(ligandCode);
+            this.confirmDelete(ccdCode);
         });
         card.appendChild(deleteBtn);
 
         const content = document.createElement('div');
-        content.innerHTML = `<h3>${ligandCode}</h3><p>${message}</p>`;
+        content.innerHTML = `<h3>${ccdCode}</h3><p>${message}</p>`;
 
         // Make title clickable
         const title = content.querySelector('h3');
         title.style.cursor = 'pointer';
         title.addEventListener('click', () => {
-            this.showMoleculeDetails(ligandCode, null);
+            this.showMoleculeDetails(ccdCode, null);
         });
 
         card.appendChild(content);
@@ -456,7 +446,7 @@ class MoleculeManager {
     }
 
     // Show molecule details in a modal
-    showMoleculeDetails(ligandCode, sdfData) {
+    showMoleculeDetails(ccdCode, sdfData) {
         const modal = document.getElementById('molecule-details-modal');
         const detailsTitle = document.getElementById('details-title');
         const detailsCode = document.getElementById('details-code');
@@ -466,12 +456,12 @@ class MoleculeManager {
         const detailsJSON = document.getElementById('details-json');
 
         // Update basic information
-        detailsTitle.textContent = `Molecule Details: ${ligandCode}`;
-        detailsCode.textContent = ligandCode;
+        detailsTitle.textContent = `Molecule Details: ${ccdCode}`;
+        detailsCode.textContent = ccdCode;
 
         // Get molecule info
-        const molecule = this.getMolecule(ligandCode);
-        const isAminoAcid = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'].includes(ligandCode);
+        const molecule = this.getMolecule(ccdCode);
+        const isAminoAcid = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLN', 'GLU', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL'].includes(ccdCode);
 
         detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
         detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
@@ -493,7 +483,7 @@ class MoleculeManager {
                     viewer.zoomTo();
                     viewer.render();
                 } catch (e) {
-                    console.error(`Error initializing details viewer for ${ligandCode}:`, e);
+                    console.error(`Error initializing details viewer for ${ccdCode}:`, e);
                     detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
                 }
             }, 100);
@@ -503,8 +493,8 @@ class MoleculeManager {
 
         // Update JSON representation
         const jsonData = {
-            molecule_id: `mol_${ligandCode.toLowerCase()}`,
-            ccd_code: ligandCode,
+            molecule_id: `mol_${ccdCode.toLowerCase()}`,
+            ccd_code: ccdCode,
             source: isAminoAcid ? 'building_blocks' : 'reagents',
             type: isAminoAcid ? 'building_block' : 'reagent',
             structure_data: sdfData ? sdfData.substring(0, 100) + '...' : 'N/A',
@@ -524,8 +514,8 @@ class MoleculeManager {
         this.clearPreviousModalData();
 
         // Load similar ligands and PDB entries
-        this.loadSimilarLigands(ligandCode);
-        this.loadPDBEntries(ligandCode);
+        this.loadSimilarCcds(ccdCode);
+        this.loadPdbEntries(ccdCode);
     }
 
     // Clear any cached data from previous molecule modal views
@@ -557,8 +547,8 @@ class MoleculeManager {
         if (pdbContainer) pdbContainer.innerHTML = '<p>Loading PDB entries...</p>';
     }
 
-    // Load similar ligands from PDBe API
-    async loadSimilarLigands(ligandCode) {
+    // Load similar compounds from PDBe API
+    async loadSimilarCcds(ccdCode) {
         const container = document.getElementById('similar-ligands-container');
         const table = document.getElementById('similar-ligands-table');
         const tbody = document.getElementById('similar-ligands-tbody');
@@ -572,16 +562,10 @@ class MoleculeManager {
             table.style.display = 'none';
             addAllBtn.style.display = 'none';
 
-            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ligandCode}`);
+            const data = await ApiService.getSimilarCcds(ccdCode);
+            const ccdData = data[ccdCode];
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const ligandData = data[ligandCode];
-
-            if (!ligandData || (!ligandData[0]?.stereoisomers?.length && !ligandData[0]?.same_scaffold?.length && !ligandData[0]?.similar_ligands?.length)) {
+            if (!ccdData || (!ccdData[0]?.stereoisomers?.length && !ccdData[0]?.same_scaffold?.length && !ccdData[0]?.similar_ligands?.length)) {
                 container.innerHTML = '<div class="no-similar-ligands">No similar ligands found</div>';
                 return;
             }
@@ -590,7 +574,7 @@ class MoleculeManager {
             tbody.innerHTML = '';
             this.currentSimilarLigands = [];
 
-            const ligandInfo = ligandData[0];
+            const ligandInfo = ccdData[0];
 
             let allLigands = [];
 
@@ -644,13 +628,13 @@ class MoleculeManager {
             }
 
         } catch (error) {
-            console.error(`Error fetching similar ligands for ${ligandCode}:`, error);
+            console.error(`Error fetching similar CCDs for ${ccdCode}:`, error);
 
             // For now, show a placeholder with some example data to demonstrate the feature
             container.innerHTML = '<div class="no-similar-ligands">Similar ligands feature temporarily unavailable due to CORS restrictions. <br><small>In production, this would be handled via a backend proxy.</small></div>';
 
             // Optionally show demo data for ATP as an example
-            if (ligandCode === 'ATP') {
+            if (ccdCode === 'ATP') {
                 this.showDemoSimilarLigands();
             }
         }
@@ -796,15 +780,15 @@ class MoleculeManager {
     }
 
     // Load 2D structure image from PDBe static files
-    async load2DStructure(ligandCode, container) {
+    async load2DStructure(ccdCode, container) {
         try {
             // PDBe provides 2D structure images at this static endpoint
             // Format: https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/{code}_200.svg
-            const imageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligandCode.toUpperCase()}_200.svg`;
+            const imageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ccdCode.toUpperCase()}_200.svg`;
 
             const img = document.createElement('img');
             img.src = imageUrl;
-            img.alt = `2D structure of ${ligandCode}`;
+            img.alt = `2D structure of ${ccdCode}`;
 
             img.onload = () => {
                 container.innerHTML = '';
@@ -813,10 +797,10 @@ class MoleculeManager {
 
             img.onerror = () => {
                 // Try with lowercase code as fallback
-                const altImageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligandCode.toLowerCase()}_200.svg`;
+                const altImageUrl = `https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ccdCode.toLowerCase()}_200.svg`;
                 const altImg = document.createElement('img');
                 altImg.src = altImageUrl;
-                altImg.alt = `2D structure of ${ligandCode}`;
+                altImg.alt = `2D structure of ${ccdCode}`;
 
                 altImg.onload = () => {
                     container.innerHTML = '';
@@ -830,14 +814,14 @@ class MoleculeManager {
             };
 
         } catch (error) {
-            console.error(`Error loading 2D structure for ${ligandCode}:`, error);
+            console.error(`Error loading 2D structure for ${ccdCode}:`, error);
             container.className = 'error';
             container.textContent = 'Error';
         }
     }
 
-    // Load PDB entries containing the ligand
-    async loadPDBEntries(ligandCode) {
+    // Load PDB entries containing the CCD code
+    async loadPdbEntries(ccdCode) {
         const container = document.getElementById('pdb-entries-container');
         const tableContainer = document.getElementById('pdb-entries-table-container');
         const tbody = document.getElementById('pdb-entries-tbody');
@@ -852,18 +836,12 @@ class MoleculeManager {
             const existingNotes = tableContainer.querySelectorAll('p[style*="font-size: 12px"]');
             existingNotes.forEach(note => note.remove());
 
-            // Fetch PDB entries containing this ligand
-            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb/${ligandCode}`);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const pdbIds = data[ligandCode];
+            // Fetch PDB entries containing this CCD
+            const data = await ApiService.getPdbEntriesForCcd(ccdCode);
+            const pdbIds = data[ccdCode];
 
             if (!pdbIds || pdbIds.length === 0) {
-                container.innerHTML = '<div class="no-pdb-entries">No PDB entries found containing this ligand</div>';
+                container.innerHTML = '<div class="no-pdb-entries">No PDB entries found containing this CCD code</div>';
                 return;
             }
 
@@ -873,7 +851,7 @@ class MoleculeManager {
             // Limit to first 10 entries to avoid overwhelming the UI
             const limitedPdbIds = pdbIds.slice(0, 10);
 
-            console.log(`Found ${pdbIds.length} PDB entries for ${ligandCode}, showing first ${limitedPdbIds.length}`);
+            console.log(`Found ${pdbIds.length} PDB entries for ${ccdCode}, showing first ${limitedPdbIds.length}`);
 
             // Create table rows with detailed info from RCSB PDB REST API
             for (const pdbId of limitedPdbIds) {
@@ -900,12 +878,12 @@ class MoleculeManager {
                 note.style.color = '#666';
                 note.style.fontStyle = 'italic';
                 note.style.marginTop = '10px';
-                note.textContent = `Showing first 10 of ${pdbIds.length} PDB entries containing ${ligandCode}`;
+                note.textContent = `Showing first 10 of ${pdbIds.length} PDB entries containing ${ccdCode}`;
                 tableContainer.appendChild(note);
             }
 
         } catch (error) {
-            console.error(`Error fetching PDB entries for ${ligandCode}:`, error);
+            console.error(`Error fetching PDB entries for ${ccdCode}:`, error);
 
             // Clear table and show error message
             tbody.innerHTML = '';
@@ -913,7 +891,7 @@ class MoleculeManager {
             container.innerHTML = '<div class="no-pdb-entries">PDB entries feature temporarily unavailable due to CORS restrictions. <br><small>In production, this would be handled via a backend proxy.</small></div>';
 
             // Show demo data for ATP as an example
-            if (ligandCode === 'ATP') {
+            if (ccdCode === 'ATP') {
                 this.showDemoPDBEntries();
             }
         }
@@ -922,13 +900,7 @@ class MoleculeManager {
     // Fetch detailed information from RCSB PDB REST API
     async fetchRCSBDetails(pdbId) {
         try {
-            const response = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toLowerCase()}`);
-
-            if (!response.ok) {
-                return null;
-            }
-
-            const data = await response.json();
+            const data = await ApiService.getRcsbEntry(pdbId);
             return data;
         } catch (error) {
             console.error(`Error fetching RCSB details for PDB ${pdbId}:`, error);
@@ -939,13 +911,7 @@ class MoleculeManager {
     // Fetch detailed information for a PDB entry (legacy method)
     async fetchPDBDetails(pdbId) {
         try {
-            const response = await fetch(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
-
-            if (!response.ok) {
-                return null;
-            }
-
-            const data = await response.json();
+            const data = await ApiService.getPdbSummary(pdbId);
             return data[pdbId] && data[pdbId][0] ? data[pdbId][0] : null;
         } catch (error) {
             console.error(`Error fetching details for PDB ${pdbId}:`, error);
@@ -1306,11 +1272,7 @@ class MoleculeManager {
             viewerContainer.style.display = 'block';
             viewerContainer.innerHTML = '<p class="properties-loading">Loading 3D structure...</p>';
 
-            const pdbResponse = await fetch(`https://files.rcsb.org/download/${pdbId}.pdb`);
-            if (!pdbResponse.ok) {
-                throw new Error('Could not fetch PDB file for 3D view.');
-            }
-            const pdbData = await pdbResponse.text();
+            const pdbData = await ApiService.getPdbFile(pdbId);
 
             setTimeout(() => {
                 try {
@@ -1403,13 +1365,7 @@ class MoleculeManager {
 
         tableBody.innerHTML = ''; // Clear previous entries
 
-        fetch(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
+        ApiService.getLigandMonomers(pdbId)
             .then(data => {
                 const ligands = data[pdbId.toLowerCase()];
 
@@ -1593,8 +1549,7 @@ class FragmentManager {
 
     async loadFragments() {
         try {
-            const response = await fetch('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
-            const tsvData = await response.text();
+            const tsvData = await ApiService.getFragmentLibraryTsv();
 
             const rows = tsvData.split('\n').slice(1); // Skip header
             this.fragments = rows.map((row, index) => {
@@ -1827,13 +1782,8 @@ class ProteinManager {
         this.resultsContainer.style.display = 'none';
         this.noResultsMessage.style.display = 'none';
 
-        const url = `https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`;
         try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Group not found or API error: ${response.status}`);
-            }
-            const data = await response.json();
+            const data = await ApiService.getProteinGroup(groupId);
             const memberIds = data.rcsb_group_container_identifiers.group_member_ids;
 
             this.currentProteinDetails = await this.fetchMemberDetails(memberIds);
@@ -1852,13 +1802,8 @@ class ProteinManager {
         const details = [];
         for (const pdbId of pdbIds) {
             try {
-                const response = await fetch(`https://data.rcsb.org/rest/v1/core/entry/${pdbId}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    details.push(data);
-                } else {
-                    details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
-                }
+                const data = await ApiService.getRcsbEntry(pdbId);
+                details.push(data);
             } catch (error) {
                 details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
             }
@@ -1868,11 +1813,7 @@ class ProteinManager {
 
     async fetchBoundLigands(pdbId) {
         try {
-            const response = await fetch(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`);
-            if (!response.ok) {
-                return [];
-            }
-            const data = await response.json();
+            const data = await ApiService.getLigandMonomers(pdbId);
             return data[pdbId.toLowerCase()] || [];
         } catch (error) {
             console.error(`Error fetching bound ligands for ${pdbId}:`, error);
@@ -1914,8 +1855,8 @@ class ProteinManager {
                                          title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" 
                                          class="bound-ligand-img">
                                     <div class="ligand-img-overlay">
-                                        <button class="ligand-action-btn add-ligand" data-ligand-code="${ligand.chem_comp_id}">+</button>
-                                        <button class="ligand-action-btn quick-view" data-ligand-code="${ligand.chem_comp_id}">👁️</button>
+                                        <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}">+</button>
+                                        <button class="ligand-action-btn quick-view" data-ccd-code="${ligand.chem_comp_id}">👁️</button>
                                     </div>
                                 </div>
                             `).join('')}
@@ -1952,16 +1893,16 @@ class ProteinManager {
 
             document.querySelectorAll('.add-ligand').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const ligandCode = e.target.dataset.ligandCode;
-                    moleculeManager.addMolecule(ligandCode);
-                    showNotification(`Added ${ligandCode} to library`, 'success');
+                    const ccdCode = e.target.dataset.ccdCode;
+                    moleculeManager.addMolecule(ccdCode);
+                    showNotification(`Added ${ccdCode} to library`, 'success');
                 });
             });
 
             document.querySelectorAll('.quick-view').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const ligandCode = e.target.dataset.ligandCode;
-                    this.showQuickViewModal(ligandCode);
+                    const ccdCode = e.target.dataset.ccdCode;
+                    this.showQuickViewModal(ccdCode);
                 });
             });
 
@@ -1972,20 +1913,20 @@ class ProteinManager {
         }
     }
 
-    async showQuickViewModal(ligandCode) {
+    async showQuickViewModal(ccdCode) {
         const modal = document.getElementById('quick-view-modal');
         const title = document.getElementById('quick-view-title');
         const viewer = document.getElementById('quick-view-viewer');
 
-        title.textContent = `3D Structure: ${ligandCode}`;
+        title.textContent = `3D Structure: ${ccdCode}`;
         viewer.innerHTML = '<p>Loading...</p>';
         modal.style.display = 'block';
 
         try {
             // First, try to find the molecule in local SDF file
-            const localSdfData = await moleculeManager.findMoleculeInLocalSdf(ligandCode);
+            const localSdfData = await moleculeManager.findMoleculeInLocalSdf(ccdCode);
             if (localSdfData) {
-                console.log(`Quick view: Found ${ligandCode} in local SDF file`);
+                console.log(`Quick view: Found ${ccdCode} in local SDF file`);
                 const glviewer = $3Dmol.createViewer(viewer, {
                     backgroundColor: 'white'
                 });
@@ -1999,9 +1940,9 @@ class ProteinManager {
             }
 
             // Second, try to find SMILES in local TSV file
-            const smilesData = await moleculeManager.findMoleculeInLocalTsv(ligandCode);
+            const smilesData = await moleculeManager.findMoleculeInLocalTsv(ccdCode);
             if (smilesData) {
-                console.log(`Quick view: Found ${ligandCode} in local TSV file with SMILES: ${smilesData}`);
+                console.log(`Quick view: Found ${ccdCode} in local TSV file with SMILES: ${smilesData}`);
                 viewer.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa;">
                         <div style="text-align: center; padding: 20px;">
@@ -2015,13 +1956,8 @@ class ProteinManager {
             }
 
             // Last resort: try external fetch
-            console.log(`Quick view: Trying external fetch for ${ligandCode}`);
-            const response = await fetch(`/rcsb/ligands/view/${ligandCode.toUpperCase()}_ideal.sdf`);
-            if (!response.ok) {
-                throw new Error(`SDF file not found (${response.status})`);
-            }
-
-            const sdfData = await response.text();
+            console.log(`Quick view: Trying external fetch for ${ccdCode}`);
+            const sdfData = await ApiService.getCcdSdf(ccdCode);
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
@@ -2347,16 +2283,16 @@ function showNotification(message, type = 'info') {
 }
 
 // Legacy functions for backward compatibility (now just wrappers)
-async function fetchMoleculeData(ligandCode, grid) {
-    await moleculeManager.loadMolecule(ligandCode);
+async function fetchMoleculeData(ccdCode, grid) {
+    await moleculeManager.loadMolecule(ccdCode);
 }
 
-function createMoleculeCard(sdfData, ligandCode, grid) {
-    moleculeManager.createMoleculeCard(sdfData, ligandCode);
+function createMoleculeCard(sdfData, ccdCode, grid) {
+    moleculeManager.createMoleculeCard(sdfData, ccdCode);
 }
 
-function createNotFoundCard(ligandCode, grid, message = "Not found") {
-    moleculeManager.createNotFoundCard(ligandCode, message);
+function createNotFoundCard(ccdCode, grid, message = "Not found") {
+    moleculeManager.createNotFoundCard(ccdCode, message);
 }
 
 // Drag and drop functionality
