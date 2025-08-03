@@ -13,7 +13,6 @@ class LigandDetails {
         this.detailsResidue = document.getElementById('details-residue');
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
-        this.viewer = null;
 
         const closeBtn = document.getElementById('close-details-modal');
         if (closeBtn) {
@@ -57,24 +56,7 @@ class LigandDetails {
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
         if (sdfData) {
-            setTimeout(() => {
-                try {
-                    const viewer = $3Dmol.createViewer(this.detailsViewer, {
-                        backgroundColor: 'white',
-                        width: '100%',
-                        height: '100%'
-                    });
-                    viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
-                    viewer.setStyle({ elem: 'H' }, {});
-                    viewer.zoomTo();
-                    viewer.render();
-                    this.viewer = viewer;
-                } catch (e) {
-                    console.error(`Error initializing details viewer for ${ccdCode}:`, e);
-                    this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
-                }
-            }, 100);
+            this.detailsViewer.innerHTML = '';
         } else {
             this.detailsViewer.innerHTML = '<p style="color: #666;">Structure data not available</p>';
         }
@@ -110,19 +92,6 @@ class LigandDetails {
     }
 
     cleanupViewer() {
-        if (this.viewer) {
-            try {
-                this.viewer.clear();
-                if (typeof this.viewer.destroy === 'function') {
-                    this.viewer.destroy();
-                } else if (this.viewer?.gl && typeof this.viewer.gl.getExtension === 'function') {
-                    this.viewer.gl.getExtension('WEBGL_lose_context')?.loseContext();
-                }
-            } catch (e) {
-                console.warn('Error destroying viewer:', e);
-            }
-            this.viewer = null;
-        }
         if (this.detailsViewer) {
             this.detailsViewer.innerHTML = '';
         }

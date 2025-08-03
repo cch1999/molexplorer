@@ -271,6 +271,11 @@
 
                 <div class="details-section">
                     <h4>Interactive Molecular Structure</h4>
+                    <div class="viewer-controls">
+                        <button id="ligand-rotate-btn" class="viewer-btn">Rotate</button>
+                        <button id="ligand-zoom-btn" class="viewer-btn">Zoom</button>
+                        <button id="ligand-reset-btn" class="viewer-btn">Reset</button>
+                    </div>
                     <div id="details-viewer-container" class="details-viewer">
                         <p>Loading structure...</p>
                     </div>
@@ -358,8 +363,13 @@
                 <!-- Content will be populated by JavaScript -->
                 <div class="properties-loading">Loading PDB entry details...</div>
             </div>
+            <div class="viewer-controls">
+                <button id="pdb-rotate-btn" class="viewer-btn">Rotate</button>
+                <button id="pdb-zoom-btn" class="viewer-btn">Zoom</button>
+                <button id="pdb-reset-btn" class="viewer-btn">Reset</button>
+            </div>
             <div id="pdb-viewer-container" class="details-viewer" style="display: none;">
-                <!-- 3Dmol.js viewer will be inserted here -->
+                <!-- 3D viewer will be inserted here -->
             </div>
             <div id="bound-ligands-section" class="details-section" style="display: none;">
                 <div class="section-header">

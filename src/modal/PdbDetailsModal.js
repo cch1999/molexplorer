@@ -1,5 +1,6 @@
 import ApiService from '../utils/apiService.js';
 import { RCSB_STRUCTURE_BASE_URL, PD_BE_ENTRY_BASE_URL } from '../utils/constants.js';
+import StructureViewer from '../components/StructureViewer.js';
 
 class PdbDetailsModal {
     constructor(boundLigandTable) {
@@ -14,6 +15,14 @@ class PdbDetailsModal {
                 this.close();
             }
         });
+
+        this.viewer = new StructureViewer(document.getElementById('pdb-viewer-container'));
+        const rot = document.getElementById('pdb-rotate-btn');
+        if (rot) rot.addEventListener('click', () => this.viewer.toggleRotate());
+        const zoom = document.getElementById('pdb-zoom-btn');
+        if (zoom) zoom.addEventListener('click', () => this.viewer.zoom());
+        const reset = document.getElementById('pdb-reset-btn');
+        if (reset) reset.addEventListener('click', () => this.viewer.reset());
     }
 
     async fetchRCSBDetails(pdbId) {
@@ -56,25 +65,9 @@ class PdbDetailsModal {
             });
 
             viewerContainer.style.display = 'block';
-            viewerContainer.innerHTML = '<p class="properties-loading">Loading 3D structure...</p>';
+            viewerContainer.innerHTML = '';
             const pdbData = await ApiService.getPdbFile(pdbId);
-
-            setTimeout(() => {
-                try {
-                    const viewer = $3Dmol.createViewer(viewerContainer, {
-                        backgroundColor: 'white',
-                        width: '100%',
-                        height: '100%'
-                    });
-                    viewer.addModel(pdbData, 'pdb');
-                    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
-                    viewer.zoomTo();
-                    viewer.render();
-                } catch (e) {
-                    console.error('Error creating 3Dmol viewer:', e);
-                    viewerContainer.innerHTML = '<div class="no-pdb-entries">Could not render 3D structure.</div>';
-                }
-            }, 100);
+            this.viewer.loadPDB(pdbData);
         } catch (error) {
             console.error('Error fetching PDB details:', error);
             body.innerHTML = '<div class="no-pdb-entries">Could not load details for this PDB entry.</div>';
