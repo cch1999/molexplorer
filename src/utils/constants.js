@@ -1,4 +1,4 @@
-export const RCSB_LIGAND_BASE_URL = 'https://files.rcsb.org/ligands/view';
+export const RCSB_LIGAND_BASE_URL = 'https://files.rcsb.org/ligands/download';
 export const RCSB_MODEL_BASE_URL = 'https://models.rcsb.org/v1';
 export const FRAGMENT_LIBRARY_URL = 'https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv';
 export const PD_BE_SIMILARITY_BASE_URL = 'https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity';

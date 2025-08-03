@@ -69,6 +69,7 @@ describe('ApiService', () => {
       const sdf = await ApiService.getCcdSdf('ATP');
       assert.ok(sdf.startsWith('ATP'));
       assert.ok(/M  END/.test(sdf));
+      assert.ok(!sdf.toLowerCase().includes('<html'));
     } catch (err) {
       t.skip(`Network request failed: ${err.message}`);
     }
@@ -83,6 +84,7 @@ describe('ApiService', () => {
         '4tos_D_355.sdf'
       );
       assert.ok(/M  END/.test(sdf));
+      assert.ok(!sdf.toLowerCase().includes('<html'));
     } catch (err) {
       t.skip(`Network request failed: ${err.message}`);
     }
