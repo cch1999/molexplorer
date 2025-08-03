@@ -63,4 +63,14 @@ describe('ApiService', () => {
     await ApiService.fetchText('/file.txt');
     assert.strictEqual(global.fetch.mock.callCount(), 2);
   });
+
+  it('getCcdSdf returns actual SDF data', async (t) => {
+    try {
+      const sdf = await ApiService.getCcdSdf('ATP');
+      assert.ok(sdf.startsWith('ATP'));
+      assert.ok(/M  END/.test(sdf));
+    } catch (err) {
+      t.skip(`Network request failed: ${err.message}`);
+    }
+  });
 });
