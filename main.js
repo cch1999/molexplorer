@@ -4,6 +4,8 @@ import MoleculeCard from './ui/MoleculeCard.js';
 import PdbDetailsModal from './ui/PdbDetailsModal.js';
 import BoundLigandTable from './ui/BoundLigandTable.js';
 import LigandModal from './ui/ligandModal.js';
+import FragmentLibrary from './ui/FragmentLibrary.js';
+import ProteinBrowser from './ui/ProteinBrowser.js';
 
 class MoleculeManager {
     constructor() {
@@ -161,6 +163,11 @@ class MoleculeManager {
 const moleculeManager = new MoleculeManager().init();
 moleculeManager.loadAllMolecules();
 
+const fragmentLibrary = new FragmentLibrary(moleculeManager).init();
+fragmentLibrary.loadFragments();
+
+const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -202,3 +209,5 @@ function showNotification(message, type = 'info') {
 }
 
 window.moleculeManager = moleculeManager;
+window.fragmentLibrary = fragmentLibrary;
+window.proteinBrowser = proteinBrowser;
