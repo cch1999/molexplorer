@@ -51,6 +51,24 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
   });
 
+  it('loads instance with duplicate code without affecting base molecule', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'AAA', status: 'pending' },
+      { code: 'AAA', status: 'pending', pdbId: '1AAA', authSeqId: '5', labelAsymId: 'A' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    const instance = repo.getMolecule('1AAA_A_5_AAA');
+    await loader.loadMolecule(instance);
+    const ideal = repo.getMolecule('AAA');
+    const loadedInstance = repo.getMolecule('1AAA_A_5_AAA');
+    assert.strictEqual(ideal.status, 'pending');
+    assert.strictEqual(loadedInstance.status, 'loaded');
+    assert.strictEqual(loadedInstance.sdf, 'instancedata');
+    assert.strictEqual(cardUI.createMoleculeCard.mock.calls[0].arguments[3], '1AAA_A_5_AAA');
+  });
+
   it('handles errors from remote fetch', async () => {
     const repo = new MoleculeRepository([{ code: 'BAD', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
