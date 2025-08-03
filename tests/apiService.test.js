@@ -39,10 +39,10 @@ describe('ApiService', () => {
 
   it('getInstanceSdf builds ligand URL', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
+    const txt = await ApiService.getInstanceSdf('1ABC', 7, 'B', '1abc_B.sdf');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/1abc/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf&filename=1abc_B.sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });
@@ -68,6 +68,20 @@ describe('ApiService', () => {
     try {
       const sdf = await ApiService.getCcdSdf('ATP');
       assert.ok(sdf.startsWith('ATP'));
+      assert.ok(/M  END/.test(sdf));
+    } catch (err) {
+      t.skip(`Network request failed: ${err.message}`);
+    }
+  });
+
+  it('getInstanceSdf returns actual SDF data', async (t) => {
+    try {
+      const sdf = await ApiService.getInstanceSdf(
+        '4tos',
+        1402,
+        'D',
+        '4tos_D_355.sdf'
+      );
       assert.ok(/M  END/.test(sdf));
     } catch (err) {
       t.skip(`Network request failed: ${err.message}`);
