@@ -15,14 +15,15 @@ class MoleculeLoader {
     }
 
     async loadMolecule(input) {
-        const { code, pdbId, authSeqId, labelAsymId } =
-            typeof input === 'string' ? { code: input } : input;
+        const { code, pdbId, authSeqId, labelAsymId, id } =
+            typeof input === 'string' ? { code: input, id: input } : input;
+        const identifier = id || code;
         try {
-            this.repository.updateMoleculeStatus(code, 'loading');
+            this.repository.updateMoleculeStatus(identifier, 'loading');
             const smilesData = await this.findMoleculeInLocalTsv(code);
             if (smilesData) {
-                this.repository.updateMoleculeStatus(code, 'loaded');
-                this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
+                this.repository.updateMoleculeStatus(identifier, 'loaded');
+                this.cardUI.createMoleculeCardFromSmiles(smilesData, code, identifier);
                 return;
             }
             let sdfData;
@@ -34,16 +35,16 @@ class MoleculeLoader {
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
-            this.repository.updateMoleculeStatus(code, 'loaded');
-            const molecule = this.repository.getMolecule(code);
+            this.repository.updateMoleculeStatus(identifier, 'loaded');
+            const molecule = this.repository.getMolecule(identifier);
             if (molecule) {
                 molecule.sdf = sdfData;
             }
-            this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
+            this.cardUI.createMoleculeCard(sdfData, code, 'sdf', identifier);
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
-            this.repository.updateMoleculeStatus(code, 'error');
-            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`);
+            this.repository.updateMoleculeStatus(identifier, 'error');
+            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`, identifier);
         }
     }
 
