@@ -1,15 +1,14 @@
-name: Deploy to GitHub Pages
+name: Deploy Preview
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
 
 permissions:
   contents: write
 
 jobs:
   build-and-deploy:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
 
     steps:
@@ -27,9 +26,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy
+      - name: Deploy preview
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
+          destination_dir: pr-preview/${{ github.event.number }}
           keep_files: true
