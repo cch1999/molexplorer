@@ -63,4 +63,13 @@ describe('MoleculeRepository', () => {
     repo.deleteAllMolecules();
     assert.strictEqual(repo.getAllMolecules().length, 0);
   });
+
+  it('exportToSdf concatenates SDF records', () => {
+    const repo = new MoleculeRepository([
+      { code: 'A', status: 'loaded', sdf: 'A\n$$$$' },
+      { code: 'B', status: 'loaded', sdf: 'B\n$$$$' },
+    ]);
+    const result = repo.exportToSdf();
+    assert.strictEqual(result, 'A\n$$$$\nB\n$$$$');
+  });
 });

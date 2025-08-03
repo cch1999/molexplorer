@@ -35,6 +35,10 @@ class MoleculeLoader {
                 throw new Error('Received empty or invalid SDF data.');
             }
             this.repository.updateMoleculeStatus(code, 'loaded');
+            const molecule = this.repository.getMolecule(code);
+            if (molecule) {
+                molecule.sdf = sdfData;
+            }
             this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);

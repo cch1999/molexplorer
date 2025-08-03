@@ -55,6 +55,23 @@ class MoleculeManager {
             }
         });
 
+        document.getElementById('export-btn').addEventListener('click', () => {
+            const sdf = this.repository.exportToSdf();
+            if (!sdf) {
+                showNotification('No SDF data to export', 'info');
+                return;
+            }
+            const blob = new Blob([sdf], { type: 'chemical/x-mdl-sdfile' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'molecules.sdf';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
         // Tab switching for Molecules, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [

@@ -62,6 +62,19 @@ class MoleculeRepository {
     clearAll() {
         this.molecules = [];
     }
+
+    exportToSdf() {
+        return this.molecules
+            .filter(m => m.sdf)
+            .map(m => {
+                let sdf = m.sdf.trimEnd();
+                if (!sdf.endsWith('$$$$')) {
+                    sdf += '\n$$$$';
+                }
+                return sdf;
+            })
+            .join('\n');
+    }
 }
 
 export default MoleculeRepository;
