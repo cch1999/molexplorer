@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import initThemeToggle from './utils/themeToggle.js';
 
 class MoleculeManager {
     constructor() {
@@ -198,6 +199,7 @@ const fragmentLibrary = new FragmentLibrary(moleculeManager, {
 fragmentLibrary.loadFragments();
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+initThemeToggle();
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
