@@ -1568,3 +1568,39 @@ main {
         font-size: 13px;
     }
 }
+
+/* General mobile layout adjustments */
+@media (max-width: 600px) {
+    header {
+        padding: 15px 20px;
+    }
+
+    header .author {
+        position: static;
+        display: block;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    .tabs {
+        flex-direction: column;
+    }
+
+    .tab-button {
+        width: 100%;
+    }
+
+    .fragment-controls,
+    .protein-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .fragment-controls input[type="text"],
+    .fragment-controls select,
+    .protein-controls select,
+    .protein-controls input[type="text"],
+    .protein-controls button {
+        width: 100%;
+    }
+}
