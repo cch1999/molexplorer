@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import ComparisonModal from './modal/ComparisonModal.js';
 
 class MoleculeManager {
     constructor() {
@@ -22,6 +23,8 @@ class MoleculeManager {
         this.boundLigandTable = null;
         this.pdbDetailsModal = null;
         this.addModal = null;
+        this.comparisonModal = null;
+        this.compareQueue = [];
     }
 
     init() {
@@ -30,7 +33,8 @@ class MoleculeManager {
 
         this.cardUI = new MoleculeCard(this.grid, this.repository, {
             onDelete: code => this.confirmDelete(code),
-            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format)
+            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format),
+            onCompare: code => this.queueComparison(code)
         });
 
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
@@ -42,6 +46,7 @@ class MoleculeManager {
         );
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
         this.addModal = new AddMoleculeModal(this);
+        this.comparisonModal = new ComparisonModal();
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
             if (this.addModal) {
@@ -149,6 +154,26 @@ class MoleculeManager {
 
     updateMoleculeStatus(code, status) {
         this.repository.updateMoleculeStatus(code, status);
+    }
+
+    queueComparison(code) {
+        if (this.compareQueue.includes(code)) return;
+        this.compareQueue.push(code);
+        if (this.compareQueue.length === 2) {
+            const [c1, c2] = this.compareQueue;
+            const mol1 = this.getMolecule(c1);
+            const mol2 = this.getMolecule(c2);
+            if (mol1 && mol2 && this.comparisonModal) {
+                if (mol1.sdf && mol2.sdf) {
+                    this.comparisonModal.show(mol1, mol2);
+                } else if (typeof showNotification === 'function') {
+                    showNotification('Both molecules must be loaded before comparison', 'error');
+                }
+            }
+            this.compareQueue = [];
+        } else if (typeof showNotification === 'function') {
+            showNotification('Select another molecule to compare', 'info');
+        }
     }
 
     loadAllMolecules() {

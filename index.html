@@ -387,6 +387,19 @@
     <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
     <script type="module" src="./src/main.js"></script>
 
+    <!-- Comparison Modal -->
+    <div id="comparison-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="comparison-title">Compare Molecules</h3>
+                <span class="close" id="close-comparison-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div id="comparison-viewer" style="width: 100%; height: 400px; position: relative;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick 3D View Modal -->
     <div id="quick-view-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">

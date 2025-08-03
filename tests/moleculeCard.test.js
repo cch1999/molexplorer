@@ -51,3 +51,36 @@ describe('MoleculeCard downloadSdf', () => {
     assert.strictEqual(URL.revokeObjectURL.mock.callCount(), 1);
   });
 });
+
+describe('MoleculeCard compare button', () => {
+  it('adds a compare button to the card', () => {
+    const makeEl = () => ({
+      style: {},
+      children: [],
+      appendChild(child) { this.children.push(child); return child; },
+      setAttribute: () => {},
+      addEventListener: () => {},
+      innerHTML: '',
+      textContent: '',
+      className: ''
+    });
+
+    global.document = { createElement: makeEl };
+    global.window = {};
+    global.$3Dmol = { createViewer: () => ({ addModel: () => {}, setStyle: () => {}, render: () => {}, zoomTo: () => {} }) };
+    const originalTimeout = global.setTimeout;
+    global.setTimeout = (fn) => { fn(); };
+
+    const grid = makeEl();
+    const cardUI = new MoleculeCard(grid, {});
+    cardUI.createMoleculeCard('sdf', 'AAA');
+    const card = grid.children[0];
+    const hasCompare = card.children.some(c => c.className === 'compare-btn');
+    assert.ok(hasCompare);
+
+    global.setTimeout = originalTimeout;
+    delete global.$3Dmol;
+    delete global.document;
+    delete global.window;
+  });
+});

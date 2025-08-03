@@ -41,6 +41,16 @@ class MoleculeCard {
         });
         card.appendChild(downloadBtn);
 
+        const compareBtn = document.createElement('div');
+        compareBtn.className = 'compare-btn';
+        compareBtn.textContent = '⇆';
+        compareBtn.title = `Compare ${ccdCode}`;
+        compareBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.onCompare) this.onCompare(ccdCode);
+        });
+        card.appendChild(compareBtn);
+
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
         codeLabel.textContent = ccdCode;
@@ -106,6 +116,16 @@ class MoleculeCard {
             this.downloadSdf(ccdCode, data);
         });
         card.appendChild(downloadBtn);
+
+        const compareBtn = document.createElement('div');
+        compareBtn.className = 'compare-btn';
+        compareBtn.textContent = '⇆';
+        compareBtn.title = `Compare ${ccdCode}`;
+        compareBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.onCompare) this.onCompare(ccdCode);
+        });
+        card.appendChild(compareBtn);
 
         const title = document.createElement('h3');
         title.textContent = ccdCode;
