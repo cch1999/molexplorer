@@ -1,4 +1,4 @@
-import ApiService from '../apiService.js';
+import ApiService from '../utils/apiService.js';
 
 class PdbDetailsModal {
     constructor(boundLigandTable) {
