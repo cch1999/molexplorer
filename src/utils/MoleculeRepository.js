@@ -1,6 +1,10 @@
 class MoleculeRepository {
     constructor(initial = []) {
-        this.molecules = initial.map(m => ({ ...m, id: this.generateId(m) }));
+        this.molecules = initial.map(m => ({
+            ...m,
+            id: this.generateId(m),
+            tags: m.tags ? [...m.tags] : []
+        }));
     }
 
     generateId(data) {
@@ -21,9 +25,11 @@ class MoleculeRepository {
             code: typeof data === 'string' ? data : data.code,
             status: 'pending',
             id,
+            tags: []
         };
         if (data && typeof data === 'object') {
             Object.assign(molecule, data);
+            if (!molecule.tags) molecule.tags = [];
         }
         this.molecules.push(molecule);
         return true;
@@ -61,6 +67,40 @@ class MoleculeRepository {
 
     clearAll() {
         this.molecules = [];
+    }
+
+    getTags(identifier) {
+        const mol = this.getMolecule(identifier);
+        return mol && mol.tags ? [...mol.tags] : [];
+    }
+
+    addTag(identifier, tag) {
+        const mol = this.getMolecule(identifier);
+        if (!mol) return false;
+        if (!mol.tags) mol.tags = [];
+        if (!mol.tags.includes(tag)) {
+            mol.tags.push(tag);
+            return true;
+        }
+        return false;
+    }
+
+    updateTag(identifier, oldTag, newTag) {
+        const mol = this.getMolecule(identifier);
+        if (!mol || !mol.tags) return false;
+        const idx = mol.tags.indexOf(oldTag);
+        if (idx === -1) return false;
+        mol.tags[idx] = newTag;
+        return true;
+    }
+
+    removeTag(identifier, tag) {
+        const mol = this.getMolecule(identifier);
+        if (!mol || !mol.tags) return false;
+        const idx = mol.tags.indexOf(tag);
+        if (idx === -1) return false;
+        mol.tags.splice(idx, 1);
+        return true;
     }
 
     removeHydrogensFromSdf(sdf) {

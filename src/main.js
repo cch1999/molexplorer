@@ -8,6 +8,8 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import TagManager from './utils/TagManager.js';
+import TagModal from './modal/TagModal.js';
 
 class MoleculeManager {
     constructor() {
@@ -22,15 +24,20 @@ class MoleculeManager {
         this.boundLigandTable = null;
         this.pdbDetailsModal = null;
         this.addModal = null;
+        this.tagManager = new TagManager(this.repository);
+        this.tagModal = null;
     }
 
     init() {
         this.grid = document.getElementById('molecule-grid');
         this.loadingIndicator = document.querySelector('.loading-indicator');
 
+        this.tagModal = new TagModal(this.tagManager);
         this.cardUI = new MoleculeCard(this.grid, this.repository, {
             onDelete: code => this.confirmDelete(code),
-            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format)
+            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format),
+            tagManager: this.tagManager,
+            tagModal: this.tagModal
         });
 
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
