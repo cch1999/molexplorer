@@ -1,3 +1,13 @@
+/**
+ * ApiService - Centralized service for all external API calls
+ *
+ * This service handles communication with various molecular biology databases:
+ * - RCSB PDB (Protein Data Bank) - Primary protein structure database
+ * - PDBe (Protein Data Bank in Europe) - European protein structure database
+ * - Local data files (SDF, TSV) - Fragment and molecule libraries
+ *
+ * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
+ */
 export default class ApiService {
   /**
    * Perform a fetch request and parse the response using the provided parser.
@@ -42,37 +52,74 @@ export default class ApiService {
   }
 
   /**
-   * Retrieve the ideal SDF data for a Chemical Component Dictionary (CCD) code.
+   * Fetch ideal chemical component data from PDBe Graph API
    *
-   * @param {string} ccdCode - Three-letter CCD code (e.g., 'ATP').
-   * @returns {Promise<string>} SDF file contents.
+   * Retrieves the ideal (reference) structure for a chemical component from the 
+   * Chemical Component Dictionary (CCD) via PDBe's Graph API.
+   *
+   * @param {string} ligandCode - The 3-letter CCD code (e.g., 'ATP', 'HEM')
+   * @returns {Promise<string>} SDF file content as string
+   *
    * @example
-   * const sdf = await ApiService.getCcdSdf('ATP');
-   * // sdf starts with 'ATP\n  3Dmol...'
+   * // Example SDF response for ligandCode 'HEM':
+   * const sdf = await ApiService.getCcdSdf('HEM');
+   * // sdf.startsWith('HEM') => true
+   *
+   * @note
+   * - Uses PDBe Graph API endpoint: /api/pdb/entry/ideal_ccd/{ligandCode}
+   * - Returns ideal (reference) structure, not experimental data
+   * - Chemical components are standardized molecular entities in the CCD
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for API documentation
    */
   static getCcdSdf(ccdCode) {
     return this.fetchText(`/rcsb/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`);
   }
 
   /**
-   * Fetch the bundled local SDF library used for offline lookups.
+   * Fetch local SDF (Structure Data File) data
    *
-   * @returns {Promise<string>} Entire SDF library as text.
+   * Loads molecular structure data from the local SDF file containing
+   * pre-loaded chemical components and their 3D coordinates.
+   *
+   * @returns {Promise<string>} SDF file content as string
+   *
    * @example
-   * const library = await ApiService.getLocalSdfLibrary();
-   * // library.includes('$$$$') => true
+   * // Example SDF format:
+   * // HEM
+   * // CCTOOLS-1004241128
+   * //
+   * // 75 82 0 0 0 0 0 0 0 0999 V2000
+   * //    -0.1234    1.2345    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
+   * //    ...
+   * // M  END
+   * // $$$$
+   *
+   * @note
+   * - SDF files contain 3D molecular coordinates in MOL format
+   * - Each molecule is separated by $$$$
+   * - Used for 3D molecular visualization with 3Dmol.js
    */
   static getLocalSdfLibrary() {
     return this.fetchText('./data/Enamine_MiniFrag_Library_80cmpds_20250123.sdf');
   }
 
   /**
-   * Download the fragment library in TSV format.
+   * Fetch fragment library data from local TSV file
    *
-   * @returns {Promise<string>} TSV file contents.
+   * Loads fragment library data containing molecular fragments with their
+   * properties, sources, and structural information.
+   *
+   * @returns {Promise<string>} TSV file contents as string
+   *
    * @example
-   * const tsv = await ApiService.getFragmentLibraryTsv();
-   * // tsv.split('\n')[0] => 'ccd\tsmiles'
+   * // Example TSV first line:
+   * // fragment_id\tsmiles\tsource\tdescription\t...
+   *
+   * @note
+   * - TSV format with tab-separated values
+   * - Contains fragments from multiple sources (PDBe, ENAMINE, DSI)
+   * - Used for fragment-based drug discovery workflows
    */
   static getFragmentLibraryTsv() {
     // Fetch fragment library TSV from GitHub
@@ -80,91 +127,168 @@ export default class ApiService {
   }
 
   /**
-   * Fetch compounds similar to the given CCD code using PDBe's similarity service.
+   * Fetch similar ligands for a given chemical component
    *
-   * @param {string} ccdCode - CCD code to query.
-   * @returns {Promise<Object>} Mapping of the CCD code to an array of similar components.
+   * Retrieves structurally similar ligands from PDBe's similarity search API.
+   * Returns ligands that share structural features with the query molecule.
+   *
+   * @param {string} ligandCode - The 3-letter CCD code to find similar ligands for
+   * @returns {Promise<Object>} Mapping of the CCD code to an array of similar components
+   *
    * @example
    * await ApiService.getSimilarCcds('ATP');
    * // => { "ATP": [ { "ccd_id": "ADP", "similarity": 0.75 } ] }
+   *
+   * @note
+   * - Uses PDBe similarity search algorithms
+   * - Similarity types: scaffold, stereoisomer, similar
+   * - Scores range from 0.0 to 1.0 (higher = more similar)
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for similarity search API
    */
   static getSimilarCcds(ccdCode) {
     return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ccdCode}`);
   }
 
   /**
-   * Retrieve PDB entry IDs that contain a given CCD code.
+   * Fetch PDB entries containing a specific ligand
    *
-   * @param {string} ccdCode - CCD code to search for.
-   * @returns {Promise<Object>} Mapping of the CCD code to an array of PDB IDs.
+   * Retrieves all PDB entries where the specified chemical component appears
+   * as a bound ligand in protein structures.
+   *
+   * @param {string} ligandCode - The 3-letter CCD code to search for
+   * @returns {Promise<Object>} Mapping of the CCD code to an array of PDB IDs
+   *
    * @example
    * await ApiService.getPdbEntriesForCcd('ATP');
    * // => { "ATP": ["2MZ5", "3AMO"] }
+   *
+   * @note
+   * - Searches across all PDB entries for ligand binding
+   * - Returns experimental protein-ligand complexes
+   * - Includes structural and experimental metadata
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDB search API
    */
   static getPdbEntriesForCcd(ccdCode) {
     return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb/${ccdCode}`);
   }
 
   /**
-   * Fetch RCSB entry metadata for a PDB ID.
+   * Fetch detailed PDB entry information from RCSB API
    *
-   * @param {string} pdbId - Four-character PDB identifier.
-   * @returns {Promise<Object>} RCSB entry JSON.
+   * Retrieves comprehensive information about a specific PDB entry including
+   * structural metadata, experimental details, and publication information.
+   *
+   * @param {string} pdbId - The 4-character PDB ID (e.g., '1ATP', '4HHB')
+   * @returns {Promise<Object|null>} PDB entry details or null if failed
+   *
    * @example
    * const entry = await ApiService.getRcsbEntry('1CBS');
    * // entry.rcsb_id => '1CBS'
+   *
+   * @note
+   * - Uses RCSB PDB REST API
+   * - Returns comprehensive structural and experimental metadata
+   * - Includes entity information for proteins, nucleic acids, and ligands
+   *
+   * @see https://data.rcsb.org/redoc/index.html for RCSB API documentation
    */
   static getRcsbEntry(pdbId) {
     return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toLowerCase()}`);
   }
 
   /**
-   * Fetch PDBe summary metadata for a PDB ID.
+   * Fetch PDBe summary information for a PDB entry
    *
-   * @param {string} pdbId - Four-character PDB identifier.
-   * @returns {Promise<Object>} Summary information.
+   * Retrieves summary information about a PDB entry from PDBe's Graph API,
+   * including structural statistics, experimental details, and quality metrics.
+   *
+   * @param {string} pdbId - The 4-character PDB ID (e.g., '1ATP', '4HHB')
+   * @returns {Promise<Object|null>} PDBe summary data or null if failed
+   *
    * @example
    * const summary = await ApiService.getPdbSummary('1CBS');
-   * // summary['1cbs'][0].title => '...'
+   * // summary['1cbs'][0].title => 'CRYSTAL STRUCTURE OF ADENOSINE KINASE'
+   *
+   * @note
+   * - Uses PDBe Graph API for comprehensive structural information
+   * - Includes quality indicators and experimental metadata
+   * - Provides entity-level information for all molecular components
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
    */
   static getPdbSummary(pdbId) {
     return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
   }
 
   /**
-   * Download a PDB file.
+   * Fetch PDB file in mmCIF format from RCSB
    *
-   * @param {string} pdbId - Four-character PDB identifier.
-   * @returns {Promise<string>} Raw PDB file content.
+   * Downloads the complete PDB file containing atomic coordinates and
+   * structural information in mmCIF format for 3D visualization.
+   *
+   * @param {string} pdbId - The 4-character PDB ID (e.g., '1ATP', '4HHB')
+   * @returns {Promise<string>} PDB file content in mmCIF format
+   *
    * @example
    * const pdb = await ApiService.getPdbFile('1CBS');
    * // pdb.startsWith('HEADER') => true
+   *
+   * @note
+   * - mmCIF format is the standard for PDB structural data
+   * - Contains atomic coordinates, B-factors, and structural metadata
+   * - Used for 3D molecular visualization with 3Dmol.js
+   *
+   * @see https://www.wwpdb.org/data/file-format for mmCIF format specification
    */
   static getPdbFile(pdbId) {
     return this.fetchText(`https://files.rcsb.org/download/${pdbId}.pdb`);
   }
 
   /**
-   * Retrieve ligand monomer information for a PDB entry.
+   * Fetch bound ligands for a specific PDB entry
    *
-   * @param {string} pdbId - PDB entry ID.
-   * @returns {Promise<Object>} Ligand monomer data keyed by PDB ID.
+   * Retrieves all chemical components bound to the protein structure,
+   * including their binding sites, chain information, and structural details.
+   *
+   * @param {string} pdbId - The 4-character PDB ID (e.g., '1ATP', '4HHB')
+   * @returns {Promise<Object>} Ligand monomer data keyed by PDB ID
+   *
    * @example
    * await ApiService.getLigandMonomers('1CBS');
    * // => { "1cbs": [ { "chem_comp_id": "ATP", ... } ] }
+   *
+   * @note
+   * - Includes both small molecules and ions
+   * - Provides binding site and structural information
+   * - Used for analyzing protein-ligand interactions
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for bound ligands API
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`);
   }
 
   /**
-   * Fetch information about an RCSB entry group.
+   * Fetch protein group information from RCSB API
    *
-   * @param {string} groupId - RCSB group identifier.
-   * @returns {Promise<Object>} Group metadata.
+   * Retrieves information about protein groups, which are collections of
+   * related PDB entries (e.g., same protein with different ligands).
+   *
+   * @param {string} groupId - The protein group ID (e.g., 'G_1002155')
+   * @returns {Promise<Object|null>} Protein group data or null if failed
+   *
    * @example
    * const group = await ApiService.getProteinGroup('P12345');
    * // group.group_id => 'P12345'
+   *
+   * @note
+   * - PDB IDs are in rcsb_group_container_identifiers.group_member_ids array
+   * - Group metadata is in rcsb_group_info object
+   * - This is NOT the same structure as individual PDB entry APIs
+   *
+   * @see https://data.rcsb.org/redoc/index.html for RCSB group API documentation
    */
   static getProteinGroup(groupId) {
     return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`);
