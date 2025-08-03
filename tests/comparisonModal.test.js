@@ -29,38 +29,42 @@ describe('ComparisonModal', () => {
     };
     global.window = { addEventListener: () => {} };
 
-    const model1 = { setStyle: mock.fn(), align: mock.fn() };
-    const model2 = { setStyle: mock.fn(), align: mock.fn() };
-    let call = 0;
-    const viewer = {
-      addModel: mock.fn(() => (call++ === 0 ? model1 : model2)),
-      zoomTo: mock.fn(),
-      render: mock.fn()
-    };
+      const model1Atoms = [{ x: 0, y: 0, z: 0 }, { x: 1, y: 1, z: 1 }];
+      const model2Atoms = [{ x: 1, y: 1, z: 1 }, { x: 2, y: 2, z: 2 }];
+      const model1 = { setStyle: mock.fn(), selectedAtoms: () => model1Atoms };
+      const model2 = { setStyle: mock.fn(), selectedAtoms: () => model2Atoms };
+      let call = 0;
+      const viewer = {
+        addModel: mock.fn(() => (call++ === 0 ? model1 : model2)),
+        zoomTo: mock.fn(),
+        render: mock.fn()
+      };
 
-    global.$3Dmol = { createViewer: mock.fn(() => viewer) };
+      global.$3Dmol = { createViewer: mock.fn(() => viewer) };
 
-    const originalTimeout = global.setTimeout;
-    global.setTimeout = (fn) => { fn(); };
+      const originalTimeout = global.setTimeout;
+      global.setTimeout = (fn) => { fn(); };
 
-    const modal = new ComparisonModal();
-    modal.show({ code: 'AAA', sdf: 'sdf1' }, { code: 'BBB', sdf: 'sdf2' });
+      const modal = new ComparisonModal();
+      modal.show({ code: 'AAA', sdf: 'sdf1' }, { code: 'BBB', sdf: 'sdf2' });
 
-    global.setTimeout = originalTimeout;
+      global.setTimeout = originalTimeout;
 
-    assert.strictEqual($3Dmol.createViewer.mock.callCount(), 1);
-    assert.strictEqual(viewer.addModel.mock.callCount(), 2);
-    assert.deepStrictEqual(viewer.addModel.mock.calls[0].arguments, ['sdf1', 'sdf']);
-    assert.deepStrictEqual(viewer.addModel.mock.calls[1].arguments, ['sdf2', 'sdf']);
-    assert.strictEqual(model2.align.mock.callCount(), 1);
-    assert.strictEqual(model2.align.mock.calls[0].arguments[0], model1);
-    assert.strictEqual(viewer.render.mock.callCount(), 1);
-    assert.strictEqual(titleEl.textContent, 'AAA vs BBB');
-    assert.strictEqual(modalEl.style.display, 'block');
+      assert.strictEqual($3Dmol.createViewer.mock.callCount(), 1);
+      assert.strictEqual(viewer.addModel.mock.callCount(), 2);
+      assert.deepStrictEqual(viewer.addModel.mock.calls[0].arguments, ['sdf1', 'sdf']);
+      assert.deepStrictEqual(viewer.addModel.mock.calls[1].arguments, ['sdf2', 'sdf']);
+      assert.deepStrictEqual(model2Atoms, [
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 1, z: 1 }
+      ]);
+      assert.strictEqual(viewer.render.mock.callCount(), 1);
+      assert.strictEqual(titleEl.textContent, 'AAA vs BBB');
+      assert.strictEqual(modalEl.style.display, 'block');
 
-    mock.restoreAll();
-    delete global.$3Dmol;
-    delete global.document;
-    delete global.window;
+      mock.restoreAll();
+      delete global.$3Dmol;
+      delete global.document;
+      delete global.window;
+    });
   });
-});
