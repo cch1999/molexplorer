@@ -1,4 +1,5 @@
-import ApiService from './apiService.js';
+import rcsbService from './api/rcsbService.js';
+import fragmentService from './api/fragmentService.js';
 
 class MoleculeLoader {
     constructor(repository, cardUI) {
@@ -27,9 +28,9 @@ class MoleculeLoader {
             }
             let sdfData;
             if (pdbId && authSeqId && labelAsymId) {
-                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
+                sdfData = await rcsbService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
             } else {
-                sdfData = await ApiService.getCcdSdf(code);
+                sdfData = await rcsbService.getCcdSdf(code);
             }
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
@@ -49,7 +50,7 @@ class MoleculeLoader {
 
     async findMoleculeInLocalTsv(code) {
         try {
-            const tsvContent = await ApiService.getFragmentLibraryTsv();
+            const tsvContent = await fragmentService.getFragmentLibraryTsv();
             const lines = tsvContent.split('\n');
             for (const line of lines) {
                 const columns = line.split('\t');

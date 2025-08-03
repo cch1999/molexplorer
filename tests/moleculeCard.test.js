@@ -2,7 +2,7 @@ import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM, Element } from './domStub.js';
 import MoleculeCard from '../src/components/MoleculeCard.js';
-import ApiService from '../src/utils/apiService.js';
+import rcsbService from '../src/utils/api/rcsbService.js';
 
 describe('MoleculeCard downloadSdf', () => {
   let dom, card, createdAnchor;
@@ -40,11 +40,11 @@ describe('MoleculeCard downloadSdf', () => {
   });
 
   it('fetches SDF and triggers file download', async () => {
-    mock.method(ApiService, 'getCcdSdf', async () => 'sdfdata');
+    mock.method(rcsbService, 'getCcdSdf', async () => 'sdfdata');
 
     await card.downloadSdf('AAA');
 
-    assert.strictEqual(ApiService.getCcdSdf.mock.callCount(), 1);
+    assert.strictEqual(rcsbService.getCcdSdf.mock.callCount(), 1);
     assert.strictEqual(createdAnchor.download, 'AAA.sdf');
     assert.strictEqual(createdAnchor.click.mock.callCount(), 1);
     assert.strictEqual(global.document.body.children.length, 0);

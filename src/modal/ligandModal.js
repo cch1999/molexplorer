@@ -1,4 +1,4 @@
-import ApiService from '../utils/apiService.js';
+import { getSimilarCcds, getPdbEntriesForCcd } from '../utils/api/pdbeService.js';
 import {
     PD_BE_STATIC_IMAGE_BASE_URL,
     RCSB_STRUCTURE_BASE_URL,
@@ -177,7 +177,7 @@ class LigandModal {
             table.style.display = 'none';
             addAllBtn.style.display = 'none';
 
-            const data = await ApiService.getSimilarCcds(ccdCode);
+            const data = await getSimilarCcds(ccdCode);
             const ccdData = data[ccdCode];
 
             if (!ccdData || (!ccdData[0]?.stereoisomers?.length && !ccdData[0]?.same_scaffold?.length && !ccdData[0]?.similar_ligands?.length)) {
@@ -379,7 +379,7 @@ class LigandModal {
             tableContainer.style.display = 'none';
             const existingNotes = tableContainer.querySelectorAll('p[style*="font-size: 12px"]');
             existingNotes.forEach(note => note.remove());
-            const data = await ApiService.getPdbEntriesForCcd(ccdCode);
+            const data = await getPdbEntriesForCcd(ccdCode);
             const pdbIds = data[ccdCode];
             if (!pdbIds || pdbIds.length === 0) {
                 container.innerHTML = '<div class="no-pdb-entries">No PDB entries found containing this CCD code</div>';

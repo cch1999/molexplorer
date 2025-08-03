@@ -1,4 +1,4 @@
-import ApiService from '../utils/apiService.js';
+import rcsbService from '../utils/api/rcsbService.js';
 
 class MoleculeCard {
     constructor(grid, repository, callbacks = {}) {
@@ -232,7 +232,7 @@ class MoleculeCard {
         try {
             let data = sdfData;
             if (!data) {
-                data = await ApiService.getCcdSdf(ccdCode);
+                data = await rcsbService.getCcdSdf(ccdCode);
             }
             if (!data) {
                 throw new Error('No SDF data available');

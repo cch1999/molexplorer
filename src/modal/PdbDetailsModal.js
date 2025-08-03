@@ -1,4 +1,4 @@
-import ApiService from '../utils/apiService.js';
+import { getRcsbEntry, getPdbFile } from '../utils/api/rcsbService.js';
 import { RCSB_STRUCTURE_BASE_URL, PD_BE_ENTRY_BASE_URL } from '../utils/constants.js';
 
 class PdbDetailsModal {
@@ -18,7 +18,7 @@ class PdbDetailsModal {
 
     async fetchRCSBDetails(pdbId) {
         try {
-            const data = await ApiService.getRcsbEntry(pdbId);
+            const data = await getRcsbEntry(pdbId);
             return data;
         } catch (error) {
             console.error(`Error fetching RCSB details for PDB ${pdbId}:`, error);
@@ -57,7 +57,7 @@ class PdbDetailsModal {
 
             viewerContainer.style.display = 'block';
             viewerContainer.innerHTML = '<p class="properties-loading">Loading 3D structure...</p>';
-            const pdbData = await ApiService.getPdbFile(pdbId);
+            const pdbData = await getPdbFile(pdbId);
 
             setTimeout(() => {
                 try {

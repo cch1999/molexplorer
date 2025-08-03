@@ -2,7 +2,8 @@ import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import MoleculeLoader from '../src/utils/MoleculeLoader.js';
 import MoleculeRepository from '../src/utils/MoleculeRepository.js';
-import ApiService from '../src/utils/apiService.js';
+import rcsbService from '../src/utils/api/rcsbService.js';
+import fragmentService from '../src/utils/api/fragmentService.js';
 
 describe('MoleculeLoader', () => {
   let cardUI;
@@ -21,7 +22,7 @@ describe('MoleculeLoader', () => {
   it('loads molecule from local TSV when available', async () => {
     const repo = new MoleculeRepository([{ code: 'XYZ', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '0\t1\t2\tC1=O\t4\t5\t6\t7\tXYZ');
+    mock.method(fragmentService, 'getFragmentLibraryTsv', async () => '0\t1\t2\tC1=O\t4\t5\t6\t7\tXYZ');
     await loader.loadMolecule('XYZ');
     assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 1);
     assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.calls[0].arguments[0], 'C1=O');
@@ -31,8 +32,8 @@ describe('MoleculeLoader', () => {
   it('falls back to remote SDF when local data missing', async () => {
     const repo = new MoleculeRepository([{ code: 'ZZZ', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
-    mock.method(ApiService, 'getCcdSdf', async () => 'sdfdata');
+    mock.method(fragmentService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(rcsbService, 'getCcdSdf', async () => 'sdfdata');
     await loader.loadMolecule('ZZZ');
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('ZZZ').status, 'loaded');
@@ -43,10 +44,10 @@ describe('MoleculeLoader', () => {
       { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
-    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    mock.method(fragmentService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(rcsbService, 'getInstanceSdf', async () => 'instancedata');
     await loader.loadMolecule(repo.getMolecule('CCC'));
-    assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.strictEqual(rcsbService.getInstanceSdf.mock.callCount(), 1);
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
   });
@@ -54,8 +55,8 @@ describe('MoleculeLoader', () => {
   it('handles errors from remote fetch', async () => {
     const repo = new MoleculeRepository([{ code: 'BAD', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
-    mock.method(ApiService, 'getCcdSdf', async () => '<html>error');
+    mock.method(fragmentService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(rcsbService, 'getCcdSdf', async () => '<html>error');
     await loader.loadMolecule('BAD');
     assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('BAD').status, 'error');
@@ -64,7 +65,7 @@ describe('MoleculeLoader', () => {
   it('findMoleculeInLocalTsv returns SMILES', async () => {
     const repo = new MoleculeRepository();
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => 'a\tb\tc\tSMI\td\te\tf\tg\tFOO');
+    mock.method(fragmentService, 'getFragmentLibraryTsv', async () => 'a\tb\tc\tSMI\td\te\tf\tg\tFOO');
     const result = await loader.findMoleculeInLocalTsv('FOO');
     assert.strictEqual(result, 'SMI');
   });

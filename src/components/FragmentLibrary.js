@@ -1,4 +1,4 @@
-import ApiService from '../utils/apiService.js';
+import { getFragmentLibraryTsv } from '../utils/api/fragmentService.js';
 
 class FragmentLibrary {
     constructor(moleculeManager, {
@@ -41,7 +41,7 @@ class FragmentLibrary {
 
     async loadFragments() {
         try {
-            const tsvData = await ApiService.getFragmentLibraryTsv();
+            const tsvData = await getFragmentLibraryTsv();
             const rows = tsvData.split('\n').slice(1); // Skip header
             this.fragments = rows.map((row, index) => {
                 const columns = row.split('\t');

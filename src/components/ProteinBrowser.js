@@ -1,4 +1,5 @@
-import ApiService from '../utils/apiService.js';
+import { getProteinGroup, getRcsbEntry } from '../utils/api/rcsbService.js';
+import { getLigandMonomers } from '../utils/api/pdbeService.js';
 import {
     PD_BE_STATIC_IMAGE_BASE_URL,
     RCSB_STRUCTURE_IMAGE_BASE_URL,
@@ -71,7 +72,7 @@ class ProteinBrowser {
         this.noResultsMessage.style.display = 'none';
 
         try {
-            const data = await ApiService.getProteinGroup(groupId);
+            const data = await getProteinGroup(groupId);
             const memberIds = data.rcsb_group_container_identifiers.group_member_ids;
             this.currentProteinDetails = await this.fetchMemberDetails(memberIds);
             this.displayResults(this.currentProteinDetails);
@@ -94,7 +95,7 @@ class ProteinBrowser {
         const details = [];
         for (const pdbId of pdbIds) {
             try {
-                const data = await ApiService.getRcsbEntry(pdbId);
+                const data = await getRcsbEntry(pdbId);
                 details.push(data);
             } catch (error) {
                 details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
@@ -105,7 +106,7 @@ class ProteinBrowser {
 
     async fetchBoundLigands(pdbId) {
         try {
-            const data = await ApiService.getLigandMonomers(pdbId);
+            const data = await getLigandMonomers(pdbId);
             return data[pdbId.toLowerCase()] || [];
         } catch (error) {
             console.error(`Error fetching bound ligands for ${pdbId}:`, error);

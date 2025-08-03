@@ -1,4 +1,4 @@
-import ApiService from '../utils/apiService.js';
+import pdbeService from '../utils/api/pdbeService.js';
 import { EXCLUDED_LIGANDS, ADD_LIGAND_DELAY_MS } from '../utils/constants.js';
 
 class BoundLigandTable {
@@ -17,7 +17,7 @@ class BoundLigandTable {
 
         tableBody.innerHTML = '';
 
-        ApiService.getLigandMonomers(pdbId)
+        pdbeService.getLigandMonomers(pdbId)
             .then(data => {
                 const ligands = data[pdbId.toLowerCase()];
 

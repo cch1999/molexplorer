@@ -2,7 +2,7 @@ import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM, Element } from './domStub.js';
 import BoundLigandTable from '../src/components/BoundLigandTable.js';
-import ApiService from '../src/utils/apiService.js';
+import pdbeService from '../src/utils/api/pdbeService.js';
 
 let dom;
 let table;
@@ -55,7 +55,7 @@ describe('populateBoundLigands', () => {
       { chem_comp_id: 'AAA', chain_id: 'A', author_residue_number: '1', entity_id: '1', chem_comp_name: 'LigA' },
       { chem_comp_id: 'HOH', chain_id: 'B', author_residue_number: '2', entity_id: '2', chem_comp_name: 'Water' }
     ];
-    mock.method(ApiService, 'getLigandMonomers', async () => ({ '1abc': ligands }));
+    mock.method(pdbeService, 'getLigandMonomers', async () => ({ '1abc': ligands }));
     const addAllSpy = mock.method(table, 'addAllLigands', () => {});
 
     table.populateBoundLigands('1ABC');
@@ -79,7 +79,7 @@ describe('populateBoundLigands', () => {
   });
 
   it('shows message when no ligands found', async () => {
-    mock.method(ApiService, 'getLigandMonomers', async () => ({ '1abc': [] }));
+    mock.method(pdbeService, 'getLigandMonomers', async () => ({ '1abc': [] }));
 
     table.populateBoundLigands('1ABC');
     await new Promise(r => setImmediate(r));
@@ -96,7 +96,7 @@ describe('populateBoundLigands', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    mock.method(ApiService, 'getLigandMonomers', async () => { throw new Error('fail'); });
+    mock.method(pdbeService, 'getLigandMonomers', async () => { throw new Error('fail'); });
 
     table.populateBoundLigands('1ABC');
     await new Promise(r => setImmediate(r));
