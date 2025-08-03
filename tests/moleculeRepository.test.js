@@ -8,7 +8,7 @@ describe('MoleculeRepository', () => {
     assert.ok(repo.addMolecule('A'));
     assert.strictEqual(repo.addMolecule('A'), false);
     assert.deepStrictEqual(repo.getAllMolecules(), [
-      { code: 'A', status: 'pending', id: 'A' },
+      { code: 'A', status: 'pending', id: 'A', tags: [] },
     ]);
   });
 
@@ -22,6 +22,7 @@ describe('MoleculeRepository', () => {
       authSeqId: '5',
       labelAsymId: 'A',
       id: '1ABC_A_5_B',
+      tags: []
     });
   });
 

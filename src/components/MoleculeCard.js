@@ -1,11 +1,13 @@
 import ApiService from '../utils/apiService.js';
 
 class MoleculeCard {
-    constructor(grid, repository, callbacks = {}) {
+    constructor(grid, repository, options = {}) {
         this.grid = grid;
         this.repository = repository;
-        this.onDelete = callbacks.onDelete;
-        this.onShowDetails = callbacks.onShowDetails;
+        this.onDelete = options.onDelete;
+        this.onShowDetails = options.onShowDetails;
+        this.tagManager = options.tagManager;
+        this.tagModal = options.tagModal;
         this.draggedElement = null;
     }
 
@@ -61,6 +63,7 @@ class MoleculeCard {
 
         this.grid.appendChild(card);
         this.renderSmilesIn2D(smiles, viewerContainer);
+        this.addTagSection(card, ccdCode);
         this.addDragEvents(card);
     }
 
@@ -121,6 +124,7 @@ class MoleculeCard {
         card.appendChild(viewerContainer);
 
         this.grid.appendChild(card);
+        this.addTagSection(card, ccdCode);
         this.addDragEvents(card);
 
         setTimeout(() => {
@@ -176,6 +180,7 @@ class MoleculeCard {
         card.appendChild(content);
 
         this.grid.appendChild(card);
+        this.addTagSection(card, ccdCode);
         this.addDragEvents(card);
     }
 
@@ -254,6 +259,48 @@ class MoleculeCard {
     clearAll() {
         const allCards = this.grid.querySelectorAll('.molecule-card');
         allCards.forEach(card => card.remove());
+    }
+
+    addTagSection(card, code) {
+        if (!this.tagManager) return;
+        const container = document.createElement('div');
+        container.className = 'tags-container';
+        card.appendChild(container);
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-tag-btn';
+        addBtn.textContent = 'Add tag';
+        addBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.tagModal) {
+                this.tagModal.open(code, () => this.updateTagsDisplay(container, code));
+            }
+        });
+        card.appendChild(addBtn);
+
+        this.updateTagsDisplay(container, code);
+    }
+
+    updateTagsDisplay(container, code) {
+        if (!this.tagManager) return;
+        container.innerHTML = '';
+        const tags = this.tagManager.getTags(code);
+        tags.forEach(tag => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.textContent = tag;
+
+            const remove = document.createElement('span');
+            remove.className = 'tag-remove';
+            remove.textContent = '×';
+            remove.addEventListener('click', e => {
+                e.stopPropagation();
+                this.tagManager.removeTag(code, tag);
+                this.updateTagsDisplay(container, code);
+            });
+            span.appendChild(remove);
+            container.appendChild(span);
+        });
     }
 }
 
