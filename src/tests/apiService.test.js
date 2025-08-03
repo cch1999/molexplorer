@@ -29,7 +29,10 @@ describe('ApiService', () => {
   it('getCcdSdf uppercases code and fetches', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
     const txt = await ApiService.getCcdSdf('atp');
-    assert.strictEqual(global.fetch.mock.calls[0].arguments[0], '/rcsb/ligands/view/ATP_ideal.sdf');
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      'https://files.rcsb.org/ligands/view/ATP_ideal.sdf'
+    );
     assert.strictEqual(txt, 'sdf');
   });
 

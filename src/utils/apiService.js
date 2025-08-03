@@ -83,7 +83,9 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for API documentation
    */
   static getCcdSdf(ccdCode) {
-    return this.fetchText(`/rcsb/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`);
+    return this.fetchText(
+      `https://files.rcsb.org/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`
+    );
   }
 
   /**
