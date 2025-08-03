@@ -1,6 +1,7 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import ApiService from '../src/utils/apiService.js';
+import { RCSB_LIGAND_BASE_URL, RCSB_MODEL_BASE_URL } from '../src/utils/constants.js';
 
 describe('ApiService', () => {
   afterEach(() => {
@@ -31,7 +32,7 @@ describe('ApiService', () => {
     const txt = await ApiService.getCcdSdf('atp');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      'https://files.rcsb.org/ligands/view/ATP_ideal.sdf'
+      `${RCSB_LIGAND_BASE_URL}/ATP_ideal.sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });
@@ -41,7 +42,7 @@ describe('ApiService', () => {
     const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      'https://models.rcsb.org/v1/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf'
+      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });

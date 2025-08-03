@@ -9,6 +9,19 @@
  * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
  */
 
+import {
+  RCSB_LIGAND_BASE_URL,
+  RCSB_MODEL_BASE_URL,
+  FRAGMENT_LIBRARY_URL,
+  PD_BE_SIMILARITY_BASE_URL,
+  PD_BE_IN_PDB_BASE_URL,
+  RCSB_ENTRY_BASE_URL,
+  PD_BE_SUMMARY_BASE_URL,
+  RCSB_PDB_DOWNLOAD_BASE_URL,
+  PD_BE_LIGAND_MONOMERS_BASE_URL,
+  RCSB_GROUP_BASE_URL
+} from './constants.js';
+
 // In-memory cache for URL -> parsed response pairs
 const responseCache = new Map();
 
@@ -84,7 +97,7 @@ export default class ApiService {
    */
   static getCcdSdf(ccdCode) {
     return this.fetchText(
-      `https://files.rcsb.org/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`
+      `${RCSB_LIGAND_BASE_URL}/${ccdCode.toUpperCase()}_ideal.sdf`
     );
   }
 
@@ -101,7 +114,7 @@ export default class ApiService {
    */
   static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
     return this.fetchText(
-      `https://models.rcsb.org/v1/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
     );
   }
   /**
@@ -123,7 +136,7 @@ export default class ApiService {
    */
   static getFragmentLibraryTsv() {
     // Fetch fragment library TSV from GitHub
-    return this.fetchText('https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv');
+    return this.fetchText(FRAGMENT_LIBRARY_URL);
   }
 
   /**
@@ -147,7 +160,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for similarity search API
    */
   static getSimilarCcds(ccdCode) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity/${ccdCode}`);
+    return this.fetchJson(`${PD_BE_SIMILARITY_BASE_URL}/${ccdCode}`);
   }
 
   /**
@@ -171,7 +184,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDB search API
    */
   static getPdbEntriesForCcd(ccdCode) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb/${ccdCode}`);
+    return this.fetchJson(`${PD_BE_IN_PDB_BASE_URL}/${ccdCode}`);
   }
 
   /**
@@ -195,7 +208,7 @@ export default class ApiService {
    * @see https://data.rcsb.org/redoc/index.html for RCSB API documentation
    */
   static getRcsbEntry(pdbId) {
-    return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry/${pdbId.toLowerCase()}`);
+    return this.fetchJson(`${RCSB_ENTRY_BASE_URL}/${pdbId.toLowerCase()}`);
   }
 
   /**
@@ -219,7 +232,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
    */
   static getPdbSummary(pdbId) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary/${pdbId}`);
+    return this.fetchJson(`${PD_BE_SUMMARY_BASE_URL}/${pdbId}`);
   }
 
   /**
@@ -243,7 +256,7 @@ export default class ApiService {
    * @see https://www.wwpdb.org/data/file-format for mmCIF format specification
    */
   static getPdbFile(pdbId) {
-    return this.fetchText(`https://files.rcsb.org/download/${pdbId}.pdb`);
+    return this.fetchText(`${RCSB_PDB_DOWNLOAD_BASE_URL}/${pdbId}.pdb`);
   }
 
   /**
@@ -267,7 +280,7 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for bound ligands API
    */
   static getLigandMonomers(pdbId) {
-    return this.fetchJson(`https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers/${pdbId}`);
+    return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
   }
 
   /**
@@ -291,7 +304,7 @@ export default class ApiService {
    * @see https://data.rcsb.org/redoc/index.html for RCSB group API documentation
    */
   static getProteinGroup(groupId) {
-    return this.fetchJson(`https://data.rcsb.org/rest/v1/core/entry_groups/${groupId}`);
+    return this.fetchJson(`${RCSB_GROUP_BASE_URL}/${groupId}`);
   }
 
   /**
