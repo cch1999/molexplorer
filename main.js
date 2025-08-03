@@ -1737,6 +1737,127 @@ class FragmentManager {
     }
 }
 
+class ProteinModal {
+    constructor() {
+        // PDB details modal elements
+        this.pdbModal = document.getElementById('pdb-details-modal');
+        this.pdbTitle = document.getElementById('pdb-details-title');
+        this.pdbBody = document.getElementById('pdb-details-body');
+        this.pdbViewerContainer = document.getElementById('pdb-viewer-container');
+        this.boundLigandsSection = document.getElementById('bound-ligands-section');
+        this.boundLigandsTable = document.getElementById('bound-ligands-table');
+        this.boundLigandsTbody = document.getElementById('bound-ligands-tbody');
+        this.noBoundLigandsMessage = document.getElementById('no-bound-ligands-message');
+        this.addAllBoundBtn = document.getElementById('add-all-bound-btn');
+
+        // Quick view modal elements
+        this.quickViewModal = document.getElementById('quick-view-modal');
+        this.quickViewTitle = document.getElementById('quick-view-title');
+        this.quickViewViewer = document.getElementById('quick-view-viewer');
+
+        // Wire up close buttons
+        const closePdbBtn = document.getElementById('close-pdb-details-modal');
+        if (closePdbBtn) {
+            closePdbBtn.addEventListener('click', () => this.closePdbDetails());
+        }
+
+        const closeQuickBtn = document.getElementById('close-quick-view-modal');
+        if (closeQuickBtn) {
+            closeQuickBtn.addEventListener('click', () => this.closeQuickView());
+        }
+
+        window.addEventListener('click', (event) => {
+            if (event.target === this.pdbModal) {
+                this.closePdbDetails();
+            }
+            if (event.target === this.quickViewModal) {
+                this.closeQuickView();
+            }
+        });
+    }
+
+    closePdbDetails() {
+        if (this.pdbModal) {
+            this.pdbModal.style.display = 'none';
+        }
+    }
+
+    closeQuickView() {
+        if (this.quickViewModal) {
+            this.quickViewModal.style.display = 'none';
+            if (this.quickViewViewer) {
+                this.quickViewViewer.innerHTML = '';
+            }
+        }
+    }
+
+    renderBoundLigands(ligands) {
+        if (!ligands || ligands.length === 0) {
+            return '<div class="bound-ligands-container"></div>';
+        }
+
+        const ligandHtml = ligands.slice(0, 5).map(ligand => `
+            <div class="ligand-img-container">
+                <img src="https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligand.chem_comp_id}_200.svg"
+                     alt="${ligand.chem_comp_id}"
+                     title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}"
+                     class="bound-ligand-img">
+                <div class="ligand-img-overlay">
+                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}">+</button>
+                    <button class="ligand-action-btn quick-view" data-ccd-code="${ligand.chem_comp_id}">👁️</button>
+                </div>
+            </div>
+        `).join('');
+
+        const moreIndicator = ligands.length > 5
+            ? `<span class="more-ligands-indicator" title="${ligands.length - 5} more ligands">+${ligands.length - 5}</span>`
+            : '';
+
+        return `<div class="bound-ligands-container">${ligandHtml}${moreIndicator}</div>`;
+    }
+
+    showQuickViewLoading(ccdCode) {
+        if (!this.quickViewModal) return;
+        this.quickViewTitle.textContent = `3D Structure: ${ccdCode}`;
+        this.quickViewViewer.innerHTML = '<p>Loading...</p>';
+        this.quickViewModal.style.display = 'block';
+    }
+
+    showQuickViewFromSdf(ccdCode, sdfData) {
+        this.showQuickViewLoading(ccdCode);
+        try {
+            const viewer = $3Dmol.createViewer(this.quickViewViewer, {
+                backgroundColor: 'white'
+            });
+            viewer.addModel(sdfData, 'sdf');
+            viewer.setStyle({}, { stick: {} });
+            viewer.zoomTo();
+            viewer.render();
+        } catch (e) {
+            console.error('Error rendering SDF for quick view:', e);
+            this.showQuickViewError(ccdCode, 'Could not render 3D structure.');
+        }
+    }
+
+    showQuickViewFromSmiles(ccdCode, smiles) {
+        this.showQuickViewLoading(ccdCode);
+        this.quickViewViewer.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa;">
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">🧪</div>
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">SMILES Structure</div>
+                    <div style="font-size: 14px; font-family: monospace; background: white; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">${smiles}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    showQuickViewError(ccdCode, message) {
+        this.showQuickViewLoading(ccdCode);
+        this.quickViewViewer.innerHTML = `<p>Could not load 3D structure: ${message}</p>`;
+    }
+}
+
 class ProteinManager {
     constructor() {
         this.searchBtn = document.getElementById('protein-group-search-btn');
@@ -1748,6 +1869,7 @@ class ProteinManager {
         this.noResultsMessage = document.getElementById('no-protein-results-message');
         this.hideAidsToggle = document.getElementById('hide-aids-toggle');
         this.currentProteinDetails = []; // To store current search results
+        this.modal = new ProteinModal();
     }
 
     init() {
@@ -1847,21 +1969,7 @@ class ProteinManager {
                     <td>${resolution}</td>
                     <td>${releaseDate}</td>
                     <td class="bound-ligands-cell">
-                        <div class="bound-ligands-container">
-                            ${boundLigands.slice(0, 5).map(ligand => `
-                                <div class="ligand-img-container">
-                                    <img src="https://www.ebi.ac.uk/pdbe/static/files/pdbechem_v2/${ligand.chem_comp_id}_200.svg" 
-                                         alt="${ligand.chem_comp_id}" 
-                                         title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" 
-                                         class="bound-ligand-img">
-                                    <div class="ligand-img-overlay">
-                                        <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}">+</button>
-                                        <button class="ligand-action-btn quick-view" data-ccd-code="${ligand.chem_comp_id}">👁️</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                            ${boundLigands.length > 5 ? `<span class="more-ligands-indicator" title="${boundLigands.length - 5} more ligands">+${boundLigands.length - 5}</span>` : ''}
-                        </div>
+                        ${this.modal.renderBoundLigands(boundLigands)}
                     </td>
                     <td class="view-buttons-cell">
                         <button class="view-structure-btn rcsb-btn" data-pdb-id="${pdbId}">RCSB PDB</button>
@@ -1902,7 +2010,7 @@ class ProteinManager {
             document.querySelectorAll('.quick-view').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const ccdCode = e.target.dataset.ccdCode;
-                    this.showQuickViewModal(ccdCode);
+                    this.showQuickView(ccdCode);
                 });
             });
 
@@ -1913,67 +2021,33 @@ class ProteinManager {
         }
     }
 
-    async showQuickViewModal(ccdCode) {
-        const modal = document.getElementById('quick-view-modal');
-        const title = document.getElementById('quick-view-title');
-        const viewer = document.getElementById('quick-view-viewer');
-
-        title.textContent = `3D Structure: ${ccdCode}`;
-        viewer.innerHTML = '<p>Loading...</p>';
-        modal.style.display = 'block';
-
+    async showQuickView(ccdCode) {
+        this.modal.showQuickViewLoading(ccdCode);
         try {
-            // First, try to find the molecule in local SDF file
             const localSdfData = await moleculeManager.findMoleculeInLocalSdf(ccdCode);
             if (localSdfData) {
                 console.log(`Quick view: Found ${ccdCode} in local SDF file`);
-                const glviewer = $3Dmol.createViewer(viewer, {
-                    backgroundColor: 'white'
-                });
-                glviewer.addModel(localSdfData, 'sdf');
-                glviewer.setStyle({}, {
-                    stick: {}
-                });
-                glviewer.zoomTo();
-                glviewer.render();
+                this.modal.showQuickViewFromSdf(ccdCode, localSdfData);
                 return;
             }
 
-            // Second, try to find SMILES in local TSV file
             const smilesData = await moleculeManager.findMoleculeInLocalTsv(ccdCode);
             if (smilesData) {
                 console.log(`Quick view: Found ${ccdCode} in local TSV file with SMILES: ${smilesData}`);
-                viewer.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa;">
-                        <div style="text-align: center; padding: 20px;">
-                            <div style="font-size: 48px; margin-bottom: 10px;">🧪</div>
-                            <div style="font-size: 12px; color: #666; margin-bottom: 10px;">SMILES Structure</div>
-                            <div style="font-size: 14px; font-family: monospace; background: white; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">${smilesData}</div>
-                        </div>
-                    </div>
-                `;
+                this.modal.showQuickViewFromSmiles(ccdCode, smilesData);
                 return;
             }
 
-            // Last resort: try external fetch
             console.log(`Quick view: Trying external fetch for ${ccdCode}`);
             const sdfData = await ApiService.getCcdSdf(ccdCode);
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
 
-            const glviewer = $3Dmol.createViewer(viewer, {
-                backgroundColor: 'white'
-            });
-            glviewer.addModel(sdfData, 'sdf');
-            glviewer.setStyle({}, {
-                stick: {}
-            });
-            glviewer.zoomTo();
-            glviewer.render();
+            this.modal.showQuickViewFromSdf(ccdCode, sdfData);
         } catch (error) {
-            viewer.innerHTML = `<p>Could not load 3D structure: ${error.message}</p>`;
             console.error('Error fetching/rendering SDF for quick view:', error);
+            this.modal.showQuickViewError(ccdCode, error.message);
         }
     }
 }
@@ -2168,36 +2242,6 @@ function initializeModal() {
     }
 
     confirmBtn.addEventListener('click', addMolecule);
-
-    // PDB Details Modal
-    const pdbDetailsModal = document.getElementById('pdb-details-modal');
-    const closePDBDetailsBtn = document.getElementById('close-pdb-details-modal');
-
-    // Quick View Modal
-    const quickViewModal = document.getElementById('quick-view-modal');
-    const closeQuickViewBtn = document.getElementById('close-quick-view-modal');
-
-    const closePDBDetailsModal = () => {
-        if (pdbDetailsModal) pdbDetailsModal.style.display = 'none';
-    };
-    if (closePDBDetailsBtn) closePDBDetailsBtn.onclick = closePDBDetailsModal;
-
-    const closeQuickViewModal = () => {
-        if (quickViewModal) quickViewModal.style.display = 'none';
-        const viewer = document.getElementById('quick-view-viewer');
-        viewer.innerHTML = ''; // Clear viewer content
-    };
-    if (closeQuickViewBtn) closeQuickViewBtn.onclick = closeQuickViewModal;
-
-    // Also add window click listener for PDB details modal
-    window.addEventListener('click', (event) => {
-        if (event.target === pdbDetailsModal) {
-            closePDBDetailsModal();
-        }
-        if (event.target === quickViewModal) {
-            closeQuickViewModal();
-        }
-    });
 }
 
 function initializeTabs() {
