@@ -2,6 +2,7 @@ import LigandDetails from './LigandDetails.js';
 import SimilarLigandTable from './SimilarLigandTable.js';
 import PdbEntryList from './PdbEntryList.js';
 import PropertyCalculator from '../utils/propertyCalculator.js';
+import SimilarityGraph from '../components/SimilarityGraph.js';
 
 class LigandModal {
     constructor(moleculeManager) {
@@ -9,9 +10,21 @@ class LigandModal {
         this.similarLigandTable = new SimilarLigandTable(moleculeManager);
         this.pdbEntryList = new PdbEntryList(moleculeManager);
         this.propertiesContainer = document.getElementById('ligand-properties');
+        this.similarityGraph = new SimilarityGraph(moleculeManager);
+        this.currentCode = null;
+
+        const viewBtn = document.getElementById('view-similar-graph-btn');
+        if (viewBtn) {
+            viewBtn.addEventListener('click', () => {
+                if (this.currentCode) {
+                    this.similarityGraph.open(this.currentCode);
+                }
+            });
+        }
     }
 
     show(ccdCode, sdfData) {
+        this.currentCode = ccdCode;
         this.details.show(ccdCode, sdfData);
         this.similarLigandTable.load(ccdCode);
         this.pdbEntryList.load(ccdCode);
