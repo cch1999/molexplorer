@@ -13,6 +13,7 @@ class ProteinBrowser {
         this.searchBtn = null;
         this.searchInput = null;
         this.suggestedDropdown = null;
+        this.groupSuggestions = null;
         this.resultsContainer = null;
         this.resultsBody = null;
         this.loadingIndicator = null;
@@ -25,6 +26,7 @@ class ProteinBrowser {
         this.searchBtn = document.getElementById('protein-group-search-btn');
         this.searchInput = document.getElementById('protein-group-search');
         this.suggestedDropdown = document.getElementById('suggested-groups-dropdown');
+        this.groupSuggestions = document.getElementById('protein-group-suggestions');
         this.resultsContainer = document.getElementById('protein-results-table-container');
         this.resultsBody = document.getElementById('protein-results-tbody');
         this.loadingIndicator = document.getElementById('protein-loading-indicator');
@@ -62,10 +64,92 @@ class ProteinBrowser {
             });
         }
 
+        if (this.searchInput && this.groupSuggestions) {
+            const inputHandler = this.debounce(async () => {
+                const term = this.searchInput.value.trim();
+                if (term) {
+                    await this.fetchProteinGroup(term, { suggestions: true });
+                } else {
+                    this.clearSuggestions();
+                }
+            }, 300);
+            this.searchInput.addEventListener('input', inputHandler);
+        }
+
         return this;
     }
 
-    async fetchProteinGroup(groupId) {
+    debounce(fn, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    clearSuggestions() {
+        if (this.groupSuggestions) {
+            this.groupSuggestions.innerHTML = '';
+            this.groupSuggestions.style.display = 'none';
+        }
+    }
+
+    renderSuggestions(ids) {
+        if (!this.groupSuggestions) return;
+        this.groupSuggestions.innerHTML = '';
+        if (!ids || ids.length === 0) {
+            this.groupSuggestions.style.display = 'none';
+            return;
+        }
+        const fragment = document.createDocumentFragment();
+        ids.forEach(id => {
+            const li = document.createElement('li');
+            li.textContent = id;
+            li.addEventListener('click', () => {
+                if (this.searchInput) {
+                    this.searchInput.value = id;
+                }
+                this.clearSuggestions();
+                this.fetchProteinGroup(id);
+            });
+            fragment.appendChild(li);
+        });
+        this.groupSuggestions.appendChild(fragment);
+        this.groupSuggestions.style.display = 'block';
+    }
+
+    async fetchProteinGroup(groupId, options = {}) {
+        const { suggestions = false } = options;
+        if (suggestions) {
+            try {
+                const query = {
+                    query: {
+                        type: 'terminal',
+                        service: 'text',
+                        parameters: {
+                            attribute: 'group_id',
+                            operator: 'starts_with',
+                            value: groupId
+                        }
+                    },
+                    request_options: { return_all_hits: true },
+                    return_type: 'entry-group'
+                };
+                const response = await fetch('https://search.rcsb.org/rcsbsearch/v2/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(query)
+                });
+                const data = await response.json();
+                const ids = data.result_set ? data.result_set.map(r => r.identifier) : [];
+                this.renderSuggestions(ids);
+            } catch (error) {
+                console.error('Error fetching group suggestions:', error);
+                this.clearSuggestions();
+            }
+            return;
+        }
+
         this.loadingIndicator.style.display = 'block';
         this.resultsContainer.style.display = 'none';
         this.noResultsMessage.style.display = 'none';
