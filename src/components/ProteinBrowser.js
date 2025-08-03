@@ -107,19 +107,27 @@ class ProteinBrowser {
         }
     }
 
-    renderBoundLigands(ligands) {
+    renderBoundLigands(ligands, pdbId) {
         if (!ligands || ligands.length === 0) {
             return '<div class="bound-ligands-container"></div>';
         }
-        const ligandHtml = ligands.slice(0, 5).map(ligand => `
+        const ligandHtml = ligands
+            .slice(0, 5)
+            .map(
+                ligand => `
             <div class="ligand-img-container">
                 <img src="${PD_BE_STATIC_IMAGE_BASE_URL}/${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
                 <div class="ligand-img-overlay">
-                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}">+</button>
+                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}" data-pdb-id="${pdbId}" data-label-asym-id="${ligand.chain_id}" data-auth-seq-id="${ligand.author_residue_number}">+</button>
                 </div>
             </div>
-        `).join('');
-        const moreIndicator = ligands.length > 5 ? `<span class="more-ligands-indicator" title="${ligands.length - 5} more ligands">+${ligands.length - 5}</span>` : '';
+        `
+            )
+            .join('');
+        const moreIndicator =
+            ligands.length > 5
+                ? `<span class="more-ligands-indicator" title="${ligands.length - 5} more ligands">+${ligands.length - 5}</span>`
+                : '';
         return `<div class="bound-ligands-container">${ligandHtml}${moreIndicator}</div>`;
     }
 
@@ -146,7 +154,7 @@ class ProteinBrowser {
                     <td>${title}</td>
                     <td>${resolution}</td>
                     <td>${releaseDate}</td>
-                    <td class="bound-ligands-cell">${this.renderBoundLigands(boundLigands)}</td>
+                    <td class="bound-ligands-cell">${this.renderBoundLigands(boundLigands, pdbId)}</td>
                     <td class="view-buttons-cell">
                         <button class="view-structure-btn rcsb-btn" data-pdb-id="${pdbId}">RCSB PDB</button>
                         <button class="view-structure-btn pdbe-btn" data-pdb-id="${pdbId}">PDBe</button>
@@ -174,9 +182,14 @@ class ProteinBrowser {
                 });
             });
             document.querySelectorAll('.add-ligand').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const ccdCode = e.target.dataset.ccdCode;
-                    const success = this.moleculeManager.addMolecule(ccdCode);
+                button.addEventListener('click', e => {
+                    const { ccdCode, pdbId, authSeqId, labelAsymId } = e.currentTarget.dataset;
+                    const success = this.moleculeManager.addPdbInstance({
+                        code: ccdCode,
+                        pdbId,
+                        authSeqId,
+                        labelAsymId
+                    });
                     if (success) {
                         showNotification(`Adding molecule ${ccdCode}...`, 'success');
                     } else {
