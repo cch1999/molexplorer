@@ -114,8 +114,10 @@ export default class ApiService {
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
   static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
+    const upperPdb = pdbId.toUpperCase();
+    const upperComp = compId.toUpperCase();
     return this.fetchText(
-      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&auth_comp_id=${compId.toUpperCase()}&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/${upperPdb}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&auth_comp_id=${upperComp}&encoding=sdf&filename=${upperPdb}_${labelAsymId}_${upperComp}.sdf`
     );
   }
   /**
