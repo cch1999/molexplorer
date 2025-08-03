@@ -1,5 +1,21 @@
 export default class ApiService {
   /**
+   * Perform a fetch request and parse the response using the provided parser.
+   *
+   * @param {string} url - Target URL.
+   * @param {(response: Response) => Promise<any>} parser - Function that parses the response.
+   * @returns {Promise<any>} Parsed response data.
+   * @private
+   */
+  static async #fetchResource(url, parser) {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return parser(response);
+  }
+
+  /**
    * Fetch a plain text resource.
    *
    * @param {string} url - Target URL.
@@ -9,11 +25,7 @@ export default class ApiService {
    * // txt => 'file contents'
    */
   static async fetchText(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.text();
+    return this.#fetchResource(url, (response) => response.text());
   }
 
   /**
@@ -26,11 +38,7 @@ export default class ApiService {
    * // data => { "id": 1 }
    */
   static async fetchJson(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
+    return this.#fetchResource(url, (response) => response.json());
   }
 
   /**
