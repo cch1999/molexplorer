@@ -91,16 +91,13 @@ class ProteinBrowser {
     }
 
     async fetchMemberDetails(pdbIds) {
-        const details = [];
-        for (const pdbId of pdbIds) {
-            try {
-                const data = await ApiService.getRcsbEntry(pdbId);
-                details.push(data);
-            } catch (error) {
-                details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
-            }
-        }
-        return details;
+        const detailPromises = pdbIds.map(pdbId =>
+            ApiService.getRcsbEntry(pdbId).catch(() => ({
+                rcsb_id: pdbId,
+                error: 'Failed to fetch details'
+            }))
+        );
+        return Promise.all(detailPromises);
     }
 
     async fetchBoundLigands(pdbId) {

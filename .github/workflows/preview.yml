@@ -1,0 +1,71 @@
+name: Preview Deployments
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-preview:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build -- --base=/molexplorer/pr-${{ github.event.pull_request.number }}/
+      - name: Deploy preview
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          keep_files: true
+      - name: Comment preview URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const previewUrl = `https://${owner}.github.io/${repo}/pr-${number}/`;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number });
+            const body = `Preview URL: ${previewUrl}`;
+            const existing = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.startsWith('Preview URL:'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+            }
+
+  cleanup:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Remove preview folder
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git rm -r --ignore-unmatch pr-${{ github.event.pull_request.number }}
+          git commit -m "chore: remove preview for #${{ github.event.pull_request.number }}" || echo "Nothing to commit"
+          git push
+      - name: Remove preview comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number: number });
+            const existing = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.startsWith('Preview URL:'));
+            if (existing) {
+              await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+            }

@@ -58,9 +58,9 @@ describe('MoleculeRepository', () => {
     assert.strictEqual(repo.getAllMolecules().length, 1);
   });
 
-  it('deleteAllMolecules clears repository', () => {
+  it('clear removes all molecules', () => {
     const repo = new MoleculeRepository([{ code: 'A', status: 'loaded' }]);
-    repo.deleteAllMolecules();
+    repo.clear();
     assert.strictEqual(repo.getAllMolecules().length, 0);
   });
 

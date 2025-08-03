@@ -38,10 +38,6 @@ class MoleculeRepository {
         return true;
     }
 
-    deleteAllMolecules() {
-        this.molecules = [];
-    }
-
     getMolecule(identifier) {
         return this.molecules.find(
             m => m.id === identifier || m.code === identifier
@@ -59,7 +55,7 @@ class MoleculeRepository {
         return [...this.molecules];
     }
 
-    clearAll() {
+    clear() {
         this.molecules = [];
     }
 
