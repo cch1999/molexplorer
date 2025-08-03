@@ -4,7 +4,7 @@
  * This service handles communication with various molecular biology databases:
  * - RCSB PDB (Protein Data Bank) - Primary protein structure database
  * - PDBe (Protein Data Bank in Europe) - European protein structure database
- * - Local data files (SDF, TSV) - Fragment and molecule libraries
+ * - Local data files (TSV) - Fragment libraries
  *
  * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for PDBe API documentation
  */
@@ -87,35 +87,6 @@ export default class ApiService {
       `https://files.rcsb.org/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`
     );
   }
-
-  /**
-   * Fetch local SDF (Structure Data File) data
-   *
-   * Loads molecular structure data from the local SDF file containing
-   * pre-loaded chemical components and their 3D coordinates.
-   *
-   * @returns {Promise<string>} SDF file content as string
-   *
-   * @example
-   * // Example SDF format:
-   * // HEM
-   * // CCTOOLS-1004241128
-   * //
-   * // 75 82 0 0 0 0 0 0 0 0999 V2000
-   * //    -0.1234    1.2345    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   * //    ...
-   * // M  END
-   * // $$$$
-   *
-   * @note
-   * - SDF files contain 3D molecular coordinates in MOL format
-   * - Each molecule is separated by $$$$
-   * - Used for 3D molecular visualization with 3Dmol.js
-   */
-  static getLocalSdfLibrary() {
-    return this.fetchText('./data/Enamine_MiniFrag_Library_80cmpds_20250123.sdf');
-  }
-
   /**
    * Fetch fragment library data from local TSV file
    *
