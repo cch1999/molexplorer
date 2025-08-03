@@ -1,3 +1,7 @@
+export const luckyDepCodes = [
+    'ATP', 'NAG', 'FAD', 'HEM', 'NAD', 'ADP', 'SAM', 'FMN', 'GDP', 'GTP'
+];
+
 class AddMoleculeModal {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
@@ -42,7 +46,10 @@ class AddMoleculeModal {
             this.confirmBtn.addEventListener('click', () => this.handleSubmit());
         }
         if (this.luckyBtn) {
-            this.luckyBtn.disabled = true;
+            this.luckyCodes = luckyDepCodes;
+            if (this.luckyCodes.length > 0) {
+                this.luckyBtn.addEventListener('click', () => this.handleLucky());
+            }
         }
     }
 
@@ -100,6 +107,27 @@ class AddMoleculeModal {
         if (this.instanceError) {
             this.instanceError.textContent = '';
         }
+    }
+
+    handleLucky() {
+        if (!this.luckyCodes || this.luckyCodes.length === 0) {
+            return;
+        }
+
+        let code;
+        let attempts = 0;
+        do {
+            code = this.luckyCodes[Math.floor(Math.random() * this.luckyCodes.length)];
+            attempts++;
+        } while (this.moleculeManager.getMolecule(code) && attempts < 10);
+
+        const success = this.moleculeManager.addMolecule(code);
+        if (success) {
+            window.showNotification(`Adding molecule ${code}...`, 'success');
+        } else {
+            window.showNotification(`Molecule ${code} already exists`, 'info');
+        }
+        this.close();
     }
 
     handleSubmit() {
