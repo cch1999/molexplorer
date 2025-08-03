@@ -55,21 +55,40 @@ class MoleculeManager {
             }
         });
 
+        const exportModal = document.getElementById('export-modal');
+        const exportFilenameInput = document.getElementById('export-filename');
+        const exportRemoveH = document.getElementById('export-remove-h-toggle');
+        const closeExport = () => (exportModal.style.display = 'none');
+
         document.getElementById('export-btn').addEventListener('click', () => {
-            const sdf = this.repository.exportToSdf();
+            if (exportModal) {
+                exportFilenameInput.value = 'molecules';
+                exportRemoveH.checked = false;
+                exportModal.style.display = 'block';
+            }
+        });
+        document.getElementById('cancel-export-btn').addEventListener('click', closeExport);
+        document.getElementById('close-export-modal').addEventListener('click', closeExport);
+        document.getElementById('confirm-export-btn').addEventListener('click', () => {
+            const sdf = this.repository.exportToSdf({ removeHydrogens: exportRemoveH.checked });
             if (!sdf) {
                 showNotification('No SDF data to export', 'info');
                 return;
+            }
+            let filename = exportFilenameInput.value.trim() || 'molecules';
+            if (!filename.toLowerCase().endsWith('.sdf')) {
+                filename += '.sdf';
             }
             const blob = new Blob([sdf], { type: 'chemical/x-mdl-sdfile' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'molecules.sdf';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            closeExport();
         });
 
         // Tab switching for Molecules, Fragments, Proteins

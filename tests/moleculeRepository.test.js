@@ -64,12 +64,23 @@ describe('MoleculeRepository', () => {
     assert.strictEqual(repo.getAllMolecules().length, 0);
   });
 
-  it('exportToSdf concatenates SDF records', () => {
-    const repo = new MoleculeRepository([
-      { code: 'A', status: 'loaded', sdf: 'A\n$$$$' },
-      { code: 'B', status: 'loaded', sdf: 'B\n$$$$' },
-    ]);
-    const result = repo.exportToSdf();
-    assert.strictEqual(result, 'A\n$$$$\nB\n$$$$');
+    it('exportToSdf concatenates SDF records', () => {
+      const repo = new MoleculeRepository([
+        { code: 'A', status: 'loaded', sdf: 'A\n$$$$' },
+        { code: 'B', status: 'loaded', sdf: 'B\n$$$$' },
+      ]);
+      const result = repo.exportToSdf();
+      assert.strictEqual(result, 'A\n$$$$\nB\n$$$$');
+    });
+
+    it('exportToSdf removes hydrogens when requested', () => {
+      const sdf = `Example\n  test\n\n  3  2  0  0  0  0            999 V2000\n    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.0000    0.0000    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.0000    0.0000    0.0000 H   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0  0  0  0\n  1  3  1  0  0  0  0\nM  END\n$$$$`;
+      const repo = new MoleculeRepository([{ code: 'X', status: 'loaded', sdf }]);
+      const result = repo.exportToSdf({ removeHydrogens: true });
+      const lines = result.split('\n');
+      assert.strictEqual(parseInt(lines[3].slice(0, 3)), 1);
+      assert.strictEqual(parseInt(lines[3].slice(3, 6)), 0);
+      assert.ok(!result.includes(' H '));
+      assert.ok(result.endsWith('$$$$'));
+    });
   });
-});

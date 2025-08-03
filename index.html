@@ -201,6 +201,32 @@
         </div>
     </div>
 
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Molecules</h3>
+                <span class="close" id="close-export-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="export-filename">File Name:</label>
+                <input type="text" id="export-filename" placeholder="molecules.sdf">
+                <div class="toggle-switch" style="margin-top:20px;">
+                    <input type="checkbox" id="export-remove-h-toggle" class="toggle-switch-checkbox">
+                    <label class="toggle-switch-label" for="export-remove-h-toggle">
+                        <span class="toggle-switch-inner"></span>
+                        <span class="toggle-switch-switch"></span>
+                    </label>
+                    <span>Remove hydrogens</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-export-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-export-btn" class="btn-primary">Export</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Molecule Details Modal -->
     <div id="molecule-details-modal" class="modal">
         <div class="modal-content details-modal">
