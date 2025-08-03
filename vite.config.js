@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
+const base = process.env.BASE_PATH || '/molexplorer/';
+
 export default defineConfig({
-    base: '/molexplorer/',
+    base,
     server: {
         proxy: {
             '/rcsb': {
@@ -12,7 +14,7 @@ export default defineConfig({
             },
         },
         fs: {
-            allow: ['..']
-        }
+            allow: ['..'],
+        },
     },
-}); 
+});
