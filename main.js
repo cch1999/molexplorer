@@ -65,6 +65,22 @@ class MoleculeManager {
             }
         });
 
+        // Tab switching for Molecules, Fragments, Proteins
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const panels = [
+            document.getElementById('molecule-library-content'),
+            document.getElementById('fragment-library-content'),
+            document.getElementById('protein-browser-content')
+        ];
+        tabButtons.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
+                panels.forEach((panel, i) => {
+                    panel.style.display = i === index ? 'block' : 'none';
+                });
+            });
+        });
+
         return this;
     }
 
@@ -119,6 +135,19 @@ class MoleculeManager {
     showMoleculeDetails(ccdCode, data, format) {
         if (this.ligandModal) {
             this.ligandModal.show(ccdCode, data, format);
+        }
+    }
+
+    fetchRCSBDetails(pdbId) {
+        if (this.pdbDetailsModal) {
+            return this.pdbDetailsModal.fetchRCSBDetails(pdbId);
+        }
+        return Promise.resolve(null);
+    }
+
+    showPDBDetailsModal(pdbId) {
+        if (this.pdbDetailsModal) {
+            this.pdbDetailsModal.showPDBDetailsModal(pdbId);
         }
     }
 

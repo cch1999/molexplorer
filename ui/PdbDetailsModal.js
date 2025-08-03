@@ -3,6 +3,16 @@ import ApiService from '../apiService.js';
 class PdbDetailsModal {
     constructor(boundLigandTable) {
         this.boundLigandTable = boundLigandTable;
+        this.modal = document.getElementById('pdb-details-modal');
+        const closeBtn = document.getElementById('close-pdb-details-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.close();
+            }
+        });
     }
 
     async fetchRCSBDetails(pdbId) {
@@ -16,7 +26,6 @@ class PdbDetailsModal {
     }
 
     async showPDBDetailsModal(pdbId) {
-        const modal = document.getElementById('pdb-details-modal');
         const title = document.getElementById('pdb-details-title');
         const body = document.getElementById('pdb-details-body');
         const viewerContainer = document.getElementById('pdb-viewer-container');
@@ -25,7 +34,7 @@ class PdbDetailsModal {
         body.innerHTML = '<div class="properties-loading">Loading PDB entry details...</div>';
         viewerContainer.innerHTML = '';
         viewerContainer.style.display = 'none';
-        modal.style.display = 'block';
+        this.modal.style.display = 'block';
 
         try {
             const details = await this.fetchRCSBDetails(pdbId);
@@ -69,6 +78,12 @@ class PdbDetailsModal {
             console.error('Error fetching PDB details:', error);
             body.innerHTML = '<div class="no-pdb-entries">Could not load details for this PDB entry.</div>';
             viewerContainer.style.display = 'none';
+        }
+    }
+
+    close() {
+        if (this.modal) {
+            this.modal.style.display = 'none';
         }
     }
 
