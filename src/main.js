@@ -82,6 +82,10 @@ class MoleculeManager {
         return added;
     }
 
+    addPdbInstance({ code, pdbId, authSeqId, labelAsymId }) {
+        return this.addMolecule({ code, pdbId, authSeqId, labelAsymId });
+    }
+
     deleteMolecule(code) {
         if (this.repository.removeMolecule(code)) {
             const card = this.grid.querySelector(`[data-molecule-code="${code}"]`);

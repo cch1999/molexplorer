@@ -7,7 +7,9 @@ describe('MoleculeRepository', () => {
     const repo = new MoleculeRepository();
     assert.ok(repo.addMolecule('A'));
     assert.strictEqual(repo.addMolecule('A'), false);
-    assert.deepStrictEqual(repo.getAllMolecules(), [{ code: 'A', status: 'pending' }]);
+    assert.deepStrictEqual(repo.getAllMolecules(), [
+      { code: 'A', status: 'pending', id: 'A' },
+    ]);
   });
 
   it('stores instance metadata when provided', () => {
@@ -19,7 +21,22 @@ describe('MoleculeRepository', () => {
       pdbId: '1ABC',
       authSeqId: '5',
       labelAsymId: 'A',
+      id: '1ABC_A_5_B',
     });
+  });
+
+  it('allows same code for different pdb instances', () => {
+    const repo = new MoleculeRepository();
+    assert.ok(repo.addMolecule('DUP'));
+    assert.ok(
+      repo.addMolecule({
+        code: 'DUP',
+        pdbId: '9XYZ',
+        authSeqId: '1',
+        labelAsymId: 'A',
+      })
+    );
+    assert.strictEqual(repo.getAllMolecules().length, 2);
   });
 
   it('removes molecules by code', () => {

@@ -7,11 +7,12 @@ class MoleculeCard {
         this.draggedElement = null;
     }
 
-    createMoleculeCardFromSmiles(smiles, ccdCode) {
+    createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
         card.setAttribute('data-molecule-code', ccdCode);
+        card.setAttribute('data-molecule-id', id);
 
         const dragHandle = document.createElement('div');
         dragHandle.className = 'drag-handle';
@@ -62,11 +63,12 @@ class MoleculeCard {
         `;
     }
 
-    createMoleculeCard(data, ccdCode, format = 'sdf') {
+    createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
         card.setAttribute('data-molecule-code', ccdCode);
+        card.setAttribute('data-molecule-id', id);
 
         const dragHandle = document.createElement('div');
         dragHandle.className = 'drag-handle';
@@ -114,11 +116,12 @@ class MoleculeCard {
         }, 100);
     }
 
-    createNotFoundCard(ccdCode, message = 'Not found') {
+    createNotFoundCard(ccdCode, message = 'Not found', id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
         card.setAttribute('data-molecule-code', ccdCode);
+        card.setAttribute('data-molecule-id', id);
 
         const dragHandle = document.createElement('div');
         dragHandle.className = 'drag-handle';
