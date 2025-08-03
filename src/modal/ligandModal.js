@@ -11,6 +11,7 @@ class LigandModal {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.currentSimilarLigands = [];
+        this.viewer = null;
 
         const closeBtn = document.getElementById('close-details-modal');
         if (closeBtn) {
@@ -24,6 +25,7 @@ class LigandModal {
     }
 
     show(ccdCode, sdfData) {
+        this.cleanupViewer();
         this.detailsTitle.textContent = `Molecule Details: ${ccdCode}`;
         this.detailsCode.textContent = ccdCode;
 
@@ -45,6 +47,7 @@ class LigandModal {
                     viewer.setStyle({ elem: 'H' }, {});
                     viewer.zoomTo();
                     viewer.render();
+                    this.viewer = viewer;
                 } catch (e) {
                     console.error(`Error initializing details viewer for ${ccdCode}:`, e);
                     this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
@@ -76,7 +79,27 @@ class LigandModal {
     }
 
     close() {
+        this.cleanupViewer();
         this.modal.style.display = 'none';
+    }
+
+    cleanupViewer() {
+        if (this.viewer) {
+            try {
+                this.viewer.clear();
+                if (typeof this.viewer.destroy === 'function') {
+                    this.viewer.destroy();
+                } else if (this.viewer?.gl && typeof this.viewer.gl.getExtension === 'function') {
+                    this.viewer.gl.getExtension('WEBGL_lose_context')?.loseContext();
+                }
+            } catch (e) {
+                console.warn('Error destroying viewer:', e);
+            }
+            this.viewer = null;
+        }
+        if (this.detailsViewer) {
+            this.detailsViewer.innerHTML = '';
+        }
     }
 
     clearPreviousModalData() {
