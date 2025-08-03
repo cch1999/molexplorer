@@ -3,7 +3,7 @@ import MoleculeRepository from './utils/MoleculeRepository.js';
 import { DEFAULT_MOLECULE_CODES } from './utils/constants.js';
 import BoundLigandTable from './components/BoundLigandTable.js';
 import FragmentLibrary from './components/FragmentLibrary.js';
-import LigandModal from './modal/ligandModal.js';
+import LigandModal from './modal/LigandModal.js';
 import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
