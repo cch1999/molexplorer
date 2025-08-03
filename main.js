@@ -211,3 +211,4 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.showNotification = showNotification;
