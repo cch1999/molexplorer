@@ -1568,3 +1568,36 @@ main {
         font-size: 13px;
     }
 }
+/* Tour Guide Styles */
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.tour-tooltip {
+    position: absolute;
+    background: #fff;
+    color: #333;
+    padding: 15px;
+    border-radius: 6px;
+    max-width: 300px;
+    z-index: 1001;
+}
+
+.tour-highlight {
+    position: relative;
+    z-index: 1002;
+    box-shadow: 0 0 0 4px #ff9800;
+}
+
+.tour-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}

@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import TourGuide from './components/TourGuide.js';
 
 class MoleculeManager {
     constructor() {
@@ -198,6 +199,29 @@ const fragmentLibrary = new FragmentLibrary(moleculeManager, {
 fragmentLibrary.loadFragments();
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+
+const tourSteps = [
+    {
+        element: '#add-molecule-btn',
+        message: 'Load molecules by clicking this button to add new entries.'
+    },
+    {
+        element: '#fragment-search',
+        message: 'Search for molecular fragments here.',
+        onShow: () => document.querySelectorAll('.tab-button')[1].click()
+    },
+    {
+        element: '#protein-group-search',
+        message: 'Browse protein structures by entering a group ID.',
+        onShow: () => document.querySelectorAll('.tab-button')[2].click()
+    }
+];
+
+const tourGuide = new TourGuide(tourSteps);
+const startTutorialBtn = document.getElementById('start-tutorial-btn');
+if (startTutorialBtn) {
+    startTutorialBtn.addEventListener('click', () => tourGuide.start());
+}
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
