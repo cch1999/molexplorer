@@ -38,6 +38,19 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('ZZZ').status, 'loaded');
   });
 
+  it('uses instance SDF when details provided', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    await loader.loadMolecule(repo.getMolecule('CCC'));
+    assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
+  });
+
   it('handles errors from remote fetch', async () => {
     const repo = new MoleculeRepository([{ code: 'BAD', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);

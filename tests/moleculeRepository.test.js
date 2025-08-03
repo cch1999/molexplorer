@@ -10,6 +10,18 @@ describe('MoleculeRepository', () => {
     assert.deepStrictEqual(repo.getAllMolecules(), [{ code: 'A', status: 'pending' }]);
   });
 
+  it('stores instance metadata when provided', () => {
+    const repo = new MoleculeRepository();
+    repo.addMolecule({ code: 'B', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' });
+    assert.deepStrictEqual(repo.getMolecule('B'), {
+      code: 'B',
+      status: 'pending',
+      pdbId: '1ABC',
+      authSeqId: '5',
+      labelAsymId: 'A',
+    });
+  });
+
   it('removes molecules by code', () => {
     const repo = new MoleculeRepository([{ code: 'A', status: 'pending' }]);
     assert.ok(repo.removeMolecule('A'));

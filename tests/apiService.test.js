@@ -36,6 +36,16 @@ describe('ApiService', () => {
     assert.strictEqual(txt, 'sdf');
   });
 
+  it('getInstanceSdf builds ligand URL', async () => {
+    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
+    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      'https://models.rcsb.org/v1/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf'
+    );
+    assert.strictEqual(txt, 'sdf');
+  });
+
   it('fetchText caches responses', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'cached' }));
     const first = await ApiService.fetchText('/file.txt');

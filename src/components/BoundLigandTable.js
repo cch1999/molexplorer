@@ -29,14 +29,14 @@ class BoundLigandTable {
                     noLigandsMessage.style.display = 'none';
 
                     ligandsToShow.forEach(ligand => {
-                        const row = this.createBoundLigandRow(ligand);
+                        const row = this.createBoundLigandRow(ligand, pdbId);
                         tableBody.appendChild(row);
                     });
-                    const currentBoundLigands = ligandsToShow.map(l => l.chem_comp_id);
+                    const currentBoundLigands = ligandsToShow;
                     if (currentBoundLigands.length > 0) {
                         addAllBtn.style.display = 'inline-block';
                         addAllBtn.textContent = `Add All (${currentBoundLigands.length})`;
-                        addAllBtn.onclick = () => this.addAllLigands(currentBoundLigands, 'bound');
+                        addAllBtn.onclick = () => this.addAllLigands(currentBoundLigands, 'bound', pdbId);
                     } else {
                         addAllBtn.style.display = 'none';
                     }
@@ -57,7 +57,7 @@ class BoundLigandTable {
             });
     }
 
-    createBoundLigandRow(ligand) {
+    createBoundLigandRow(ligand, pdbId) {
         const row = document.createElement('tr');
 
         const imageCell = document.createElement('td');
@@ -103,7 +103,12 @@ class BoundLigandTable {
         addButton.innerHTML = '&#43;';
         addButton.title = `Add ${ligand.chem_comp_id} to database`;
         addButton.addEventListener('click', () => {
-            const success = this.addMolecule(ligand.chem_comp_id);
+            const success = this.addMolecule({
+                code: ligand.chem_comp_id,
+                pdbId,
+                labelAsymId: ligand.chain_id,
+                authSeqId: ligand.author_residue_number
+            });
             if (success) {
                 showNotification(`Adding molecule ${ligand.chem_comp_id}...`, 'success');
             } else {
@@ -123,7 +128,7 @@ class BoundLigandTable {
         return row;
     }
 
-    addAllLigands(ligandList, type) {
+    addAllLigands(ligandList, type, pdbId) {
         if (!ligandList || ligandList.length === 0) {
             showNotification(`No ${type} ligands to add`, 'info');
             return;
@@ -135,7 +140,12 @@ class BoundLigandTable {
         let skippedCount = 0;
         ligandList.forEach((ligand, index) => {
             setTimeout(() => {
-                const success = this.addMolecule(ligand);
+                const success = this.addMolecule({
+                    code: ligand.chem_comp_id,
+                    pdbId,
+                    labelAsymId: ligand.chain_id,
+                    authSeqId: ligand.author_residue_number
+                });
                 if (success) {
                     addedCount++;
                 } else {

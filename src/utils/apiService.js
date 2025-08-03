@@ -87,6 +87,23 @@ export default class ApiService {
       `https://files.rcsb.org/ligands/view/${ccdCode.toUpperCase()}_ideal.sdf`
     );
   }
+
+  /**
+   * Fetch experimental ligand instance data from RCSB models API
+   *
+   * Retrieves the experimentally observed coordinates for a specific ligand
+   * instance within a PDB entry.
+   *
+   * @param {string} pdbId - The 4-character PDB ID
+   * @param {string|number} authSeqId - Author provided residue/sequence number
+   * @param {string} labelAsymId - Chain identifier
+   * @returns {Promise<string>} SDF file content for the ligand instance
+   */
+  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
+    return this.fetchText(
+      `https://models.rcsb.org/v1/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
+    );
+  }
   /**
    * Fetch fragment library data from local TSV file
    *

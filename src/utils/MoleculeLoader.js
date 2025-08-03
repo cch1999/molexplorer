@@ -9,12 +9,14 @@ class MoleculeLoader {
     async loadAllMolecules() {
         for (const molecule of this.repository.getAllMolecules()) {
             if (molecule.status === 'pending') {
-                await this.loadMolecule(molecule.code);
+                await this.loadMolecule(molecule);
             }
         }
     }
 
-    async loadMolecule(code) {
+    async loadMolecule(input) {
+        const { code, pdbId, authSeqId, labelAsymId } =
+            typeof input === 'string' ? { code: input } : input;
         try {
             this.repository.updateMoleculeStatus(code, 'loading');
             const smilesData = await this.findMoleculeInLocalTsv(code);
@@ -23,7 +25,12 @@ class MoleculeLoader {
                 this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
                 return;
             }
-            const sdfData = await ApiService.getCcdSdf(code);
+            let sdfData;
+            if (pdbId && authSeqId && labelAsymId) {
+                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
+            } else {
+                sdfData = await ApiService.getCcdSdf(code);
+            }
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
