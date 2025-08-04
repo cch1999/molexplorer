@@ -122,9 +122,33 @@ describe('ApiService', () => {
       }
       return { ok: false, status: 404 };
     });
-    const ids = await ApiService.getPdbEntriesForUniprot('P12345', true);
+    const ids = await ApiService.getPdbEntriesForUniprot('P12345', 'UniRef90');
     assert.deepStrictEqual(ids.sort(), ['1AAA', '2BBB', '3CCC']);
     assert.strictEqual(global.fetch.mock.callCount(), 4);
+  });
+
+  it('getPdbEntriesForUniprot supports other UniRef clusters', async () => {
+    const clusterData = {
+      representativeMember: { accessions: ['P12345'] },
+      members: [{ accessions: ['Q99999'] }]
+    };
+    const entryData = {
+      P12345: { uniProtKBCrossReferences: [{ database: 'PDB', id: '1AAA' }] },
+      Q99999: { uniProtKBCrossReferences: [{ database: 'PDB', id: '2BBB' }] }
+    };
+    global.fetch = mock.fn(async (url) => {
+      if (url === `${UNIPROT_UNIREF_BASE_URL}/UniRef50_P12345.json`) {
+        return { ok: true, json: async () => clusterData };
+      }
+      const match = url.match(/uniprotkb\/(\w+)\.json$/);
+      if (match && entryData[match[1]]) {
+        return { ok: true, json: async () => entryData[match[1]] };
+      }
+      return { ok: false, status: 404 };
+    });
+    const ids = await ApiService.getPdbEntriesForUniprot('P12345', 'UniRef50');
+    assert.deepStrictEqual(ids.sort(), ['1AAA', '2BBB']);
+    assert.strictEqual(global.fetch.mock.callCount(), 3);
   });
 
   it('fetchText caches responses', async () => {

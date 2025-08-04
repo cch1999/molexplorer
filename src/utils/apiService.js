@@ -343,24 +343,24 @@ export default class ApiService {
    * Queries the UniProt REST API for cross-references and extracts all
    * associated PDB identifiers.
    *
-  * @param {string} uniprotId - UniProt accession (e.g., 'P0DTC2').
-  * @param {boolean} [includeSimilar=false] - Include UniRef90 cluster members.
-  * @returns {Promise<string[]>} Array of PDB IDs.
-  */
-  static async getPdbEntriesForUniprot(uniprotId, includeSimilar = false) {
+   * @param {string} uniprotId - UniProt accession (e.g., 'P0DTC2').
+   * @param {string} [cluster] - Optional UniRef cluster to include (e.g., 'UniRef90').
+   * @returns {Promise<string[]>} Array of PDB IDs.
+   */
+  static async getPdbEntriesForUniprot(uniprotId, cluster = '') {
     const accession = uniprotId.toUpperCase();
     const accessions = new Set([accession]);
 
-    if (includeSimilar) {
+    if (cluster) {
       try {
-        const clusterUrl = `${UNIPROT_UNIREF_BASE_URL}/UniRef90_${accession}.json`;
+        const clusterUrl = `${UNIPROT_UNIREF_BASE_URL}/${cluster}_${accession}.json`;
         const clusterData = await this.fetchJson(clusterUrl);
         clusterData?.representativeMember?.accessions?.forEach(acc => accessions.add(acc));
         (clusterData?.members ?? []).forEach(m =>
           m.accessions?.forEach(acc => accessions.add(acc))
         );
       } catch (e) {
-        console.error('Error fetching UniRef90 cluster', e);
+        console.error(`Error fetching ${cluster} cluster`, e);
       }
     }
 
