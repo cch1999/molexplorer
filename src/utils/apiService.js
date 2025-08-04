@@ -19,6 +19,7 @@ import {
   PD_BE_SUMMARY_BASE_URL,
   RCSB_PDB_DOWNLOAD_BASE_URL,
   PD_BE_LIGAND_MONOMERS_BASE_URL,
+  PD_BE_LIGAND_INTERACTIONS_BASE_URL,
   RCSB_GROUP_BASE_URL,
   PUBCHEM_COMPOUND_BASE_URL,
   PUBCHEM_COMPOUND_LINK_BASE
@@ -286,6 +287,26 @@ export default class ApiService {
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch interaction data for a specific bound ligand residue.
+   *
+   * Retrieves detailed interactions between a protein residue and its bound
+   * ligand, including interaction types, atoms involved and distances.
+   *
+   * @param {string} pdbId - PDB entry ID (e.g., '1cbs')
+   * @param {string} chainId - Chain identifier (auth_asym_id)
+   * @param {number|string} seqId - Residue sequence number (auth_seq_id)
+   * @returns {Promise<Object>} Interaction data keyed by PDB ID
+   *
+   * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for interactions API
+   */
+  static getLigandInteractions(pdbId, chainId, seqId) {
+    const id = pdbId.toLowerCase();
+    return this.fetchJson(
+      `${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/${id}/${chainId}/${seqId}`
+    );
   }
 
   /**

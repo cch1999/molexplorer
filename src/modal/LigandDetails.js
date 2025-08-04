@@ -16,6 +16,9 @@ class LigandDetails {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.viewer = null;
+        this.interactionsSection = document.getElementById('interactions-section');
+        this.interactionsTbody = document.getElementById('interactions-tbody');
+        this.noInteractionsMessage = document.getElementById('no-interactions-message');
 
         const closeBtn = document.getElementById('close-details-modal');
         if (closeBtn) {
@@ -55,6 +58,16 @@ class LigandDetails {
             if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
             if (this.detailsChain) this.detailsChain.textContent = '-';
             if (this.detailsResidue) this.detailsResidue.textContent = '-';
+        }
+
+        if (this.interactionsSection) {
+            this.interactionsSection.style.display = isInstance ? 'block' : 'none';
+        }
+        if (isInstance) {
+            this.loadInteractions(molecule);
+        } else if (this.interactionsTbody) {
+            this.interactionsTbody.innerHTML = '';
+            if (this.noInteractionsMessage) this.noInteractionsMessage.style.display = 'none';
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
@@ -152,6 +165,66 @@ class LigandDetails {
         this.detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
 
         this.modal.style.display = 'block';
+    }
+
+    loadInteractions(molecule) {
+        if (!this.interactionsTbody) return;
+        this.interactionsTbody.innerHTML = '';
+        if (this.noInteractionsMessage) {
+            this.noInteractionsMessage.style.display = 'none';
+            this.noInteractionsMessage.textContent = 'No interactions found.';
+        }
+        ApiService.getLigandInteractions(
+            molecule.pdbId,
+            molecule.labelAsymId,
+            molecule.authSeqId
+        )
+            .then(data => {
+                const interactions =
+                    data?.[molecule.pdbId.toLowerCase()]?.[0]?.interactions ?? [];
+                if (interactions.length === 0) {
+                    if (this.noInteractionsMessage)
+                        this.noInteractionsMessage.style.display = 'block';
+                    return;
+                }
+                for (const interaction of interactions) {
+                    const row = document.createElement('tr');
+                    const ligandAtoms = interaction.ligand_atoms?.join(', ') ?? '-';
+                    const interactionType =
+                        interaction.interaction_type ||
+                        interaction.interaction_class ||
+                        '-';
+                    const residue = interaction.end
+                        ? `${interaction.end.chem_comp_id || ''} ${
+                              interaction.end.author_residue_number || ''
+                          } (${interaction.end.chain_id || ''})`
+                        : '-';
+                    const atomNames =
+                        interaction.end?.atom_names?.join(', ') ?? '-';
+                    const details =
+                        interaction.interaction_details?.join(', ') ?? '-';
+                    const distance =
+                        interaction.distance != null
+                            ? interaction.distance.toFixed(2)
+                            : '-';
+                    row.innerHTML = `
+                        <td>${ligandAtoms}</td>
+                        <td>${interactionType}</td>
+                        <td>${residue}</td>
+                        <td>${atomNames}</td>
+                        <td>${details}</td>
+                        <td>${distance}</td>`;
+                    this.interactionsTbody.appendChild(row);
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching interactions:', err);
+                if (this.noInteractionsMessage) {
+                    this.noInteractionsMessage.textContent =
+                        'Failed to load interactions.';
+                    this.noInteractionsMessage.style.display = 'block';
+                }
+            });
     }
 
     close() {

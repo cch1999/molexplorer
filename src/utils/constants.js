@@ -7,6 +7,7 @@ export const RCSB_ENTRY_BASE_URL = 'https://data.rcsb.org/rest/v1/core/entry';
 export const PD_BE_SUMMARY_BASE_URL = 'https://www.ebi.ac.uk/pdbe/graph-api/pdb/summary';
 export const RCSB_PDB_DOWNLOAD_BASE_URL = 'https://files.rcsb.org/download';
 export const PD_BE_LIGAND_MONOMERS_BASE_URL = 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/ligand_monomers';
+export const PD_BE_LIGAND_INTERACTIONS_BASE_URL = 'https://www.ebi.ac.uk/pdbe/graph-api/pdb/bound_ligand_interactions';
 export const RCSB_GROUP_BASE_URL = 'https://data.rcsb.org/rest/v1/core/entry_groups';
 export const PUBCHEM_COMPOUND_BASE_URL = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound';
 export const PUBCHEM_COMPOUND_LINK_BASE = 'https://pubchem.ncbi.nlm.nih.gov/compound';

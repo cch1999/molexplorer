@@ -87,3 +87,70 @@ describe('LigandDetails viewer focus', () => {
     delete global.window;
   });
 });
+
+describe('LigandDetails interactions', () => {
+  it('populates rows when API key uses lowercase', async () => {
+    const dom = new JSDOM();
+    const { document } = dom.window;
+
+    const ids = [
+      'molecule-details-modal',
+      'details-title',
+      'details-code',
+      'details-source',
+      'details-type',
+      'details-structure',
+      'details-pdb-id',
+      'details-chain',
+      'details-residue',
+      'details-viewer-container',
+      'details-json',
+      'interactions-section',
+      'no-interactions-message'
+    ];
+    ids.forEach(id => {
+      const el = document.createElement('div');
+      el.style = {};
+      document.registerElement(id, el);
+    });
+    const tbody = document.createElement('tbody');
+    tbody.style = {};
+    document.registerElement('interactions-tbody', tbody);
+    document.querySelectorAll = () => [];
+    global.document = document;
+    global.window = { addEventListener: () => {} };
+
+    mock.method(ApiService, 'getLigandInteractions', async () => ({
+      '1cbs': [
+        {
+          interactions: [
+            {
+              ligand_atoms: ['C1'],
+              interaction_type: 'atom-atom',
+              end: {
+                chem_comp_id: 'PHE',
+                author_residue_number: 15,
+                chain_id: 'A',
+                atom_names: ['CZ']
+              },
+              interaction_details: ['hydrophobic'],
+              distance: 4.05
+            }
+          ]
+        }
+      ]
+    }));
+
+    const ld = new LigandDetails({});
+    ld.loadInteractions({ pdbId: '1CBS', labelAsymId: 'A', authSeqId: 200 });
+    await new Promise(setImmediate);
+
+    assert.strictEqual(tbody.children.length, 1);
+    assert.match(tbody.children[0].innerHTML, /C1/);
+    assert.match(tbody.children[0].innerHTML, /PHE/);
+
+    mock.restoreAll();
+    delete global.document;
+    delete global.window;
+  });
+});
