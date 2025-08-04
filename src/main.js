@@ -281,9 +281,9 @@ function toggleDarkMode() {
             el.style.background = bg;
         }
     });
-    const btn = document.getElementById('theme-toggle');
-    if (btn) {
-        btn.textContent = isDark ? '☀️' : '🌙';
+    const icon = document.getElementById('theme-toggle-icon');
+    if (icon) {
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
     }
 }
 
