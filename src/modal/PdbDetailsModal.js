@@ -69,7 +69,13 @@ class PdbDetailsModal {
                     });
                     viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
-                    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                    viewer.setStyle({}, { cartoon: { color: '#b3b3b3', opacity: 0.7 } });
+                    // highlight bound ligands with vivid magenta coloring
+                    viewer.setStyle({ hetflag: true }, {
+                        stick: { radius: 0.3, color: '#ff00ff' },
+                        sphere: { scale: 0.5, color: '#ff00ff' }
+                    });
+                    viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
                     viewer.zoomTo();
                     viewer.render();
                 } catch (e) {
