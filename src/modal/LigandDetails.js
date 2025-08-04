@@ -181,7 +181,7 @@ class LigandDetails {
         )
             .then(data => {
                 const interactions =
-                    data?.[molecule.pdbId]?.[0]?.interactions ?? [];
+                    data?.[molecule.pdbId.toLowerCase()]?.[0]?.interactions ?? [];
                 if (interactions.length === 0) {
                     if (this.noInteractionsMessage)
                         this.noInteractionsMessage.style.display = 'block';

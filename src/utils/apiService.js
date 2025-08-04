@@ -303,8 +303,9 @@ export default class ApiService {
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for interactions API
    */
   static getLigandInteractions(pdbId, chainId, seqId) {
+    const id = pdbId.toLowerCase();
     return this.fetchJson(
-      `${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/${pdbId}/${chainId}/${seqId}`
+      `${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/${id}/${chainId}/${seqId}`
     );
   }
 

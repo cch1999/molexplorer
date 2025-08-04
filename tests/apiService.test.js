@@ -70,7 +70,7 @@ describe('ApiService', () => {
 
   it('getLigandInteractions builds interaction URL', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, json: async () => ({}) }));
-    await ApiService.getLigandInteractions('1cbs', 'A', 200);
+    await ApiService.getLigandInteractions('1CBS', 'A', 200);
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
       `${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/1cbs/A/200`
