@@ -10,18 +10,18 @@
  */
 
 import {
+  FRAGMENT_LIBRARY_URL,
+  PD_BE_IN_PDB_BASE_URL,
+  PD_BE_LIGAND_MONOMERS_BASE_URL,
+  PD_BE_SIMILARITY_BASE_URL,
+  PD_BE_SUMMARY_BASE_URL,
+  PUBCHEM_COMPOUND_BASE_URL,
+  PUBCHEM_COMPOUND_LINK_BASE,
+  RCSB_ENTRY_BASE_URL,
+  RCSB_GROUP_BASE_URL,
   RCSB_LIGAND_BASE_URL,
   RCSB_MODEL_BASE_URL,
-  FRAGMENT_LIBRARY_URL,
-  PD_BE_SIMILARITY_BASE_URL,
-  PD_BE_IN_PDB_BASE_URL,
-  RCSB_ENTRY_BASE_URL,
-  PD_BE_SUMMARY_BASE_URL,
-  RCSB_PDB_DOWNLOAD_BASE_URL,
-  PD_BE_LIGAND_MONOMERS_BASE_URL,
-  RCSB_GROUP_BASE_URL,
-  PUBCHEM_COMPOUND_BASE_URL,
-  PUBCHEM_COMPOUND_LINK_BASE
+  RCSB_PDB_DOWNLOAD_BASE_URL
 } from './constants.js';
 
 // In-memory cache for URL -> parsed response pairs
@@ -119,17 +119,19 @@ export default class ApiService {
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
   static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
+    // Returns a string in the form:
+    // https://models.rcsb.org/v1/4tos/ligand?auth_seq_id=1402&label_asym_id=D&encoding=sdf&filename=4tos_D_355.sdf
+    const pdbIdLower = pdbId.toLowerCase();
     const params = new URLSearchParams({
       auth_seq_id: authSeqId,
       label_asym_id: labelAsymId,
       encoding: 'sdf',
     });
     if (compId) {
-      const filename = `${pdbId}_${labelAsymId}_${compId}`.toUpperCase();
+      const filename = `${pdbIdLower}_${labelAsymId}_${compId}`.toLowerCase();
       params.append('filename', `${filename}.sdf`);
     }
-    const url = `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?${params.toString()}`;
-    return this.fetchText(url);
+    return `${RCSB_MODEL_BASE_URL}/${pdbIdLower}/ligand?${params.toString()}`;
   }
   /**
    * Fetch fragment library data from local TSV file
