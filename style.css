@@ -1427,6 +1427,10 @@ main {
     line-height: 1.4;
 }
 
+.pdb-info-value.authors-list {
+    white-space: nowrap;
+}
+
 .pdb-info-value a {
     color: #6e45e2;
     text-decoration: none;

@@ -103,7 +103,16 @@ class PdbDetailsModal {
 
     createPDBDetailsHTML(data) {
         const title = data.struct?.title || 'Not available';
-        const authors = data.citation?.[0]?.rcsb_authors?.join(', ') || 'Not available';
+        const authorList = data.citation?.[0]?.rcsb_authors || [];
+        let fullAuthors = 'Not available';
+        let displayAuthors = 'Not available';
+        if (authorList.length > 0) {
+            fullAuthors = authorList.join(', ');
+            displayAuthors = fullAuthors;
+            if (authorList.length > 4) {
+                displayAuthors = `${authorList.slice(0, 2).join(', ')}, ..., ${authorList.slice(-2).join(', ')}`;
+            }
+        }
         const releaseDate = data.rcsb_accession_info?.initial_release_date ? new Date(data.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'Not available';
         const resolution = data.rcsb_entry_info?.resolution_combined?.[0]?.toFixed(2) ? `${data.rcsb_entry_info.resolution_combined[0].toFixed(2)} Å` : 'N/A';
         const method = data.exptl?.[0]?.method || 'N/A';
@@ -143,7 +152,7 @@ class PdbDetailsModal {
                     </div>
                     <div class="pdb-info-item" style="grid-column: 1 / -1;">
                         <div class="pdb-info-label">Authors</div>
-                        <div class="pdb-info-value">${authors}</div>
+                        <div class="pdb-info-value authors-list" title="${fullAuthors}">${displayAuthors}</div>
                     </div>
                 </div>
                 <div class="pdb-external-links">
