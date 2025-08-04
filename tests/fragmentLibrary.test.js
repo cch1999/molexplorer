@@ -29,8 +29,10 @@ describe('FragmentLibrary', () => {
       addMolecule: () => true,
       showMoleculeDetails: () => {}
     };
-    const smilesStub = { parse: () => {}, Drawer: class { draw() {} } };
-    library = new FragmentLibrary(moleculeManager, { notify: () => {}, smilesDrawer: smilesStub });
+    library = new FragmentLibrary(moleculeManager, {
+      notify: () => {},
+      rdkit: Promise.resolve(null)
+    });
     library.init();
     // Stub createFragmentCard to simplify DOM interactions
     library.createFragmentCard = (fragment) => {
