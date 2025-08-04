@@ -5,8 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ligand Surfer</title>
-  <script type="module" crossorigin src="./assets/index-CZTyNoNR.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-zT-ZtdO8.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
+  <script type="module" crossorigin src="./assets/index-CiH_6ALh.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BE6roIai.css">
 </head>
 
 <body>
@@ -107,8 +109,13 @@
                         <option value="G_1002003">PLpro (Papain-like Protease)</option>
                         <option value="G_1002165">NSP15 (Endoribonuclease)</option>
                         <option value="G_1002166">NSP16 (2'-O-Methyltransferase)</option>
+                        <option value="B1MDI3">TrmD (tRNA methyltransferase)</option>
+                        <option value="O60885">BRD4 (Bromodomain-containing protein 4)</option>
+                        <option value="P07900">Hsp90 (Heat Shock Protein 90)</option>
+                        <option value="P00918">Carbonic Anhydrase II</option>
+                        <option value="P24941">CDK2 (Cyclin-Dependent Kinase 2)</option>
                     </select>
-                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID..." value="G_1002155">
+                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID or UniProt ID..." value="G_1002155">
                     <button id="protein-group-search-btn" class="action-btn">Search</button>
                     <div class="toggle-switch">
                         <input type="checkbox" id="hide-aids-toggle" class="toggle-switch-checkbox" checked>
@@ -126,6 +133,7 @@
                                     <th>Title</th>
                                     <th>Resolution (Å)</th>
                                     <th>Release Date</th>
+                                    <th>Publication</th>
                                     <th>Bound Ligands</th>
                                     <th>View Structure</th>
                                 </tr>
@@ -135,6 +143,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <p id="protein-results-count" style="display: none;"></p>
+                    <button id="protein-load-more" class="action-btn" style="display: none;">Load more</button>
                     <p id="no-protein-results-message" style="display: none;">No results found.</p>
                     <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
                         data...</div>
