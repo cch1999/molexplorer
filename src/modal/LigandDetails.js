@@ -69,13 +69,28 @@ class LigandDetails {
                                 height: '100%'
                             });
                             viewer.addModel(pdbData, 'pdb');
-                            viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
-                            const selection = {
+                            // Show overall protein as light grey cartoon
+                            viewer.setStyle({}, { cartoon: { color: 'lightgrey' } });
+                            const ligandSel = {
                                 chain: molecule.labelAsymId,
                                 resi: parseInt(molecule.authSeqId, 10)
                             };
-                            viewer.setStyle(selection, { stick: { radius: 0.25, colorscheme: 'greenCarbon' } });
-                            viewer.zoomTo(selection);
+                            const pocketSel = { within: { distance: 5, sel: ligandSel } };
+                            // Surrounding residues as element-coloured sticks
+                            viewer.setStyle(pocketSel, {
+                                stick: { radius: 0.15, colorscheme: 'element' }
+                            });
+                            // Ligand in ball-and-stick with element colouring
+                            viewer.setStyle(ligandSel, {
+                                stick: { radius: 0.2, colorscheme: 'element' },
+                                sphere: { scale: 0.3, colorscheme: 'element' }
+                            });
+                            // Transparent surface around binding pocket
+                            viewer.addSurface($3Dmol.SurfaceType.MS,
+                                { opacity: 0.6, color: 'white' },
+                                pocketSel
+                            );
+                            viewer.zoomTo(ligandSel);
                             viewer.render();
                             this.viewer = viewer;
                         } catch (e) {
@@ -97,7 +112,10 @@ class LigandDetails {
                         height: '100%'
                     });
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
+                    viewer.setStyle({}, {
+                        stick: { radius: 0.2, colorscheme: 'element' },
+                        sphere: { scale: 0.3, colorscheme: 'element' }
+                    });
                     viewer.setStyle({ elem: 'H' }, {});
                     viewer.zoomTo();
                     viewer.render();
