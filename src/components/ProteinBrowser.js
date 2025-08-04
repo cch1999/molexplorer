@@ -4,7 +4,8 @@ import {
     RCSB_STRUCTURE_IMAGE_BASE_URL,
     RCSB_STRUCTURE_BASE_URL,
     PD_BE_ENTRY_BASE_URL,
-    CRYSTALLIZATION_AIDS
+    CRYSTALLIZATION_AIDS,
+    ION_LIGANDS
 } from '../utils/constants.js';
 
 class ProteinBrowser {
@@ -18,6 +19,7 @@ class ProteinBrowser {
         this.loadingIndicator = null;
         this.noResultsMessage = null;
         this.hideAidsToggle = null;
+        this.hideIonsToggle = null;
         this.currentProteinDetails = [];
         this.resultsCountMessage = null;
         this.loadMoreBtn = null;
@@ -36,6 +38,7 @@ class ProteinBrowser {
         this.loadingIndicator = document.getElementById('protein-loading-indicator');
         this.noResultsMessage = document.getElementById('no-protein-results-message');
         this.hideAidsToggle = document.getElementById('hide-aids-toggle');
+        this.hideIonsToggle = document.getElementById('hide-ions-toggle');
         this.resultsCountMessage = document.getElementById('protein-results-count');
         this.loadMoreBtn = document.getElementById('protein-load-more');
 
@@ -67,6 +70,14 @@ class ProteinBrowser {
 
         if (this.hideAidsToggle) {
             this.hideAidsToggle.addEventListener('change', () => {
+                if (this.currentProteinDetails.length > 0) {
+                    this.displayResults(this.currentProteinDetails);
+                }
+            });
+        }
+
+        if (this.hideIonsToggle) {
+            this.hideIonsToggle.addEventListener('change', () => {
                 if (this.currentProteinDetails.length > 0) {
                     this.displayResults(this.currentProteinDetails);
                 }
@@ -224,6 +235,7 @@ class ProteinBrowser {
         }
         if (proteinDetails && proteinDetails.length > 0) {
             const hideAids = this.hideAidsToggle && this.hideAidsToggle.checked;
+            const hideIons = this.hideIonsToggle && this.hideIonsToggle.checked;
             for (const detail of proteinDetails) {
                 const row = this.resultsBody.insertRow();
                 const pdbId = detail.rcsb_id;
@@ -245,6 +257,9 @@ class ProteinBrowser {
                 let boundLigands = await this.fetchBoundLigands(pdbId);
                 if (hideAids) {
                     boundLigands = boundLigands.filter(ligand => !CRYSTALLIZATION_AIDS.includes(ligand.chem_comp_id));
+                }
+                if (hideIons) {
+                    boundLigands = boundLigands.filter(ligand => !ION_LIGANDS.includes(ligand.chem_comp_id));
                 }
 
                 row.innerHTML = `

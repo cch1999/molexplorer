@@ -27,6 +27,7 @@ describe('displayResults', () => {
       insertRow: () => rowStub
     };
     browser.hideAidsToggle = { checked: false };
+    browser.hideIonsToggle = { checked: false };
     browser.resultsContainer = { style: {} };
     browser.noResultsMessage = { style: {}, textContent: '' };
     mock.method(browser, 'fetchBoundLigands', async () => []);
@@ -43,6 +44,44 @@ describe('displayResults', () => {
 
     assert.ok(rowStub.innerHTML.includes('The Paper'));
     assert.ok(rowStub.innerHTML.includes('doi.org/10.1000/xyz'));
+  });
+});
+
+describe('hide ions toggle', () => {
+  it('filters ion ligands when enabled', async () => {
+    const rowStub = {
+      innerHTML: '',
+      querySelector: () => ({ addEventListener: () => {}, dataset: {} }),
+      querySelectorAll: () => []
+    };
+    const browser = new ProteinBrowser({});
+    browser.resultsBody = {
+      innerHTML: '',
+      insertRow: () => rowStub
+    };
+    browser.hideAidsToggle = { checked: false };
+    browser.hideIonsToggle = { checked: true };
+    browser.resultsContainer = { style: {} };
+    browser.noResultsMessage = { style: {}, textContent: '' };
+    mock.method(browser, 'fetchBoundLigands', async () => [
+      { chem_comp_id: 'ZN', chem_comp_name: 'Zinc' },
+      { chem_comp_id: 'ATP', chem_comp_name: 'ATP' }
+    ]);
+    browser.renderBoundLigands = mock.fn(() => '');
+
+    const details = [{
+      rcsb_id: '1ABC',
+      struct: { title: 'Structure' },
+      rcsb_entry_info: { resolution_combined: [1.5] },
+      rcsb_accession_info: { initial_release_date: '2024-01-01' },
+      rcsb_primary_citation: { title: 'Paper' }
+    }];
+
+    await browser.displayResults(details);
+    assert.deepStrictEqual(
+      browser.renderBoundLigands.mock.calls[0].arguments[0].map(l => l.chem_comp_id),
+      ['ATP']
+    );
   });
 });
 
