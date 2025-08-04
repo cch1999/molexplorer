@@ -4,7 +4,8 @@ import ApiService from '../src/utils/apiService.js';
 import {
   RCSB_LIGAND_BASE_URL,
   RCSB_MODEL_BASE_URL,
-  UNIPROT_ENTRY_BASE_URL
+  UNIPROT_ENTRY_BASE_URL,
+  UNIPROT_UNIREF_BASE_URL
 } from '../src/utils/constants.js';
 
 describe('ApiService', () => {
@@ -96,6 +97,34 @@ describe('ApiService', () => {
       global.fetch.mock.calls[0].arguments[0],
       `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
     );
+  });
+
+  it('getPdbEntriesForUniprot includes UniRef90 members when requested', async () => {
+    const clusterData = {
+      representativeMember: { accessions: ['P12345'] },
+      members: [
+        { accessions: ['Q11111'] },
+        { accessions: ['Q22222'] }
+      ]
+    };
+    const entryData = {
+      P12345: { uniProtKBCrossReferences: [{ database: 'PDB', id: '1AAA' }] },
+      Q11111: { uniProtKBCrossReferences: [{ database: 'PDB', id: '2BBB' }] },
+      Q22222: { uniProtKBCrossReferences: [{ database: 'PDB', id: '3CCC' }] }
+    };
+    global.fetch = mock.fn(async (url) => {
+      if (url === `${UNIPROT_UNIREF_BASE_URL}/UniRef90_P12345.json`) {
+        return { ok: true, json: async () => clusterData };
+      }
+      const match = url.match(/uniprotkb\/(\w+)\.json$/);
+      if (match && entryData[match[1]]) {
+        return { ok: true, json: async () => entryData[match[1]] };
+      }
+      return { ok: false, status: 404 };
+    });
+    const ids = await ApiService.getPdbEntriesForUniprot('P12345', true);
+    assert.deepStrictEqual(ids.sort(), ['1AAA', '2BBB', '3CCC']);
+    assert.strictEqual(global.fetch.mock.callCount(), 4);
   });
 
   it('fetchText caches responses', async () => {

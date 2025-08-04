@@ -2,6 +2,8 @@
 
 ChemLogic Interface is a demo application for exploring molecular structures, fragments and proteins. It combines local fragment libraries with live data from the PDBe and RCSB APIs to provide quick visualisations and analysis.
 
+The protein browser supports UniProt searches with an optional button to include proteins from the same UniRef90 cluster (90% identity / 80% overlap).
+
 ## Requirements
 - Node.js 18 or later
 

@@ -11,6 +11,7 @@ class ProteinBrowser {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
         this.searchBtn = null;
+        this.searchSimilarBtn = null;
         this.searchInput = null;
         this.suggestedDropdown = null;
         this.resultsContainer = null;
@@ -23,6 +24,7 @@ class ProteinBrowser {
 
     init() {
         this.searchBtn = document.getElementById('protein-group-search-btn');
+        this.searchSimilarBtn = document.getElementById('protein-group-search-similar-btn');
         this.searchInput = document.getElementById('protein-group-search');
         this.suggestedDropdown = document.getElementById('suggested-groups-dropdown');
         this.resultsContainer = document.getElementById('protein-results-table-container');
@@ -36,6 +38,17 @@ class ProteinBrowser {
                 const queryId = this.searchInput.value.trim();
                 if (queryId) {
                     this.fetchProteinEntries(queryId);
+                } else {
+                    showNotification('Please enter a Group ID or UniProt ID.', 'info');
+                }
+            });
+        }
+
+        if (this.searchSimilarBtn) {
+            this.searchSimilarBtn.addEventListener('click', () => {
+                const queryId = this.searchInput.value.trim();
+                if (queryId) {
+                    this.fetchProteinEntries(queryId, true);
                 } else {
                     showNotification('Please enter a Group ID or UniProt ID.', 'info');
                 }
@@ -65,7 +78,7 @@ class ProteinBrowser {
         return this;
     }
 
-    async fetchProteinEntries(identifier) {
+    async fetchProteinEntries(identifier, includeSimilar = false) {
         this.loadingIndicator.style.display = 'block';
         this.resultsContainer.style.display = 'none';
         this.noResultsMessage.style.display = 'none';
@@ -76,7 +89,7 @@ class ProteinBrowser {
                 const data = await ApiService.getProteinGroup(identifier);
                 pdbIds = data.rcsb_group_container_identifiers.group_member_ids;
             } else {
-                pdbIds = await ApiService.getPdbEntriesForUniprot(identifier);
+                pdbIds = await ApiService.getPdbEntriesForUniprot(identifier, includeSimilar);
             }
             this.currentProteinDetails = await this.fetchMemberDetails(pdbIds);
             this.displayResults(this.currentProteinDetails);

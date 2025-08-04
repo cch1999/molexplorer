@@ -21,6 +21,7 @@ import {
   PD_BE_LIGAND_MONOMERS_BASE_URL,
   RCSB_GROUP_BASE_URL,
   UNIPROT_ENTRY_BASE_URL,
+  UNIPROT_UNIREF_BASE_URL,
   PUBCHEM_COMPOUND_BASE_URL,
   PUBCHEM_COMPOUND_LINK_BASE
 } from './constants.js';
@@ -343,14 +344,40 @@ export default class ApiService {
    * associated PDB identifiers.
    *
   * @param {string} uniprotId - UniProt accession (e.g., 'P0DTC2').
+  * @param {boolean} [includeSimilar=false] - Include UniRef90 cluster members.
   * @returns {Promise<string[]>} Array of PDB IDs.
   */
-  static async getPdbEntriesForUniprot(uniprotId) {
+  static async getPdbEntriesForUniprot(uniprotId, includeSimilar = false) {
     const accession = uniprotId.toUpperCase();
-    const url = `${UNIPROT_ENTRY_BASE_URL}/${accession}.json`;
-    const data = await this.fetchJson(url);
-    const refs = data?.uniProtKBCrossReferences ?? [];
-    return refs.filter(ref => ref.database === 'PDB').map(ref => ref.id);
+    const accessions = new Set([accession]);
+
+    if (includeSimilar) {
+      try {
+        const clusterUrl = `${UNIPROT_UNIREF_BASE_URL}/UniRef90_${accession}.json`;
+        const clusterData = await this.fetchJson(clusterUrl);
+        clusterData?.representativeMember?.accessions?.forEach(acc => accessions.add(acc));
+        (clusterData?.members ?? []).forEach(m =>
+          m.accessions?.forEach(acc => accessions.add(acc))
+        );
+      } catch (e) {
+        console.error('Error fetching UniRef90 cluster', e);
+      }
+    }
+
+    const pdbIds = new Set();
+    for (const acc of accessions) {
+      try {
+        const url = `${UNIPROT_ENTRY_BASE_URL}/${acc}.json`;
+        const data = await this.fetchJson(url);
+        const refs = data?.uniProtKBCrossReferences ?? [];
+        refs
+          .filter(ref => ref.database === 'PDB')
+          .forEach(ref => pdbIds.add(ref.id));
+      } catch {
+        /* ignore failures for individual accessions */
+      }
+    }
+    return Array.from(pdbIds);
   }
 
   /**
