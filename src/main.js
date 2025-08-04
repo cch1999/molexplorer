@@ -1,6 +1,6 @@
 import MoleculeLoader from './utils/MoleculeLoader.js';
 import MoleculeRepository from './utils/MoleculeRepository.js';
-import { DEFAULT_MOLECULE_CODES } from './utils/constants.js';
+import { DEFAULT_MOLECULE_CODES, DEFAULT_PDB_INSTANCES } from './utils/constants.js';
 import BoundLigandTable from './components/BoundLigandTable.js';
 import FragmentLibrary from './components/FragmentLibrary.js';
 import LigandModal from './modal/LigandModal.js';
@@ -8,12 +8,14 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import ComparisonModal from './modal/ComparisonModal.js';
 
 class MoleculeManager {
     constructor() {
-        this.repository = new MoleculeRepository(
-            DEFAULT_MOLECULE_CODES.map(code => ({ code, status: 'pending' }))
-        );
+        this.repository = new MoleculeRepository([
+            ...DEFAULT_MOLECULE_CODES.map(code => ({ code, status: 'pending' })),
+            ...DEFAULT_PDB_INSTANCES.map(inst => ({ ...inst, status: 'pending' }))
+        ]);
         this.grid = null;
         this.loadingIndicator = null;
         this.cardUI = null;
@@ -22,6 +24,8 @@ class MoleculeManager {
         this.boundLigandTable = null;
         this.pdbDetailsModal = null;
         this.addModal = null;
+        this.comparisonModal = null;
+        this.compareQueue = [];
     }
 
     init() {
@@ -30,7 +34,8 @@ class MoleculeManager {
 
         this.cardUI = new MoleculeCard(this.grid, this.repository, {
             onDelete: code => this.confirmDelete(code),
-            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format)
+            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format),
+            onCompare: code => this.queueComparison(code)
         });
 
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
@@ -42,6 +47,7 @@ class MoleculeManager {
         );
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
         this.addModal = new AddMoleculeModal(this);
+        this.comparisonModal = new ComparisonModal();
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
             if (this.addModal) {
@@ -118,8 +124,8 @@ class MoleculeManager {
         return added;
     }
 
-    addPdbInstance({ code, pdbId, authSeqId, labelAsymId }) {
-        return this.addMolecule({ code, pdbId, authSeqId, labelAsymId });
+    addPdbInstance({ code, pdbId, chainId, authorResidueNumber }) {
+        return this.addMolecule({ code, pdbId, chainId, authorResidueNumber });
     }
 
     deleteMolecule(code) {
@@ -149,6 +155,26 @@ class MoleculeManager {
 
     updateMoleculeStatus(code, status) {
         this.repository.updateMoleculeStatus(code, status);
+    }
+
+    queueComparison(code) {
+        if (this.compareQueue.includes(code)) return;
+        this.compareQueue.push(code);
+        if (this.compareQueue.length === 2) {
+            const [c1, c2] = this.compareQueue;
+            const mol1 = this.getMolecule(c1);
+            const mol2 = this.getMolecule(c2);
+            if (mol1 && mol2 && this.comparisonModal) {
+                if (mol1.sdf && mol2.sdf) {
+                    this.comparisonModal.show(mol1, mol2);
+                } else if (typeof showNotification === 'function') {
+                    showNotification('Both molecules must be loaded before comparison', 'error');
+                }
+            }
+            this.compareQueue = [];
+        } else if (typeof showNotification === 'function') {
+            showNotification('Select another molecule to compare', 'info');
+        }
     }
 
     loadAllMolecules() {
@@ -191,11 +217,69 @@ class MoleculeManager {
 const moleculeManager = new MoleculeManager().init();
 moleculeManager.loadAllMolecules();
 
+const rdkitPromise =
+    typeof initRDKitModule === 'function'
+        ? initRDKitModule()
+        : Promise.resolve(null);
+
 const fragmentLibrary = new FragmentLibrary(moleculeManager, {
     notify: showNotification,
-    smilesDrawer: window.SmilesDrawer
+    rdkit: rdkitPromise
 }).init();
 fragmentLibrary.loadFragments();
+
+// Add Fragment Modal handlers
+const addFragmentModal = document.getElementById('add-fragment-modal');
+const addFragmentBtn = document.getElementById('add-fragment-btn');
+const cancelAddFragmentBtn = document.getElementById('cancel-add-fragment-btn');
+const closeFragmentModalBtn = document.getElementById('close-fragment-modal');
+const confirmAddFragmentBtn = document.getElementById('confirm-add-fragment-btn');
+
+const openFragmentModal = () => {
+    if (addFragmentModal) {
+        addFragmentModal.style.display = 'block';
+    }
+};
+
+const closeFragmentModal = () => {
+    if (addFragmentModal) {
+        addFragmentModal.style.display = 'none';
+    }
+};
+
+if (addFragmentBtn) {
+    addFragmentBtn.addEventListener('click', openFragmentModal);
+}
+if (cancelAddFragmentBtn) {
+    cancelAddFragmentBtn.addEventListener('click', closeFragmentModal);
+}
+if (closeFragmentModalBtn) {
+    closeFragmentModalBtn.addEventListener('click', closeFragmentModal);
+}
+if (confirmAddFragmentBtn) {
+    confirmAddFragmentBtn.addEventListener('click', () => {
+        const nameEl = document.getElementById('fragment-name');
+        const queryEl = document.getElementById('fragment-query');
+        const sourceEl = document.getElementById('fragment-source');
+        const descEl = document.getElementById('fragment-description');
+
+        const fragmentData = {
+            name: nameEl ? nameEl.value.trim() : '',
+            query: queryEl ? queryEl.value.trim() : '',
+            source: sourceEl ? sourceEl.value.trim() : '',
+            description: descEl ? descEl.value.trim() : ''
+        };
+
+        const added = fragmentLibrary.addFragment(fragmentData);
+        if (added) {
+            if (nameEl) nameEl.value = '';
+            if (queryEl) queryEl.value = '';
+            if (sourceEl) sourceEl.value = 'custom';
+            if (descEl) descEl.value = '';
+            closeFragmentModal();
+        }
+    });
+}
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
 
@@ -243,3 +327,30 @@ window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.showNotification = showNotification;
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const bg = isDark ? '#e0e0e0' : 'white';
+    document.querySelectorAll('.viewer-container, .molecule-viewer, .details-viewer').forEach(el => {
+        if (el.viewer && typeof el.viewer.setBackgroundColor === 'function') {
+            el.viewer.setBackgroundColor(bg);
+            el.viewer.render();
+        } else {
+            el.style.background = bg;
+        }
+    });
+    const icon = document.getElementById('theme-toggle-icon');
+    if (icon) {
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+}
+
+function initThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.addEventListener('click', toggleDarkMode);
+    }
+}
+
+initThemeToggle();

@@ -15,19 +15,23 @@ class MoleculeLoader {
     }
 
     async loadMolecule(input) {
-        const { code, pdbId, authSeqId, labelAsymId } =
+        const { code, pdbId, chainId, authorResidueNumber } =
             typeof input === 'string' ? { code: input } : input;
         try {
             this.repository.updateMoleculeStatus(code, 'loading');
-            const smilesData = await this.findMoleculeInLocalTsv(code);
+            const hasInstanceDetails = pdbId && chainId && authorResidueNumber;
+            let smilesData = null;
+            if (!hasInstanceDetails) {
+                smilesData = await this.findMoleculeInLocalTsv(code);
+            }
             if (smilesData) {
                 this.repository.updateMoleculeStatus(code, 'loaded');
                 this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
                 return;
             }
             let sdfData;
-            if (pdbId && authSeqId && labelAsymId) {
-                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
+            if (hasInstanceDetails) {
+                sdfData = await ApiService.getInstanceSdf(pdbId, chainId, authorResidueNumber);
             } else {
                 sdfData = await ApiService.getCcdSdf(code);
             }

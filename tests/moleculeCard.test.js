@@ -51,3 +51,41 @@ describe('MoleculeCard downloadSdf', () => {
     assert.strictEqual(URL.revokeObjectURL.mock.callCount(), 1);
   });
 });
+
+describe('MoleculeCard compare button', () => {
+  it('adds a compare button and triggers callback on click', () => {
+    const makeEl = () => ({
+      style: {},
+      children: [],
+      appendChild(child) { this.children.push(child); return child; },
+      setAttribute: () => {},
+      addEventListener(type, handler) { this['on' + type] = handler; },
+      dispatchEvent(evt) { const h = this['on' + evt.type]; if (h) h(evt); },
+      innerHTML: '',
+      textContent: '',
+      className: ''
+    });
+
+    global.document = { createElement: makeEl };
+    global.window = {};
+    global.$3Dmol = { createViewer: () => ({ addModel: () => {}, setStyle: () => {}, render: () => {}, zoomTo: () => {} }) };
+    const originalTimeout = global.setTimeout;
+    global.setTimeout = (fn) => { fn(); };
+
+    const grid = makeEl();
+    const onCompare = mock.fn();
+    const cardUI = new MoleculeCard(grid, {}, { onCompare });
+    cardUI.createMoleculeCard('sdf', 'AAA');
+    const card = grid.children[0];
+    const compareBtn = card.children.find(c => c.className === 'compare-btn');
+    assert.ok(compareBtn);
+    compareBtn.dispatchEvent({ type: 'click', stopPropagation: () => {} });
+    assert.strictEqual(onCompare.mock.callCount(), 1);
+    assert.strictEqual(onCompare.mock.calls[0].arguments[0], 'AAA');
+
+    global.setTimeout = originalTimeout;
+    delete global.$3Dmol;
+    delete global.document;
+    delete global.window;
+  });
+});

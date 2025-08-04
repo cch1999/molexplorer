@@ -29,8 +29,10 @@ describe('FragmentLibrary', () => {
       addMolecule: () => true,
       showMoleculeDetails: () => {}
     };
-    const smilesStub = { parse: () => {}, Drawer: class { draw() {} } };
-    library = new FragmentLibrary(moleculeManager, { notify: () => {}, smilesDrawer: smilesStub });
+    library = new FragmentLibrary(moleculeManager, {
+      notify: () => {},
+      rdkit: Promise.resolve(null)
+    });
     library.init();
     // Stub createFragmentCard to simplify DOM interactions
     library.createFragmentCard = (fragment) => {
@@ -55,20 +57,39 @@ describe('FragmentLibrary', () => {
     assert.strictEqual(library.fragments[0].name, 'Frag');
   });
 
-  it('addFragment missing name returns false and does not modify list', () => {
+  it('addFragment missing name returns false, notifies, and does not modify list', () => {
     library.fragments = [];
     library.renderFragments = () => {};
+    let msg = '';
+    library.notify = (m) => { msg = m; };
     const result = library.addFragment({ query: 'C' });
     assert.strictEqual(result, false);
     assert.strictEqual(library.fragments.length, 0);
+    assert.match(msg, /name and SMILES\/SMARTS query are required/i);
   });
 
-  it('addFragment missing query returns false and does not modify list', () => {
+  it('addFragment missing query returns false, notifies, and does not modify list', () => {
     library.fragments = [];
     library.renderFragments = () => {};
+    let msg = '';
+    library.notify = (m) => { msg = m; };
     const result = library.addFragment({ name: 'Frag' });
     assert.strictEqual(result, false);
     assert.strictEqual(library.fragments.length, 0);
+    assert.match(msg, /name and SMILES\/SMARTS query are required/i);
+  });
+
+  it('addFragment duplicate name returns false and notifies', () => {
+    library.fragments = [];
+    library.renderFragments = () => {};
+    let msg = '';
+    library.notify = (m) => { msg = m; };
+    const first = library.addFragment({ name: 'Frag', query: 'C' });
+    assert.strictEqual(first, true);
+    const second = library.addFragment({ name: 'Frag', query: 'N' });
+    assert.strictEqual(second, false);
+    assert.strictEqual(library.fragments.length, 1);
+    assert.match(msg, /already exists/i);
   });
 
   it('renderFragments filters by search text, source filter, and CCD toggle', () => {

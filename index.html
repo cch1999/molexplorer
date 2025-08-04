@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ligand Surfer</title>
     <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
 </head>
 
 <body>
@@ -106,13 +108,23 @@
                         <option value="G_1002003">PLpro (Papain-like Protease)</option>
                         <option value="G_1002165">NSP15 (Endoribonuclease)</option>
                         <option value="G_1002166">NSP16 (2'-O-Methyltransferase)</option>
+                        <option value="B1MDI3">TrmD (tRNA methyltransferase)</option>
+                        <option value="O60885">BRD4 (Bromodomain-containing protein 4)</option>
+                        <option value="P07900">Hsp90 (Heat Shock Protein 90)</option>
+                        <option value="P00918">Carbonic Anhydrase II</option>
+                        <option value="P24941">CDK2 (Cyclin-Dependent Kinase 2)</option>
                     </select>
-                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID..." value="G_1002155">
+                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID or UniProt ID..." value="G_1002155">
                     <button id="protein-group-search-btn" class="action-btn">Search</button>
                     <div class="toggle-switch">
                         <input type="checkbox" id="hide-aids-toggle" class="toggle-switch-checkbox" checked>
                         <label class="toggle-switch-label" for="hide-aids-toggle"></label>
                         <span>Hide Crystallization Aids</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="hide-ions-toggle" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="hide-ions-toggle"></label>
+                        <span>Hide Ions</span>
                     </div>
                 </div>
                 <div id="protein-results-container">
@@ -125,6 +137,7 @@
                                     <th>Title</th>
                                     <th>Resolution (Å)</th>
                                     <th>Release Date</th>
+                                    <th>Publication</th>
                                     <th>Bound Ligands</th>
                                     <th>View Structure</th>
                                 </tr>
@@ -134,6 +147,8 @@
                             </tbody>
                         </table>
                     </div>
+                    <p id="protein-results-count" style="display: none;"></p>
+                    <button id="protein-load-more" class="action-btn" style="display: none;">Load more</button>
                     <p id="no-protein-results-message" style="display: none;">No results found.</p>
                     <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
                         data...</div>
@@ -185,14 +200,14 @@
                 <label for="pdb-id" style="margin-top:20px;">PDB Instance:</label>
                 <div class="instance-inputs">
                     <input type="text" id="pdb-id" placeholder="PDB ID" maxlength="4">
-                    <input type="text" id="auth-seq-id" placeholder="Residue #">
-                    <input type="text" id="label-asym-id" placeholder="Chain" maxlength="2">
+                    <input type="text" id="author-residue-number" placeholder="Residue #">
+                    <input type="text" id="chain-id" placeholder="Chain" maxlength="2">
                 </div>
                 <p class="help-text">Optional: specify PDB ID, residue number and chain to add a bound ligand</p>
                 <p class="error-text" id="instance-error"></p>
             </div>
             <div class="modal-footer">
-                <button id="feeling-lucky-btn" class="btn-secondary" disabled>I'm Feeling Lucky</button>
+                <button id="feeling-lucky-btn" class="btn-secondary">I'm Feeling Lucky</button>
                 <div>
                     <button id="cancel-btn" class="btn-secondary">Cancel</button>
                     <button id="confirm-add-btn" class="btn-primary" disabled>Add Molecule</button>
@@ -274,6 +289,11 @@
                     <div id="details-viewer-container" class="details-viewer">
                         <p>Loading structure...</p>
                     </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Molecular Properties</h4>
+                    <div id="ligand-properties" class="properties-panel">Loading properties...</div>
                 </div>
 
                 <div class="details-section">
@@ -383,9 +403,18 @@
         </div>
     </div>
 
-    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
-    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
-    <script type="module" src="./src/main.js"></script>
+    <!-- Comparison Modal -->
+    <div id="comparison-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="comparison-title">Compare Molecules</h3>
+                <span class="close" id="close-comparison-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div id="comparison-viewer" style="width: 100%; height: 400px; position: relative;"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Quick 3D View Modal -->
     <div id="quick-view-modal" class="modal">
@@ -401,6 +430,10 @@
             </div>
         </div>
     </div>
+
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+    <script type="module" src="./src/main.js"></script>
 </body>
 
 

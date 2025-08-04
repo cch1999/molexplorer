@@ -6,6 +6,7 @@ class MoleculeCard {
         this.repository = repository;
         this.onDelete = callbacks.onDelete;
         this.onShowDetails = callbacks.onShowDetails;
+        this.onCompare = callbacks.onCompare;
         this.draggedElement = null;
     }
 
@@ -40,6 +41,16 @@ class MoleculeCard {
             this.downloadSdf(ccdCode);
         });
         card.appendChild(downloadBtn);
+
+        const compareBtn = document.createElement('div');
+        compareBtn.className = 'compare-btn';
+        compareBtn.textContent = '⇆';
+        compareBtn.title = `Compare ${ccdCode}`;
+        compareBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.onCompare) this.onCompare(ccdCode);
+        });
+        card.appendChild(compareBtn);
 
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
@@ -107,6 +118,16 @@ class MoleculeCard {
         });
         card.appendChild(downloadBtn);
 
+        const compareBtn = document.createElement('div');
+        compareBtn.className = 'compare-btn';
+        compareBtn.textContent = '⇆';
+        compareBtn.title = `Compare ${ccdCode}`;
+        compareBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (this.onCompare) this.onCompare(ccdCode);
+        });
+        card.appendChild(compareBtn);
+
         const title = document.createElement('h3');
         title.textContent = ccdCode;
         title.style.cursor = 'pointer';
@@ -125,7 +146,9 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: 'white' });
+                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
+                viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
                 viewer.setStyle({}, { stick: {} });
                 viewer.setStyle({ elem: 'H' }, {});

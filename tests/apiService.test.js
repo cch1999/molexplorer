@@ -1,7 +1,11 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import ApiService from '../src/utils/apiService.js';
-import { RCSB_LIGAND_BASE_URL, RCSB_MODEL_BASE_URL } from '../src/utils/constants.js';
+import {
+  RCSB_LIGAND_BASE_URL,
+  RCSB_MODEL_BASE_URL,
+  UNIPROT_ENTRY_BASE_URL
+} from '../src/utils/constants.js';
 
 describe('ApiService', () => {
   afterEach(() => {
@@ -58,14 +62,46 @@ describe('ApiService', () => {
     assert.strictEqual(txt, 'sdf');
   });
 
-  it('getInstanceSdf builds ligand URL', async () => {
-    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
+    it('getInstanceSdf resolves chain and residue to RCSB URL', async () => {
+      mock.method(ApiService, 'getLigandMonomers', async () => ({
+        '1abc': [
+          { chain_id: 'A', author_residue_number: 7, struct_asym_id: 'B' }
+        ]
+      }));
+      mock.method(ApiService, 'fetchText', async (url) => {
+        return url;
+      });
+      const url = await ApiService.getInstanceSdf('1abc', 'A', 7);
+      assert.strictEqual(
+        url,
+        `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
+      );
+    });
+
+  it('getPdbEntriesForUniprot parses PDB ids', async () => {
+    const mockData = {
+      uniProtKBCrossReferences: [
+        { database: 'PDB', id: '1ABC' },
+        { database: 'Other', id: 'XYZ' }
+      ]
+    };
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => mockData }));
+    const ids = await ApiService.getPdbEntriesForUniprot('P12345');
+    assert.deepStrictEqual(ids, ['1ABC']);
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
+      `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
     );
-    assert.strictEqual(txt, 'sdf');
+  });
+
+  it('getPdbEntriesForUniprot uppercases accessions', async () => {
+    const mockData = { uniProtKBCrossReferences: [] };
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => mockData }));
+    await ApiService.getPdbEntriesForUniprot('p12345');
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
+    );
   });
 
   it('fetchText caches responses', async () => {

@@ -109,13 +109,13 @@ class BoundLigandTable {
         addButton.className = 'add-ligand-btn';
         addButton.innerHTML = '&#43;';
         addButton.title = `Add ${ligand.chem_comp_id} to database`;
-        addButton.addEventListener('click', () => {
-            const success = this.addMolecule({
-                code: ligand.chem_comp_id,
-                pdbId,
-                labelAsymId: ligand.chain_id,
-                authSeqId: ligand.author_residue_number
-            });
+          addButton.addEventListener('click', () => {
+              const success = this.addMolecule({
+                  code: ligand.chem_comp_id,
+                  pdbId,
+                  chainId: ligand.chain_id,
+                  authorResidueNumber: ligand.author_residue_number
+              });
             if (success) {
                 showNotification(`Adding molecule ${ligand.chem_comp_id}...`, 'success');
             } else {
@@ -147,12 +147,12 @@ class BoundLigandTable {
         let skippedCount = 0;
         ligandList.forEach((ligand, index) => {
             setTimeout(() => {
-                const success = this.addMolecule({
-                    code: ligand.chem_comp_id,
-                    pdbId,
-                    labelAsymId: ligand.chain_id,
-                    authSeqId: ligand.author_residue_number
-                });
+                  const success = this.addMolecule({
+                      code: ligand.chem_comp_id,
+                      pdbId,
+                      chainId: ligand.chain_id,
+                      authorResidueNumber: ligand.author_residue_number
+                  });
                 if (success) {
                     addedCount++;
                 } else {

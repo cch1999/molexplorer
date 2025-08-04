@@ -1,3 +1,5 @@
+import ApiService from '../utils/apiService.js';
+
 class LigandDetails {
     constructor(moleculeManager) {
         this.moleculeManager = moleculeManager;
@@ -35,8 +37,8 @@ class LigandDetails {
         this.detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
         this.detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
 
-        const molecule = this.moleculeManager.getMolecule ? this.moleculeManager.getMolecule(ccdCode) : null;
-        const isInstance = molecule && molecule.pdbId && molecule.authSeqId && molecule.labelAsymId;
+          const molecule = this.moleculeManager.getMolecule ? this.moleculeManager.getMolecule(ccdCode) : null;
+          const isInstance = molecule && molecule.pdbId && molecule.chainId && molecule.authorResidueNumber;
         if (this.detailsStructure) {
             this.detailsStructure.textContent = isInstance ? 'PDB instance' : 'Ideal CCD SDF';
         }
@@ -47,8 +49,8 @@ class LigandDetails {
         }
         if (isInstance) {
             if (this.detailsPdbId) this.detailsPdbId.textContent = molecule.pdbId.toUpperCase();
-            if (this.detailsChain) this.detailsChain.textContent = molecule.labelAsymId;
-            if (this.detailsResidue) this.detailsResidue.textContent = molecule.authSeqId;
+              if (this.detailsChain) this.detailsChain.textContent = molecule.chainId;
+              if (this.detailsResidue) this.detailsResidue.textContent = molecule.authorResidueNumber;
         } else {
             if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
             if (this.detailsChain) this.detailsChain.textContent = '-';
@@ -56,16 +58,68 @@ class LigandDetails {
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
-        if (sdfData) {
+        if (isInstance) {
+            ApiService.getPdbFile(molecule.pdbId)
+                .then(pdbData => {
+                    setTimeout(() => {
+                        try {
+                            const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                            const viewer = $3Dmol.createViewer(this.detailsViewer, {
+                                backgroundColor: bgColor,
+                                width: '100%',
+                                height: '100%'
+                            });
+                            this.detailsViewer.viewer = viewer;
+                            viewer.addModel(pdbData, 'pdb');
+                            // Show overall protein as light grey cartoon
+                            viewer.setStyle({}, { cartoon: { color: 'lightgrey' } });
+              const ligandSel = {
+                                  chain: molecule.chainId,
+                                  resi: parseInt(molecule.authorResidueNumber, 10)
+                              };
+                            const pocketSel = { within: { distance: 5, sel: ligandSel } };
+                            // Surrounding residues as element-coloured sticks
+                            viewer.setStyle(pocketSel, {
+                                stick: { radius: 0.15, colorscheme: 'element' }
+                            });
+                            // Ligand in ball-and-stick with element colouring
+                            viewer.setStyle(ligandSel, {
+                                stick: { radius: 0.2, colorscheme: 'element' },
+                                sphere: { scale: 0.3, colorscheme: 'element' }
+                            });
+                            // Transparent surface around binding pocket
+                            viewer.addSurface($3Dmol.SurfaceType.MS,
+                                { opacity: 0.6, color: 'white' },
+                                pocketSel
+                            );
+                            viewer.zoomTo(ligandSel);
+                            viewer.render();
+                            this.viewer = viewer;
+                        } catch (e) {
+                            console.error(`Error initializing PDB viewer for ${ccdCode}:`, e);
+                            this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
+                        }
+                    }, 100);
+                })
+                .catch(e => {
+                    console.error(`Error fetching PDB for ${ccdCode}:`, e);
+                    this.detailsViewer.innerHTML = '<p style="color: #666;">Structure data not available</p>';
+                });
+        } else if (sdfData) {
             setTimeout(() => {
                 try {
+                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
-                        backgroundColor: 'white',
+                        backgroundColor: bgColor,
                         width: '100%',
                         height: '100%'
                     });
+                    this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, { stick: { radius: 0.2 }, sphere: { scale: 0.3 } });
+                    viewer.setStyle({}, {
+                        stick: { radius: 0.2, colorscheme: 'element' },
+                        sphere: { scale: 0.3, colorscheme: 'element' }
+                    });
                     viewer.setStyle({ elem: 'H' }, {});
                     viewer.zoomTo();
                     viewer.render();
@@ -95,9 +149,9 @@ class LigandDetails {
         if (isInstance) {
             jsonData.pdb_instance = {
                 pdb_id: molecule.pdbId,
-                auth_seq_id: molecule.authSeqId,
-                label_asym_id: molecule.labelAsymId
-            };
+                  chain_id: molecule.chainId,
+                  author_residue_number: molecule.authorResidueNumber
+              };
         }
         this.detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
 
@@ -125,6 +179,7 @@ class LigandDetails {
         }
         if (this.detailsViewer) {
             this.detailsViewer.innerHTML = '';
+            this.detailsViewer.viewer = null;
         }
     }
 }

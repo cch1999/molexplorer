@@ -14,14 +14,14 @@ describe('MoleculeRepository', () => {
 
   it('stores instance metadata when provided', () => {
     const repo = new MoleculeRepository();
-    repo.addMolecule({ code: 'B', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' });
+      repo.addMolecule({ code: 'B', pdbId: '1ABC', chainId: 'A', authorResidueNumber: '5' });
     assert.deepStrictEqual(repo.getMolecule('B'), {
       code: 'B',
       status: 'pending',
       pdbId: '1ABC',
-      authSeqId: '5',
-      labelAsymId: 'A',
-      id: '1ABC_A_5_B',
+        chainId: 'A',
+        authorResidueNumber: '5',
+        id: '1ABC_A_5_B',
     });
   });
 
@@ -31,9 +31,9 @@ describe('MoleculeRepository', () => {
     assert.ok(
       repo.addMolecule({
         code: 'DUP',
-        pdbId: '9XYZ',
-        authSeqId: '1',
-        labelAsymId: 'A',
+          pdbId: '9XYZ',
+          chainId: 'A',
+          authorResidueNumber: '1',
       })
     );
     assert.strictEqual(repo.getAllMolecules().length, 2);

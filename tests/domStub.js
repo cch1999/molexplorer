@@ -9,6 +9,12 @@ class Element {
     this.checked = false;
     this.disabled = false;
     this.dataset = {};
+    this.classList = {
+      classes: new Set(),
+      add: (...cls) => cls.forEach(c => this.classList.classes.add(c)),
+      remove: (...cls) => cls.forEach(c => this.classList.classes.delete(c)),
+      contains: (c) => this.classList.classes.has(c)
+    };
   }
   appendChild(child) {
     if (child && child.isFragment) {

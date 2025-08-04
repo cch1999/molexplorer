@@ -5,9 +5,9 @@ class MoleculeRepository {
 
     generateId(data) {
         if (typeof data === 'string') return data;
-        const { code, pdbId, authSeqId, labelAsymId } = data;
-        if (pdbId && authSeqId && labelAsymId) {
-            return `${pdbId}_${labelAsymId}_${authSeqId}_${code}`;
+        const { code, pdbId, chainId, authorResidueNumber } = data;
+        if (pdbId && chainId && authorResidueNumber) {
+            return `${pdbId}_${chainId}_${authorResidueNumber}_${code}`;
         }
         return code;
     }

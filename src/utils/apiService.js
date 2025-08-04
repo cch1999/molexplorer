@@ -19,7 +19,10 @@ import {
   PD_BE_SUMMARY_BASE_URL,
   RCSB_PDB_DOWNLOAD_BASE_URL,
   PD_BE_LIGAND_MONOMERS_BASE_URL,
-  RCSB_GROUP_BASE_URL
+  RCSB_GROUP_BASE_URL,
+  UNIPROT_ENTRY_BASE_URL,
+  PUBCHEM_COMPOUND_BASE_URL,
+  PUBCHEM_COMPOUND_LINK_BASE
 } from './constants.js';
 
 // In-memory cache for URL -> parsed response pairs
@@ -108,14 +111,28 @@ export default class ApiService {
    * Fetch experimental ligand instance data from RCSB models API
    *
    * Retrieves the experimentally observed coordinates for a specific ligand
-   * instance within a PDB entry.
+   * instance within a PDB entry. The function resolves author-provided chain
+   * identifiers and residue numbers to the corresponding structural asym id
+   * using PDBe's ligand monomers API before requesting the SDF from RCSB.
    *
    * @param {string} pdbId - The 4-character PDB ID
-   * @param {string|number} authSeqId - Author provided residue/sequence number
-   * @param {string} labelAsymId - Chain identifier
+   * @param {string} chainId - Author chain identifier (e.g. 'A')
+   * @param {string|number} authorResidueNumber - Author provided residue number
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
-  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
+  static async getInstanceSdf(pdbId, chainId, authorResidueNumber) {
+    const data = await this.getLigandMonomers(pdbId);
+    const ligands = data?.[pdbId.toLowerCase()] || [];
+    const match = ligands.find(
+      l => l.chain_id === chainId && l.author_residue_number === Number(authorResidueNumber)
+    );
+    if (!match) {
+      throw new Error(
+        `Ligand instance not found for chain ${chainId} residue ${authorResidueNumber}`
+      );
+    }
+    const labelAsymId = match.struct_asym_id;
+    const authSeqId = match.author_residue_number;
     return this.fetchText(
       `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
     );
@@ -284,6 +301,70 @@ export default class ApiService {
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch compound synonyms from PubChem.
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<string[]>} Array of synonym strings.
+   */
+  static async getPubChemSynonyms(name) {
+    const url = `${PUBCHEM_COMPOUND_BASE_URL}/name/${encodeURIComponent(name)}/synonyms/JSON`;
+    const data = await this.fetchJson(url);
+    return data?.InformationList?.Information?.[0]?.Synonym ?? [];
+  }
+
+  /**
+   * Fetch compound properties from PubChem.
+   *
+   * Retrieves basic chemical properties for a compound such as formula and
+   * molecular weight.
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<Object|null>} Properties object or null if unavailable.
+   */
+  static async getPubChemProperties(name) {
+    const url = `${PUBCHEM_COMPOUND_BASE_URL}/name/${encodeURIComponent(name)}/property/MolecularFormula,MolecularWeight,IUPACName,CanonicalSMILES/JSON`;
+    const data = await this.fetchJson(url);
+    return data?.PropertyTable?.Properties?.[0] ?? null;
+  }
+
+  /**
+   * Fetch combined compound metadata from PubChem (synonyms, properties, link).
+   *
+   * @param {string} name - Compound name or identifier.
+   * @returns {Promise<{synonyms: string[], properties: Object|null, link: string|null}>}
+   *   Metadata including synonyms, properties, and a PubChem entry link.
+   */
+  static async getPubChemMetadata(name) {
+    const [synonyms, properties] = await Promise.all([
+      this.getPubChemSynonyms(name).catch(() => []),
+      this.getPubChemProperties(name).catch(() => null)
+    ]);
+    const cid = properties?.CID;
+    return {
+      synonyms,
+      properties,
+      link: cid ? `${PUBCHEM_COMPOUND_LINK_BASE}/${cid}` : null
+    };
+  }
+
+  /**
+   * Fetch PDB entry IDs linked to a UniProt accession.
+   *
+   * Queries the UniProt REST API for cross-references and extracts all
+   * associated PDB identifiers.
+   *
+  * @param {string} uniprotId - UniProt accession (e.g., 'P0DTC2').
+  * @returns {Promise<string[]>} Array of PDB IDs.
+  */
+  static async getPdbEntriesForUniprot(uniprotId) {
+    const accession = uniprotId.toUpperCase();
+    const url = `${UNIPROT_ENTRY_BASE_URL}/${accession}.json`;
+    const data = await this.fetchJson(url);
+    const refs = data?.uniProtKBCrossReferences ?? [];
+    return refs.filter(ref => ref.database === 'PDB').map(ref => ref.id);
   }
 
   /**
