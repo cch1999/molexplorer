@@ -109,8 +109,8 @@ class PdbDetailsModal {
         if (authorList.length > 0) {
             fullAuthors = authorList.join(', ');
             displayAuthors = fullAuthors;
-            if (authorList.length > 4) {
-                displayAuthors = `${authorList.slice(0, 2).join(', ')}, ..., ${authorList.slice(-2).join(', ')}`;
+            if (authorList.length > 6) {
+                displayAuthors = `${authorList.slice(0, 3).join(', ')}, ..., ${authorList.slice(-3).join(', ')}`;
             }
         }
         const releaseDate = data.rcsb_accession_info?.initial_release_date ? new Date(data.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'Not available';
