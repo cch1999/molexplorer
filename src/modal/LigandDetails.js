@@ -15,6 +15,8 @@ class LigandDetails {
         this.detailsResidue = document.getElementById('details-residue');
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
+        this.interactionSection = document.getElementById('interaction-summary');
+        this.interactionTableBody = document.getElementById('interaction-summary-body');
         this.viewer = null;
 
         const closeBtn = document.getElementById('close-details-modal');
@@ -51,10 +53,17 @@ class LigandDetails {
             if (this.detailsPdbId) this.detailsPdbId.textContent = molecule.pdbId.toUpperCase();
             if (this.detailsChain) this.detailsChain.textContent = molecule.labelAsymId;
             if (this.detailsResidue) this.detailsResidue.textContent = molecule.authSeqId;
+            if (this.interactionSection && this.interactionTableBody) {
+                this.interactionSection.style.display = 'block';
+                this.loadInteractions(molecule.pdbId, ccdCode, molecule.labelAsymId, molecule.authSeqId);
+            }
         } else {
             if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
             if (this.detailsChain) this.detailsChain.textContent = '-';
             if (this.detailsResidue) this.detailsResidue.textContent = '-';
+            if (this.interactionSection) {
+                this.interactionSection.style.display = 'none';
+            }
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
@@ -134,6 +143,44 @@ class LigandDetails {
         this.detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
 
         this.modal.style.display = 'block';
+    }
+
+    async loadInteractions(pdbId, ligandCode, chainId, authSeqId) {
+        if (!this.interactionSection || !this.interactionTableBody) return;
+        this.interactionTableBody.innerHTML = '<tr><td colspan="3">Loading interactions...</td></tr>';
+
+        try {
+            const url = `https://www.ebi.ac.uk/pdbe/graph-api/pdb/entry/ligand_interactions/${pdbId}/${ligandCode}/${chainId}/${authSeqId}`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            let interactions = [];
+            const firstKey = Object.keys(data || {})[0];
+            if (firstKey) {
+                const entry = data[firstKey];
+                const molecules = entry?.molecules || entry?.[ligandCode] || [];
+                if (Array.isArray(molecules)) {
+                    const interArr = molecules[0]?.interactions || molecules[0]?.interaction || [];
+                    if (Array.isArray(interArr)) interactions = interArr;
+                }
+            }
+
+            if (!interactions.length) {
+                this.interactionTableBody.innerHTML = '<tr><td colspan="3">No interactions found.</td></tr>';
+                return;
+            }
+
+            this.interactionTableBody.innerHTML = interactions.map(int => {
+                const partner = int.partner_residue || int.residue_label || int.name || 'Unknown';
+                const type = int.interaction_type || int.type || 'Unknown';
+                const dist = int.distance || int.dist || '';
+                const distance = typeof dist === 'number' ? dist.toFixed(2) : dist;
+                return `<tr><td>${partner}</td><td>${type}</td><td>${distance}</td></tr>`;
+            }).join('');
+        } catch (e) {
+            console.error('Error fetching interaction data:', e);
+            this.interactionTableBody.innerHTML = '<tr><td colspan="3">Interaction data unavailable.</td></tr>';
+        }
     }
 
     close() {
