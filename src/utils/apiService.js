@@ -19,6 +19,7 @@ import {
   PD_BE_SUMMARY_BASE_URL,
   RCSB_PDB_DOWNLOAD_BASE_URL,
   PD_BE_LIGAND_MONOMERS_BASE_URL,
+  PD_BE_INTERACTIONS_BASE_URL,
   RCSB_GROUP_BASE_URL,
   PUBCHEM_COMPOUND_BASE_URL,
   PUBCHEM_COMPOUND_LINK_BASE
@@ -286,6 +287,23 @@ export default class ApiService {
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch interaction information for a specific ligand instance.
+   *
+   * Retrieves non-covalent contacts between a ligand and surrounding
+   * residues in a PDB entry.
+   *
+   * @param {string} pdbId - The 4-character PDB ID.
+   * @param {string} chainId - Chain identifier for the ligand.
+   * @param {string|number} residueNo - Residue number of the ligand instance.
+   * @returns {Promise<Object>} Interaction data from PDBe.
+   */
+  static getLigandInteractions(pdbId, chainId, residueNo) {
+    return this.fetchJson(
+      `${PD_BE_INTERACTIONS_BASE_URL}/${pdbId}/${chainId}/${residueNo}`
+    );
   }
 
   /**
