@@ -155,13 +155,13 @@ class ProteinBrowser {
                 }
 
                 row.innerHTML = `
-                    <td><img src="${imageUrl}" alt="${pdbId} thumbnail" class="protein-thumbnail"></td>
-                    <td><a href="#" class="pdb-id-link" data-pdb-id="${pdbId}">${pdbId}</a></td>
-                    <td>${title}</td>
-                    <td>${resolution}</td>
-                    <td>${releaseDate}</td>
-                    <td class="bound-ligands-cell">${this.renderBoundLigands(boundLigands, pdbId)}</td>
-                    <td class="view-buttons-cell">
+                    <td data-label="Image"><img src="${imageUrl}" alt="${pdbId} thumbnail" class="protein-thumbnail"></td>
+                    <td data-label="PDB ID"><a href="#" class="pdb-id-link" data-pdb-id="${pdbId}">${pdbId}</a></td>
+                    <td data-label="Title">${title}</td>
+                    <td data-label="Resolution">${resolution}</td>
+                    <td data-label="Release Date">${releaseDate}</td>
+                    <td data-label="Bound Ligands" class="bound-ligands-cell">${this.renderBoundLigands(boundLigands, pdbId)}</td>
+                    <td data-label="View Structure" class="view-buttons-cell">
                         <button class="view-structure-btn rcsb-btn" data-pdb-id="${pdbId}">RCSB PDB</button>
                         <button class="view-structure-btn pdbe-btn" data-pdb-id="${pdbId}">PDBe</button>
                     </td>
