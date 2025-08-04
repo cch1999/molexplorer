@@ -31,15 +31,15 @@ export const DEFAULT_MOLECULE_CODES = [
   'VIA'
 ];
 export const DEFAULT_PDB_INSTANCES = [
-  {
-    code: 'UHV',
-    source: 'reagents',
-    type: 'reagent',
-    pdbId: '5RH5',
-    labelAsymId: 'A',
-    authSeqId: '1001'
-  }
-];
+    {
+      code: 'UHV',
+      source: 'reagents',
+      type: 'reagent',
+      pdbId: '5RH5',
+      chainId: 'A',
+      authorResidueNumber: 1001
+    }
+  ];
 export const CRYSTALLIZATION_AIDS = [
   'SO4', 'PO4', 'CIT', 'EDO', 'GOL', '1PE',
   'ACE', 'ACT', 'BME', 'DMS', 'FMT', 'IMD', 'MES',

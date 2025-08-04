@@ -37,8 +37,8 @@ class LigandDetails {
         this.detailsSource.textContent = isAminoAcid ? 'building_blocks' : 'reagents';
         this.detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
 
-        const molecule = this.moleculeManager.getMolecule ? this.moleculeManager.getMolecule(ccdCode) : null;
-        const isInstance = molecule && molecule.pdbId && molecule.authSeqId && molecule.labelAsymId;
+          const molecule = this.moleculeManager.getMolecule ? this.moleculeManager.getMolecule(ccdCode) : null;
+          const isInstance = molecule && molecule.pdbId && molecule.chainId && molecule.authorResidueNumber;
         if (this.detailsStructure) {
             this.detailsStructure.textContent = isInstance ? 'PDB instance' : 'Ideal CCD SDF';
         }
@@ -49,8 +49,8 @@ class LigandDetails {
         }
         if (isInstance) {
             if (this.detailsPdbId) this.detailsPdbId.textContent = molecule.pdbId.toUpperCase();
-            if (this.detailsChain) this.detailsChain.textContent = molecule.labelAsymId;
-            if (this.detailsResidue) this.detailsResidue.textContent = molecule.authSeqId;
+              if (this.detailsChain) this.detailsChain.textContent = molecule.chainId;
+              if (this.detailsResidue) this.detailsResidue.textContent = molecule.authorResidueNumber;
         } else {
             if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
             if (this.detailsChain) this.detailsChain.textContent = '-';
@@ -73,10 +73,10 @@ class LigandDetails {
                             viewer.addModel(pdbData, 'pdb');
                             // Show overall protein as light grey cartoon
                             viewer.setStyle({}, { cartoon: { color: 'lightgrey' } });
-                            const ligandSel = {
-                                chain: molecule.labelAsymId,
-                                resi: parseInt(molecule.authSeqId, 10)
-                            };
+              const ligandSel = {
+                                  chain: molecule.chainId,
+                                  resi: parseInt(molecule.authorResidueNumber, 10)
+                              };
                             const pocketSel = { within: { distance: 5, sel: ligandSel } };
                             // Surrounding residues as element-coloured sticks
                             viewer.setStyle(pocketSel, {
@@ -149,9 +149,9 @@ class LigandDetails {
         if (isInstance) {
             jsonData.pdb_instance = {
                 pdb_id: molecule.pdbId,
-                auth_seq_id: molecule.authSeqId,
-                label_asym_id: molecule.labelAsymId
-            };
+                  chain_id: molecule.chainId,
+                  author_residue_number: molecule.authorResidueNumber
+              };
         }
         this.detailsJSON.textContent = JSON.stringify(jsonData, null, 2);
 

@@ -62,15 +62,21 @@ describe('ApiService', () => {
     assert.strictEqual(txt, 'sdf');
   });
 
-  it('getInstanceSdf builds ligand URL', async () => {
-    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
-    assert.strictEqual(
-      global.fetch.mock.calls[0].arguments[0],
-      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
-    );
-    assert.strictEqual(txt, 'sdf');
-  });
+    it('getInstanceSdf resolves chain and residue to RCSB URL', async () => {
+      mock.method(ApiService, 'getLigandMonomers', async () => ({
+        '1abc': [
+          { chain_id: 'A', author_residue_number: 7, struct_asym_id: 'B' }
+        ]
+      }));
+      mock.method(ApiService, 'fetchText', async (url) => {
+        return url;
+      });
+      const url = await ApiService.getInstanceSdf('1abc', 'A', 7);
+      assert.strictEqual(
+        url,
+        `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
+      );
+    });
 
   it('getPdbEntriesForUniprot parses PDB ids', async () => {
     const mockData = {

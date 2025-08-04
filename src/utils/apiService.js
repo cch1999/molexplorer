@@ -111,14 +111,28 @@ export default class ApiService {
    * Fetch experimental ligand instance data from RCSB models API
    *
    * Retrieves the experimentally observed coordinates for a specific ligand
-   * instance within a PDB entry.
+   * instance within a PDB entry. The function resolves author-provided chain
+   * identifiers and residue numbers to the corresponding structural asym id
+   * using PDBe's ligand monomers API before requesting the SDF from RCSB.
    *
    * @param {string} pdbId - The 4-character PDB ID
-   * @param {string|number} authSeqId - Author provided residue/sequence number
-   * @param {string} labelAsymId - Chain identifier
+   * @param {string} chainId - Author chain identifier (e.g. 'A')
+   * @param {string|number} authorResidueNumber - Author provided residue number
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
-  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
+  static async getInstanceSdf(pdbId, chainId, authorResidueNumber) {
+    const data = await this.getLigandMonomers(pdbId);
+    const ligands = data?.[pdbId.toLowerCase()] || [];
+    const match = ligands.find(
+      l => l.chain_id === chainId && l.author_residue_number === Number(authorResidueNumber)
+    );
+    if (!match) {
+      throw new Error(
+        `Ligand instance not found for chain ${chainId} residue ${authorResidueNumber}`
+      );
+    }
+    const labelAsymId = match.struct_asym_id;
+    const authSeqId = match.author_residue_number;
     return this.fetchText(
       `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
     );

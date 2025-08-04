@@ -40,7 +40,7 @@ describe('MoleculeLoader', () => {
 
   it('uses instance SDF when details provided', async () => {
     const repo = new MoleculeRepository([
-      { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
+        { code: 'CCC', status: 'pending', pdbId: '1ABC', chainId: 'A', authorResidueNumber: '5' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
     mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
@@ -49,6 +49,20 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
+  });
+
+  it('prefers instance SDF over local TSV data when details provided', async () => {
+    const repo = new MoleculeRepository([
+        { code: 'ATP', status: 'pending', pdbId: '4TOS', chainId: 'D', authorResidueNumber: '1402' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '0\t1\t2\tC1=O\t4\t5\t6\t7\tATP');
+    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    await loader.loadMolecule(repo.getMolecule('ATP'));
+    assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 0);
+    assert.strictEqual(repo.getMolecule('ATP').status, 'loaded');
   });
 
   it('handles errors from remote fetch', async () => {
