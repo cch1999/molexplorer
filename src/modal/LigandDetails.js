@@ -36,7 +36,7 @@ class LigandDetails {
         this.detailsType.textContent = isAminoAcid ? 'building_block' : 'reagent';
 
         const molecule = this.moleculeManager.getMolecule ? this.moleculeManager.getMolecule(ccdCode) : null;
-        const isInstance = molecule && molecule.pdbId && molecule.authSeqId && molecule.labelAsymId;
+        const isInstance = molecule && molecule.pdbId && molecule.authSeqId && molecule.authAsymId;
         if (this.detailsStructure) {
             this.detailsStructure.textContent = isInstance ? 'PDB instance' : 'Ideal CCD SDF';
         }
@@ -47,7 +47,7 @@ class LigandDetails {
         }
         if (isInstance) {
             if (this.detailsPdbId) this.detailsPdbId.textContent = molecule.pdbId.toUpperCase();
-            if (this.detailsChain) this.detailsChain.textContent = molecule.labelAsymId;
+            if (this.detailsChain) this.detailsChain.textContent = molecule.authAsymId;
             if (this.detailsResidue) this.detailsResidue.textContent = molecule.authSeqId;
         } else {
             if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
@@ -96,7 +96,7 @@ class LigandDetails {
             jsonData.pdb_instance = {
                 pdb_id: molecule.pdbId,
                 auth_seq_id: molecule.authSeqId,
-                label_asym_id: molecule.labelAsymId
+                auth_asym_id: molecule.authAsymId
             };
         }
         this.detailsJSON.textContent = JSON.stringify(jsonData, null, 2);

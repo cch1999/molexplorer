@@ -113,7 +113,7 @@ class BoundLigandTable {
             const success = this.addMolecule({
                 code: ligand.chem_comp_id,
                 pdbId,
-                labelAsymId: ligand.chain_id,
+                authAsymId: ligand.chain_id,
                 authSeqId: ligand.author_residue_number
             });
             if (success) {
@@ -150,7 +150,7 @@ class BoundLigandTable {
                 const success = this.addMolecule({
                     code: ligand.chem_comp_id,
                     pdbId,
-                    labelAsymId: ligand.chain_id,
+                    authAsymId: ligand.chain_id,
                     authSeqId: ligand.author_residue_number
                 });
                 if (success) {

@@ -11,7 +11,7 @@ class AddMoleculeModal {
 
         this.pdbIdInput = document.getElementById('pdb-id');
         this.authSeqIdInput = document.getElementById('auth-seq-id');
-        this.labelAsymIdInput = document.getElementById('label-asym-id');
+        this.authAsymIdInput = document.getElementById('auth-asym-id');
         this.instanceError = document.getElementById('instance-error');
 
         if (this.cancelBtn) {
@@ -35,8 +35,8 @@ class AddMoleculeModal {
         if (this.authSeqIdInput) {
             this.authSeqIdInput.addEventListener('input', () => this.handleInstanceInput());
         }
-        if (this.labelAsymIdInput) {
-            this.labelAsymIdInput.addEventListener('input', () => this.handleInstanceInput());
+        if (this.authAsymIdInput) {
+            this.authAsymIdInput.addEventListener('input', () => this.handleInstanceInput());
         }
         if (this.confirmBtn) {
             this.confirmBtn.addEventListener('click', () => this.handleSubmit());
@@ -76,8 +76,8 @@ class AddMoleculeModal {
         if (this.authSeqIdInput) {
             this.authSeqIdInput.value = '';
         }
-        if (this.labelAsymIdInput) {
-            this.labelAsymIdInput.value = '';
+        if (this.authAsymIdInput) {
+            this.authAsymIdInput.value = '';
         }
         if (this.confirmBtn) {
             this.confirmBtn.disabled = true;
@@ -106,10 +106,10 @@ class AddMoleculeModal {
         const code = this.codeInput.value.toUpperCase();
         const pdbId = this.pdbIdInput.value.trim().toUpperCase();
         const authSeqId = this.authSeqIdInput.value.trim();
-        const labelAsymId = this.labelAsymIdInput.value.trim().toUpperCase();
+        const authAsymId = this.authAsymIdInput.value.trim().toUpperCase();
 
-        if (pdbId || authSeqId || labelAsymId) {
-            if (!(pdbId && authSeqId && labelAsymId)) {
+        if (pdbId || authSeqId || authAsymId) {
+            if (!(pdbId && authSeqId && authAsymId)) {
                 if (this.instanceError) {
                     this.instanceError.textContent = 'PDB ID, residue number and chain are required.';
                 }
@@ -119,7 +119,7 @@ class AddMoleculeModal {
                 code,
                 pdbId,
                 authSeqId,
-                labelAsymId
+                authAsymId
             });
             if (success) {
                 window.showNotification(`Adding ligand ${code} from ${pdbId}...`, 'success');

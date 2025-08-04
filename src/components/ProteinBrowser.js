@@ -124,7 +124,7 @@ class ProteinBrowser {
             <div class="ligand-img-container">
                 <img src="${PD_BE_STATIC_IMAGE_BASE_URL}/${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
                 <div class="ligand-img-overlay">
-                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}" data-pdb-id="${pdbId}" data-label-asym-id="${ligand.chain_id}" data-auth-seq-id="${ligand.author_residue_number}">+</button>
+                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}" data-pdb-id="${pdbId}" data-auth-asym-id="${ligand.chain_id}" data-auth-seq-id="${ligand.author_residue_number}">+</button>
                 </div>
             </div>
         `
@@ -189,12 +189,12 @@ class ProteinBrowser {
             });
             document.querySelectorAll('.add-ligand').forEach(button => {
                 button.addEventListener('click', e => {
-                    const { ccdCode, pdbId, authSeqId, labelAsymId } = e.currentTarget.dataset;
+                    const { ccdCode, pdbId, authSeqId, authAsymId } = e.currentTarget.dataset;
                     const success = this.moleculeManager.addPdbInstance({
                         code: ccdCode,
                         pdbId,
                         authSeqId,
-                        labelAsymId
+                        authAsymId
                     });
                     if (success) {
                         showNotification(`Adding molecule ${ccdCode}...`, 'success');

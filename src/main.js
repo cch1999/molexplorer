@@ -118,8 +118,8 @@ class MoleculeManager {
         return added;
     }
 
-    addPdbInstance({ code, pdbId, authSeqId, labelAsymId }) {
-        return this.addMolecule({ code, pdbId, authSeqId, labelAsymId });
+    addPdbInstance({ code, pdbId, authSeqId, authAsymId }) {
+        return this.addMolecule({ code, pdbId, authSeqId, authAsymId });
     }
 
     deleteMolecule(code) {

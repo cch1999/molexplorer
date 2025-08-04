@@ -15,7 +15,7 @@ class MoleculeLoader {
     }
 
     async loadMolecule(input) {
-        const { code, pdbId, authSeqId, labelAsymId } =
+        const { code, pdbId, authSeqId, authAsymId } =
             typeof input === 'string' ? { code: input } : input;
         try {
             this.repository.updateMoleculeStatus(code, 'loading');
@@ -26,8 +26,8 @@ class MoleculeLoader {
                 return;
             }
             let sdfData;
-            if (pdbId && authSeqId && labelAsymId) {
-                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
+            if (pdbId && authSeqId && authAsymId) {
+                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, authAsymId);
             } else {
                 sdfData = await ApiService.getCcdSdf(code);
             }
