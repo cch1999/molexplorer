@@ -70,6 +70,12 @@ class PdbDetailsModal {
                     viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
                     viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                    // highlight bound ligands clearly
+                    viewer.setStyle({ hetflag: true }, {
+                        stick: { radius: 0.2, colorscheme: 'element' },
+                        sphere: { scale: 0.3, colorscheme: 'element' }
+                    });
+                    viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
                     viewer.zoomTo();
                     viewer.render();
                 } catch (e) {
