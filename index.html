@@ -281,6 +281,24 @@
                     <div id="ligand-properties" class="properties-panel">Loading properties...</div>
                 </div>
 
+                <div id="interactions-section" class="details-section pdb-instance-field" style="display: none;">
+                    <h4>Residue Interactions</h4>
+                    <table id="interactions-table" class="pdb-entries-table">
+                        <thead>
+                            <tr>
+                                <th>Ligand Atoms</th>
+                                <th>Interaction Type</th>
+                                <th>Protein Residue</th>
+                                <th>Protein Atoms</th>
+                                <th>Details</th>
+                                <th>Distance (Å)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interactions-tbody"></tbody>
+                    </table>
+                    <p id="no-interactions-message" style="display: none;">No interactions found.</p>
+                </div>
+
                 <div class="details-section">
                     <h4>PDB Entries</h4>
                     <div id="pdb-entries-container">
