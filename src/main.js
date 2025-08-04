@@ -9,6 +9,7 @@ import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import Viewer from './components/Viewer.js';
 
 class MoleculeManager {
     constructor() {
@@ -97,10 +98,11 @@ class MoleculeManager {
             closeExport();
         });
 
-        // Tab switching for Molecules, Fragments, Proteins
+        // Tab switching for Molecules, Viewer, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [
             document.getElementById('molecule-library-content'),
+            document.getElementById('viewer-content'),
             document.getElementById('fragment-library-content'),
             document.getElementById('protein-browser-content')
         ];
@@ -217,6 +219,8 @@ class MoleculeManager {
 const moleculeManager = new MoleculeManager().init();
 moleculeManager.loadAllMolecules();
 
+const viewer = new Viewer().init();
+
 const rdkitPromise =
     typeof initRDKitModule === 'function'
         ? initRDKitModule()
@@ -326,6 +330,7 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.viewer = viewer;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {
