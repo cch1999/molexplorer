@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemLogic Interface</title>
+  <script type="module" crossorigin src="./assets/index-BevpD8ae.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-zT-ZtdO8.css">
+</head>
+
+<body>
+    <!-- Disclaimer Modal - appears on launch -->
+    <div id="launch-disclaimer-modal" class="modal disclaimer-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>⚠️ Disclaimer</h3>
+            </div>
+            <div class="modal-body">
+                <p><strong>This application was vibe coded with AI purely for demonstration purposes.</strong></p>
+                <p>It is not high quality, nor was it intended for serious scientific research and should be used for
+                    educational and illustrative purposes only. Data and calculations may not be accurate or complete.
+                </p>
+                <p>That being said, if you have any suggestions for improvements, feel free to write an issue at <a
+                        href="https://github.com/cch1999/molexplorer/issues"
+                        target="_blank">github.com/cch1999/molexplorer/issues</a> and I will endeavour to blindly paste
+                    this as a prompt into Cursor Agent Mode.</p>
+                <p><em>Best - Charlie</em></p>
+            </div>
+            <div class="modal-footer">
+                <button id="accept-disclaimer-btn" class="btn-primary">I Understand - Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Content -->
+    <header>
+        <h1>ChemLogic Interface</h1>
+        <p>Molecular Data Visualization and Pattern Analysis</p>
+        <p class="author">By Charlie Harris 🛡️</p>
+    </header>
+    <main>
+        <div class="tabs">
+            <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Fragments</button>
+            <button class="tab-button">Proteins</button>
+        </div>
+        <div class="content">
+            <div id="molecule-library-content" class="content-panel">
+                <div class="database-header">
+                    <h2>Molecular Database</h2>
+                    <div class="header-buttons">
+                        <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
+                        <button id="delete-all-btn" class="delete-all-btn" title="Delete all molecules">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <path fill="currentColor"
+                                    d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                            </svg>
+                        </button>
+                        <button id="export-btn" class="export-btn" title="Export all molecules">
+                            <svg viewBox="0 0 24 24" width="18" height="18">
+                                <path fill="currentColor"
+                                    d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="molecule-grid" class="molecule-grid">
+                    <div class="loading-indicator">Loading molecules...</div>
+                </div>
+            </div>
+            <div id="fragment-library-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Fragment Library</h2>
+                    <button id="add-fragment-btn" class="add-btn" title="Add new fragment">+</button>
+                </div>
+                <div class="fragment-controls">
+                    <input type="text" id="fragment-search" placeholder="Search fragments...">
+                    <select id="fragment-filter-source">
+                        <option value="all">All Sources</option>
+                        <option value="PDBe">PDBe</option>
+                        <option value="ENAMINE">ENAMINE</option>
+                        <option value="DSI">DSI</option>
+                    </select>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="ccd-toggle" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="ccd-toggle">
+                            <span class="toggle-switch-inner"></span>
+                            <span class="toggle-switch-switch"></span>
+                        </label>
+                        <span>Only in CCD</span>
+                    </div>
+                </div>
+                <div id="fragment-grid" class="molecule-grid">
+                    <!-- Fragment cards will be populated here -->
+                </div>
+            </div>
+            <div id="protein-browser-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Protein Structure Browser</h2>
+                </div>
+                <div class="protein-controls">
+                    <select id="suggested-groups-dropdown">
+                        <option value="">Choose a common protein...</option>
+                        <option value="G_1002155">mPro (Main Protease)</option>
+                        <option value="G_1002164">NSP13 (Helicase)</option>
+                        <option value="G_1002003">PLpro (Papain-like Protease)</option>
+                        <option value="G_1002165">NSP15 (Endoribonuclease)</option>
+                        <option value="G_1002166">NSP16 (2'-O-Methyltransferase)</option>
+                    </select>
+                    <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID..." value="G_1002155">
+                    <button id="protein-group-search-btn" class="action-btn">Search</button>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="hide-aids-toggle" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="hide-aids-toggle"></label>
+                        <span>Hide Crystallization Aids</span>
+                    </div>
+                </div>
+                <div id="protein-results-container">
+                    <div id="protein-results-table-container" style="display: none;">
+                        <table id="protein-results-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>Image</th>
+                                    <th>PDB ID</th>
+                                    <th>Title</th>
+                                    <th>Resolution (Å)</th>
+                                    <th>Release Date</th>
+                                    <th>Bound Ligands</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="protein-results-tbody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="no-protein-results-message" style="display: none;">No results found.</p>
+                    <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
+                        data...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Fragment Modal -->
+    <div id="add-fragment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Fragment</h3>
+                <span class="close" id="close-fragment-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="fragment-name">Fragment Name:</label>
+                <input type="text" id="fragment-name" placeholder="e.g., My Custom Fragment">
+
+                <label for="fragment-query">SMILES/SMARTS:</label>
+                <input type="text" id="fragment-query" placeholder="e.g., c1ccccc1">
+
+                <label for="fragment-source">Source:</label>
+                <input type="text" id="fragment-source" placeholder="e.g., My Library" value="custom">
+
+                <label for="fragment-description">Description:</label>
+                <textarea id="fragment-description" placeholder="Enter a short description"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-fragment-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-add-fragment-btn" class="btn-primary">Add Fragment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Molecule Modal -->
+    <div id="add-molecule-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Molecule</h3>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="molecule-code">CCD Code:</label>
+                <input type="text" id="molecule-code" placeholder="Enter 3-letter code (e.g., ATP)" maxlength="3">
+                <p class="help-text">Enter a Chemical Component Dictionary (CCD) code</p>
+                <p class="error-text" id="ccd-error"></p>
+
+                <label for="pdb-id" style="margin-top:20px;">PDB Instance:</label>
+                <div class="instance-inputs">
+                    <input type="text" id="pdb-id" placeholder="PDB ID" maxlength="4">
+                    <input type="text" id="auth-seq-id" placeholder="Residue #">
+                    <input type="text" id="label-asym-id" placeholder="Chain" maxlength="2">
+                </div>
+                <p class="help-text">Optional: specify PDB ID, residue number and chain to add a bound ligand</p>
+                <p class="error-text" id="instance-error"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="feeling-lucky-btn" class="btn-secondary">I'm Feeling Lucky</button>
+                <div>
+                    <button id="cancel-btn" class="btn-secondary">Cancel</button>
+                    <button id="confirm-add-btn" class="btn-primary" disabled>Add Molecule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Molecules</h3>
+                <span class="close" id="close-export-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <label for="export-filename">File Name:</label>
+                <input type="text" id="export-filename" placeholder="molecules.sdf">
+                <div class="toggle-switch" style="margin-top:20px;">
+                    <input type="checkbox" id="export-remove-h-toggle" class="toggle-switch-checkbox">
+                    <label class="toggle-switch-label" for="export-remove-h-toggle">
+                        <span class="toggle-switch-inner"></span>
+                        <span class="toggle-switch-switch"></span>
+                    </label>
+                    <span>Remove hydrogens</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-export-btn" class="btn-secondary">Cancel</button>
+                <button id="confirm-export-btn" class="btn-primary">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Molecule Details Modal -->
+    <div id="molecule-details-modal" class="modal">
+        <div class="modal-content details-modal">
+            <div class="modal-header">
+                <h3 id="details-title">Molecule Details: </h3>
+                <span class="close" id="close-details-modal">&times;</span>
+            </div>
+            <div class="modal-body details-body">
+                <div class="details-section">
+                    <h4>Basic Information</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>CCD Code:</label>
+                            <span id="details-code">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Source:</label>
+                            <span id="details-source">building_blocks</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Type:</label>
+                            <span id="details-type">building_block</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Structure:</label>
+                            <span id="details-structure">Ideal CCD SDF</span>
+                        </div>
+                        <div class="info-item pdb-instance-field" style="display: none;">
+                            <label>PDB ID:</label>
+                            <span id="details-pdb-id">-</span>
+                        </div>
+                        <div class="info-item pdb-instance-field" style="display: none;">
+                            <label>Chain:</label>
+                            <span id="details-chain">-</span>
+                        </div>
+                        <div class="info-item pdb-instance-field" style="display: none;">
+                            <label>Residue No.:</label>
+                            <span id="details-residue">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Interactive Molecular Structure</h4>
+                    <div id="details-viewer-container" class="details-viewer">
+                        <p>Loading structure...</p>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Molecular Properties</h4>
+                    <div id="ligand-properties" class="properties-panel">Loading properties...</div>
+                </div>
+
+                <div class="details-section">
+                    <h4>PDB Entries</h4>
+                    <div id="pdb-entries-container">
+                        <p>Loading PDB entries...</p>
+                    </div>
+                    <div id="pdb-entries-table-container" style="display: none;">
+                        <table id="pdb-entries-table" class="pdb-entries-table">
+                            <thead>
+                                <tr>
+                                    <th>PDB ID</th>
+                                    <th>Title</th>
+                                    <th>Resolution (Å)</th>
+                                    <th>Release Date</th>
+                                    <th>View Structure</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pdb-entries-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <div class="section-header">
+                        <h4>Similar Ligands</h4>
+                        <button id="add-all-similar-btn" class="add-all-btn" style="display: none;">Add All</button>
+                    </div>
+                    <div id="similar-ligands-container">
+                        <p>Loading similar ligands...</p>
+                    </div>
+                    <table id="similar-ligands-table" class="similar-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>2D Structure</th>
+                                <th>Type</th>
+                                <th>CCD Code</th>
+                                <th>Name</th>
+                                <th>Match Info</th>
+                                <th>Add</th>
+                            </tr>
+                        </thead>
+                        <tbody id="similar-ligands-tbody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="details-section">
+                    <h4>JSON Representation</h4>
+                    <div class="json-container">
+                        <pre id="details-json">{
+    "molecule_id": "",
+    "ccd_code": "",
+    "source": "building_blocks",
+    "type": "building_block",
+    "structure_data": "...",
+    "properties": {
+      "molecular_weight": null,
+      "formula": null
+    }
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDB Details Modal -->
+    <div id="pdb-details-modal" class="modal">
+        <div class="modal-content details-modal pdb-details-modal styled-like-ligand">
+            <div class="modal-header">
+                <h3 id="pdb-details-title">PDB Entry Details</h3>
+                <span class="close" id="close-pdb-details-modal">&times;</span>
+            </div>
+            <div id="pdb-details-body" class="modal-body details-body">
+                <!-- Content will be populated by JavaScript -->
+                <div class="properties-loading">Loading PDB entry details...</div>
+            </div>
+            <div id="pdb-viewer-container" class="details-viewer" style="display: none;">
+                <!-- 3Dmol.js viewer will be inserted here -->
+            </div>
+            <div id="bound-ligands-section" class="details-section" style="display: none;">
+                <div class="section-header">
+                    <h4>Bound Ligands</h4>
+                    <button id="add-all-bound-btn" class="add-all-btn" style="display: none;">Add All</button>
+                </div>
+                <table id="bound-ligands-table" class="similar-table">
+                    <thead>
+                        <tr>
+                            <th>2D Structure</th>
+                            <th>CCD Code</th>
+                            <th>Chain ID</th>
+                            <th>Residue No.</th>
+                            <th>Entity ID</th>
+                            <th>Name</th>
+                            <th>Add</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bound-ligands-tbody">
+                    </tbody>
+                </table>
+                <div id="no-bound-ligands-message" class="no-similar-ligands" style="display: none;">
+                    No bound ligands found in this entry.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div id="comparison-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="comparison-title">Compare Molecules</h3>
+                <span class="close" id="close-comparison-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div id="comparison-viewer" style="width: 100%; height: 400px; position: relative;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick 3D View Modal -->
+    <div id="quick-view-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="quick-view-title">3D Structure</h3>
+                <span class="close" id="close-quick-view-modal">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 10px;">
+                <div id="quick-view-viewer" style="width: 100%; height: 300px; position: relative;">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+</body>
+
+
+</html>
