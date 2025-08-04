@@ -57,7 +57,7 @@ describe('LigandModal properties panel', () => {
     mock.method(LigandDetails.prototype, 'show', () => {});
     mock.method(SimilarLigandTable.prototype, 'load', () => {});
     mock.method(PdbEntryList.prototype, 'load', () => {});
-    mock.method(PropertyCalculator, 'getProperties', async () => ({ molecularWeight: 55, formula: 'C2H6O' }));
+    mock.method(PropertyCalculator, 'getProperties', async () => ({ molecularWeight: 55, formula: 'C2H6O', atomCount: 9, heavyAtomCount: 3, aromaticBondCount: 1 }));
     mock.method(ApiService, 'getPubChemMetadata', async () => ({ properties: null, synonyms: [], link: null }));
 
     const lm = new LigandModal({});
@@ -65,6 +65,9 @@ describe('LigandModal properties panel', () => {
     await new Promise(setImmediate);
     assert.ok(propsEl.innerHTML.includes('55'));
     assert.ok(propsEl.innerHTML.includes('C2H6O'));
+    assert.ok(propsEl.innerHTML.includes('Atom Count: 9'));
+    assert.ok(propsEl.innerHTML.includes('Heavy Atom Count: 3'));
+    assert.ok(propsEl.innerHTML.includes('Aromatic Bond Count: 1'));
 
     mock.restoreAll();
     delete global.document;

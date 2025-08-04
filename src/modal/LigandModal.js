@@ -35,6 +35,17 @@ class LigandModal {
                         html += `<div>Molecular Weight: ${weight ?? 'N/A'}</div>`;
                         html += `<div>Formula: ${formula ?? 'N/A'}</div>`;
                     }
+                    if (calcProps) {
+                        if (calcProps.atomCount != null) {
+                            html += `<div>Atom Count: ${calcProps.atomCount}</div>`;
+                        }
+                        if (calcProps.heavyAtomCount != null) {
+                            html += `<div>Heavy Atom Count: ${calcProps.heavyAtomCount}</div>`;
+                        }
+                        if (calcProps.aromaticBondCount != null) {
+                            html += `<div>Aromatic Bond Count: ${calcProps.aromaticBondCount}</div>`;
+                        }
+                    }
                     if (meta?.properties?.IUPACName) {
                         html += `<div>IUPAC Name: ${meta.properties.IUPACName}</div>`;
                     }
