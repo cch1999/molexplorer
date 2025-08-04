@@ -64,10 +64,10 @@ describe('ApiService', () => {
 
   it('getInstanceSdf builds ligand URL', async () => {
     global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B');
+    const txt = await ApiService.getInstanceSdf('1abc', 7, 'B', 'ATP');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf&filename=1ABC_B_ATP.sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });

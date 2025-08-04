@@ -25,6 +25,8 @@ describe('MoleculeLoader', () => {
     await loader.loadMolecule('XYZ');
     assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 1);
     assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.calls[0].arguments[0], 'C1=O');
+    // Should pass the generated id through to card creation
+    assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.calls[0].arguments[2], 'XYZ');
     assert.strictEqual(repo.getMolecule('XYZ').status, 'loaded');
   });
 
@@ -35,6 +37,7 @@ describe('MoleculeLoader', () => {
     mock.method(ApiService, 'getCcdSdf', async () => 'sdfdata');
     await loader.loadMolecule('ZZZ');
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCard.mock.calls[0].arguments[3], 'ZZZ');
     assert.strictEqual(repo.getMolecule('ZZZ').status, 'loaded');
   });
 
@@ -47,8 +50,36 @@ describe('MoleculeLoader', () => {
     mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
     await loader.loadMolecule(repo.getMolecule('CCC'));
     assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.deepStrictEqual(ApiService.getInstanceSdf.mock.calls[0].arguments, [
+      '1ABC',
+      '5',
+      'A',
+      'CCC',
+    ]);
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    // Instance should use a unique id composed from pdbId, chain and residue number
+    assert.strictEqual(
+      cardUI.createMoleculeCard.mock.calls[0].arguments[3],
+      '1ABC_A_5_CCC'
+    );
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
+  });
+
+  it('treats SDF with no elements as an error', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'EEE', status: 'pending', pdbId: '1XYZ', authSeqId: '7', labelAsymId: 'B' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(
+      ApiService,
+      'getInstanceSdf',
+      async () =>
+        '> <model_server_stats.element_count>\n0\n\n$$$$\n'
+    );
+    await loader.loadMolecule(repo.getMolecule('EEE'));
+    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('EEE').status, 'error');
   });
 
   it('handles errors from remote fetch', async () => {
