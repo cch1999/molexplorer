@@ -7,7 +7,7 @@
     <title>Ligand Surfer</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
-  <script type="module" crossorigin src="./assets/index-5DsaBL9C.js"></script>
+  <script type="module" crossorigin src="./assets/index-DRt9hMNq.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-BvHBMpia.css">
 </head>
 
@@ -44,6 +44,7 @@
     <main>
         <div class="tabs">
             <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Viewer</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
         </div>
@@ -71,6 +72,7 @@
                     <div class="loading-indicator">Loading molecules...</div>
                 </div>
             </div>
+            <div id="viewer-content" class="content-panel" style="display: none;"></div>
             <div id="fragment-library-content" class="content-panel" style="display: none;">
                 <div class="database-header">
                     <h2>Fragment Library</h2>
