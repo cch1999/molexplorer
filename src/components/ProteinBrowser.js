@@ -215,6 +215,16 @@ class ProteinBrowser {
                 const title = detail.struct?.title || 'N/A';
                 const resolution = detail.rcsb_entry_info?.resolution_combined?.[0]?.toFixed(2) || 'N/A';
                 const releaseDate = detail.rcsb_accession_info?.initial_release_date ? new Date(detail.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'N/A';
+                const citation = detail.rcsb_primary_citation;
+                const citationTitle = citation?.title || 'N/A';
+                const citationUrl = citation?.pdbx_database_id_doi
+                    ? `https://doi.org/${citation.pdbx_database_id_doi}`
+                    : (citation?.pdbx_database_id_PubMed
+                        ? `https://pubmed.ncbi.nlm.nih.gov/${citation.pdbx_database_id_PubMed}/`
+                        : null);
+                const citationHtml = citationUrl
+                    ? `<a href="${citationUrl}" target="_blank">${citationTitle}</a>`
+                    : citationTitle;
                 const imageUrl = `${RCSB_STRUCTURE_IMAGE_BASE_URL}/${pdbId.toLowerCase()}_assembly-1.jpeg`;
 
                 let boundLigands = await this.fetchBoundLigands(pdbId);
@@ -228,6 +238,7 @@ class ProteinBrowser {
                     <td data-label="Title">${title}</td>
                     <td data-label="Resolution">${resolution}</td>
                     <td data-label="Release Date">${releaseDate}</td>
+                    <td data-label="Publication">${citationHtml}</td>
                     <td data-label="Bound Ligands" class="bound-ligands-cell">${this.renderBoundLigands(boundLigands, pdbId)}</td>
                     <td data-label="View Structure" class="view-buttons-cell">
                         <button class="view-structure-btn rcsb-btn" data-pdb-id="${pdbId}">RCSB PDB</button>
