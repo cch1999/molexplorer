@@ -50,6 +50,21 @@ class ProteinBrowser {
             });
         }
 
+        if (this.searchInput) {
+            this.searchInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    const queryId = this.searchInput.value.trim();
+                    if (queryId) {
+                        this.fetchProteinEntries(queryId);
+                    } else {
+                        showNotification('Please enter a Group ID or UniProt ID.', 'info');
+                    }
+                    this.searchInput.blur();
+                }
+            });
+        }
+
         if (this.hideAidsToggle) {
             this.hideAidsToggle.addEventListener('change', () => {
                 if (this.currentProteinDetails.length > 0) {
