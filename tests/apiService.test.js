@@ -1,7 +1,7 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import ApiService from '../src/utils/apiService.js';
-import { RCSB_LIGAND_BASE_URL, RCSB_MODEL_BASE_URL } from '../src/utils/constants.js';
+import { RCSB_LIGAND_BASE_URL, RCSB_MODEL_BASE_URL, PD_BE_LIGAND_INTERACTIONS_BASE_URL } from '../src/utils/constants.js';
 
 describe('ApiService', () => {
   afterEach(() => {
@@ -66,6 +66,15 @@ describe('ApiService', () => {
       `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
     );
     assert.strictEqual(txt, 'sdf');
+  });
+
+  it('getLigandInteractions builds interaction URL', async () => {
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => ({}) }));
+    await ApiService.getLigandInteractions('1cbs', 'A', 200);
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      `${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/1cbs/A/200`
+    );
   });
 
   it('fetchText caches responses', async () => {
