@@ -4,8 +4,7 @@ class FragmentLibrary {
     constructor(moleculeManager, {
         notify = (typeof window !== 'undefined' && window.showNotification)
             || (typeof showNotification === 'function' ? showNotification : () => {}),
-        smilesDrawer = (typeof window !== 'undefined' && window.SmilesDrawer)
-            || (typeof SmilesDrawer !== 'undefined' ? SmilesDrawer : undefined)
+        rdkit = Promise.resolve(null)
     } = {}) {
         this.moleculeManager = moleculeManager;
         this.fragments = [];
@@ -14,7 +13,7 @@ class FragmentLibrary {
         this.sourceFilter = null;
         this.ccdToggle = null;
         this.notify = notify;
-        this.smilesDrawer = smilesDrawer;
+        this.rdkitPromise = rdkit;
     }
 
     init() {
@@ -166,25 +165,22 @@ class FragmentLibrary {
 
         setTimeout(() => {
             if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 200;
-                canvas.height = 150;
-                canvasContainer.appendChild(canvas);
-
-                try {
-                    const sanitizedQuery = this.sanitizeSMILES(fragment.query);
-                    this.smilesDrawer.parse(sanitizedQuery, (tree) => {
-                        const options = { width: 200, height: 150 };
-                        const drawer = new this.smilesDrawer.Drawer(options);
-                        drawer.draw(tree, canvas, 'light', false);
-                    }, (err) => {
-                        console.error('Error parsing SMILES for ' + fragment.name, err);
+                this.rdkitPromise.then((RDKit) => {
+                    if (!RDKit) {
+                        canvasContainer.innerHTML = `<p class="render-error">RDKit not available</p>`;
+                        return;
+                    }
+                    try {
+                        const sanitizedQuery = this.sanitizeSMILES(fragment.query);
+                        const mol = RDKit.get_mol(sanitizedQuery);
+                        const svg = mol.get_svg(200, 150);
+                        mol.delete();
+                        canvasContainer.innerHTML = svg;
+                    } catch (err) {
+                        console.error('Error rendering SMILES for ' + fragment.name, err);
                         canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
-                    });
-                } catch (ex) {
-                    console.error('General error rendering SMILES for ' + fragment.name, ex);
-                    canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
-                }
+                    }
+                });
             } else {
                 canvasContainer.innerHTML = `<p class="render-error">Cannot render type: ${fragment.kind || 'N/A'}</p>`;
             }
