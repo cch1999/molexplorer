@@ -829,6 +829,10 @@ main {
     table-layout: fixed;
 }
 
+#protein-results-table-container {
+    overflow-x: auto;
+}
+
 .pdb-entries-table th,
 .pdb-entries-table td {
     padding: 6px 4px;
@@ -897,13 +901,13 @@ main {
 }
 
 #protein-results-table th:nth-child(6) {
-    width: 15%;
-    /* View Structure */
+    width: 30%;
+    /* Bound Ligands */
 }
 
 #protein-results-table th:nth-child(7) {
-    width: 30%;
-    /* Bound Ligands */
+    width: 15%;
+    /* View Structure */
 }
 
 .pdb-entries-table tbody tr:hover {
@@ -1659,6 +1663,50 @@ main {
     .protein-controls input[type="text"],
     .protein-controls button {
         width: 100%;
+    }
+
+    #protein-results-table,
+    #protein-results-table thead,
+    #protein-results-table tbody,
+    #protein-results-table th,
+    #protein-results-table td,
+    #protein-results-table tr {
+        display: block;
+    }
+
+    #protein-results-table thead {
+        display: none;
+    }
+
+    #protein-results-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #fff;
+    }
+
+    #protein-results-table td {
+        border: none;
+        position: relative;
+        padding-left: 110px;
+        white-space: normal;
+    }
+
+    #protein-results-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        font-weight: 600;
+        width: 100px;
+        white-space: pre-wrap;
+    }
+
+    #protein-results-table .view-buttons-cell {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
     }
 }
 
