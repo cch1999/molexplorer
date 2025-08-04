@@ -9,6 +9,7 @@ import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import Viewer from './components/Viewer.js';
 
 class MoleculeManager {
     constructor() {
@@ -132,6 +133,10 @@ class MoleculeManager {
         if (this.repository.removeMolecule(code)) {
             const card = this.grid.querySelector(`[data-molecule-code="${code}"]`);
             if (card) card.remove();
+            this.repository.removeViewerMolecule(code);
+            if (window.viewer) {
+                window.viewer.removeMolecule(code);
+            }
             return true;
         }
         return false;
@@ -139,8 +144,12 @@ class MoleculeManager {
 
     deleteAllMolecules() {
         this.repository.clearAll();
+        this.repository.clearViewerState();
         if (this.cardUI) {
             this.cardUI.clearAll();
+        }
+        if (window.viewer) {
+            window.viewer.clear();
         }
         showNotification('All molecules deleted successfully!', 'info');
     }
@@ -215,6 +224,9 @@ class MoleculeManager {
 }
 
 const moleculeManager = new MoleculeManager().init();
+const viewer = new Viewer().init(
+    moleculeManager.repository.getViewerMolecules()
+);
 moleculeManager.loadAllMolecules();
 
 const rdkitPromise =
@@ -326,6 +338,7 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.viewer = viewer;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {

@@ -52,6 +52,8 @@ class MoleculeCard {
         });
         card.appendChild(compareBtn);
 
+
+
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
         codeLabel.textContent = ccdCode;
@@ -127,6 +129,22 @@ class MoleculeCard {
             if (this.onCompare) this.onCompare(ccdCode);
         });
         card.appendChild(compareBtn);
+
+        const viewBtn = document.createElement('div');
+        viewBtn.className = 'view-btn';
+        viewBtn.textContent = '\ud83d\udc41';
+        viewBtn.title = `View ${ccdCode}`;
+        viewBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (window.viewer) {
+                window.viewer.addMolecule({ code: ccdCode, sdf: data });
+                window.moleculeManager?.repository.addViewerMolecule({ code: ccdCode, sdf: data });
+                if (typeof showNotification === 'function') {
+                    showNotification(`Sent ${ccdCode} to viewer`, 'success');
+                }
+            }
+        });
+        card.appendChild(viewBtn);
 
         const title = document.createElement('h3');
         title.textContent = ccdCode;

@@ -104,7 +104,10 @@ class BoundLigandTable {
         nameCell.textContent = ligand.chem_comp_name;
         nameCell.title = ligand.chem_comp_name;
 
-        const addCell = document.createElement('td');
+        const actionsCell = document.createElement('td');
+        actionsCell.style.display = 'flex';
+        actionsCell.style.gap = '4px';
+        actionsCell.style.justifyContent = 'center';
         const addButton = document.createElement('button');
         addButton.className = 'add-ligand-btn';
         addButton.innerHTML = '&#43;';
@@ -122,7 +125,26 @@ class BoundLigandTable {
                 showNotification(`Molecule ${ligand.chem_comp_id} already exists`, 'info');
             }
         });
-        addCell.appendChild(addButton);
+        actionsCell.appendChild(addButton);
+
+        const viewButton = document.createElement('button');
+        viewButton.className = 'view-ligand-btn';
+        viewButton.innerHTML = '👁';
+        viewButton.title = `View ${ligand.chem_comp_id}`;
+        viewButton.addEventListener('click', async () => {
+            try {
+                const sdf = await ApiService.getCcdSdf(ligand.chem_comp_id);
+                if (window.viewer) {
+                    window.viewer.addMolecule({ code: ligand.chem_comp_id, sdf });
+                    window.moleculeManager?.repository.addViewerMolecule({ code: ligand.chem_comp_id, sdf });
+                    showNotification(`Sent ${ligand.chem_comp_id} to viewer`, 'success');
+                }
+            } catch (e) {
+                console.error('Error fetching SDF for viewer:', e);
+                showNotification(`Failed to load ${ligand.chem_comp_id}`, 'error');
+            }
+        });
+        actionsCell.appendChild(viewButton);
 
         row.appendChild(imageCell);
         row.appendChild(codeCell);
@@ -130,7 +152,7 @@ class BoundLigandTable {
         row.appendChild(residueCell);
         row.appendChild(entityCell);
         row.appendChild(nameCell);
-        row.appendChild(addCell);
+        row.appendChild(actionsCell);
 
         return row;
     }
