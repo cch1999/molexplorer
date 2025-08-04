@@ -63,11 +63,13 @@ class LigandDetails {
                 .then(pdbData => {
                     setTimeout(() => {
                         try {
+                            const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
                             const viewer = $3Dmol.createViewer(this.detailsViewer, {
-                                backgroundColor: 'white',
+                                backgroundColor: bgColor,
                                 width: '100%',
                                 height: '100%'
                             });
+                            this.detailsViewer.viewer = viewer;
                             viewer.addModel(pdbData, 'pdb');
                             // Show overall protein as light grey cartoon
                             viewer.setStyle({}, { cartoon: { color: 'lightgrey' } });
@@ -106,11 +108,13 @@ class LigandDetails {
         } else if (sdfData) {
             setTimeout(() => {
                 try {
+                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
-                        backgroundColor: 'white',
+                        backgroundColor: bgColor,
                         width: '100%',
                         height: '100%'
                     });
+                    this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
                     viewer.setStyle({}, {
                         stick: { radius: 0.2, colorscheme: 'element' },
@@ -175,6 +179,7 @@ class LigandDetails {
         }
         if (this.detailsViewer) {
             this.detailsViewer.innerHTML = '';
+            this.detailsViewer.viewer = null;
         }
     }
 }

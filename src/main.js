@@ -268,3 +268,30 @@ window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.showNotification = showNotification;
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    const bg = isDark ? '#e0e0e0' : 'white';
+    document.querySelectorAll('.viewer-container, .molecule-viewer, .details-viewer').forEach(el => {
+        if (el.viewer && typeof el.viewer.setBackgroundColor === 'function') {
+            el.viewer.setBackgroundColor(bg);
+            el.viewer.render();
+        } else {
+            el.style.background = bg;
+        }
+    });
+    const icon = document.getElementById('theme-toggle-icon');
+    if (icon) {
+        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    }
+}
+
+function initThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.addEventListener('click', toggleDarkMode);
+    }
+}
+
+initThemeToggle();
