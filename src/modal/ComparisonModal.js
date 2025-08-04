@@ -27,7 +27,9 @@ class ComparisonModal {
         }
         setTimeout(() => {
             try {
-                const viewer = $3Dmol.createViewer(this.viewerContainer, { backgroundColor: 'white' });
+                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const viewer = $3Dmol.createViewer(this.viewerContainer, { backgroundColor: bgColor });
+                this.viewerContainer.viewer = viewer;
                 const model1 = viewer.addModel(molA.sdf, 'sdf');
                 const model2 = viewer.addModel(molB.sdf, 'sdf');
                 model1.setStyle({}, { stick: { colorscheme: 'cyanCarbon' } });

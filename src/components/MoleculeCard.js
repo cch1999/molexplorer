@@ -146,7 +146,9 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: 'white' });
+                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
+                viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
                 viewer.setStyle({}, { stick: {} });
                 viewer.setStyle({ elem: 'H' }, {});
