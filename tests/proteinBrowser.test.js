@@ -45,3 +45,31 @@ describe('displayResults', () => {
     assert.ok(rowStub.innerHTML.includes('doi.org/10.1000/xyz'));
   });
 });
+
+describe('search input Enter key', () => {
+  it('triggers fetch on Enter key press', () => {
+    const searchInput = {
+      value: 'G_123',
+      addEventListener(type, handler) { this['on' + type] = handler; },
+      blur: mock.fn()
+    };
+    const searchBtn = { addEventListener: () => {} };
+    global.document = {
+      getElementById: (id) => {
+        if (id === 'protein-group-search') return searchInput;
+        if (id === 'protein-group-search-btn') return searchBtn;
+        return null;
+      }
+    };
+    const browser = new ProteinBrowser({});
+    mock.method(browser, 'fetchProteinEntries', () => {});
+    browser.init();
+    const preventDefault = mock.fn();
+    searchInput.onkeydown({ key: 'Enter', preventDefault });
+    assert.strictEqual(browser.fetchProteinEntries.mock.callCount(), 1);
+    assert.deepStrictEqual(browser.fetchProteinEntries.mock.calls[0].arguments, ['G_123']);
+    assert.strictEqual(preventDefault.mock.callCount(), 1);
+    assert.strictEqual(searchInput.blur.mock.callCount(), 1);
+    delete global.document;
+  });
+});
