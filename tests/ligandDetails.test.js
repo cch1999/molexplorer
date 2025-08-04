@@ -60,12 +60,13 @@ describe('LigandDetails viewer focus', () => {
     const viewer = {
       addModel: mock.fn(),
       setStyle: mock.fn(),
+      addSurface: mock.fn(),
       zoomTo: mock.fn(),
       render: mock.fn(),
       clear: () => {},
       destroy: () => {}
     };
-    global.$3Dmol = { createViewer: mock.fn(() => viewer) };
+    global.$3Dmol = { createViewer: mock.fn(() => viewer), SurfaceType: { MS: 'MS' } };
     mock.method(global, 'setTimeout', (fn) => { fn(); });
 
     const ld = new LigandDetails(moleculeManager);
@@ -76,6 +77,9 @@ describe('LigandDetails viewer focus', () => {
     assert.deepStrictEqual(ApiService.getPdbFile.mock.calls[0].arguments, ['1abc']);
     assert.strictEqual(viewer.zoomTo.mock.callCount(), 1);
     assert.deepStrictEqual(viewer.zoomTo.mock.calls[0].arguments, [{ chain: 'B', resi: 5 }]);
+    assert.strictEqual(viewer.addSurface.mock.callCount(), 1);
+    assert.strictEqual(viewer.addSurface.mock.calls[0].arguments[0], 'MS');
+    assert.deepStrictEqual(viewer.setStyle.mock.calls[0].arguments, [{}, { cartoon: { color: 'lightgrey' } }]);
 
     mock.restoreAll();
     delete global.$3Dmol;
