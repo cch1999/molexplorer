@@ -23,12 +23,13 @@ class MoleculeLoader {
             let sdfData;
             if (pdbId && authSeqId && labelAsymId) {
                 // For PDB instances always fetch experimental coordinates
-                sdfData = await ApiService.getInstanceSdf(
+                const url = ApiService.getInstanceSdf(
                     pdbId,
                     authSeqId,
                     labelAsymId,
                     code
                 );
+                sdfData = await ApiService.fetchText(url);
             } else {
                 const smilesData = await this.findMoleculeInLocalTsv(code);
                 if (smilesData) {

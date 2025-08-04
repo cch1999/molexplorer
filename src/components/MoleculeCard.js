@@ -253,15 +253,25 @@ class MoleculeCard {
 
     async downloadSdf(ccdCode, sdfData, instanceInfo) {
         try {
-            let data = sdfData;
-            let filename = `${ccdCode}.sdf`;
             if (instanceInfo) {
                 const { pdbId, authSeqId, labelAsymId } = instanceInfo;
-                filename = `${pdbId.toLowerCase()}_${labelAsymId}_${ccdCode}`.toLowerCase() + '.sdf';
-                if (!data) {
-                    data = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId, ccdCode);
-                }
-            } else if (!data) {
+                const url = ApiService.getInstanceSdf(
+                    pdbId,
+                    authSeqId,
+                    labelAsymId,
+                    ccdCode
+                );
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${pdbId.toLowerCase()}_${labelAsymId}_${ccdCode}`.toLowerCase() + '.sdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                return;
+            }
+
+            let data = sdfData;
+            if (!data) {
                 data = await ApiService.getCcdSdf(ccdCode);
             }
             if (!data) {
@@ -271,7 +281,7 @@ class MoleculeCard {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
+            a.download = `${ccdCode}.sdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

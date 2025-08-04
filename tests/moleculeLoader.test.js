@@ -54,9 +54,10 @@ describe('MoleculeLoader', () => {
       'getFragmentLibraryTsv',
       async () => '0\t1\t2\tSMI\t4\t5\t6\t7\tCCC'
     );
+    mock.method(ApiService, 'getInstanceSdf', () => 'http://inst');
     mock.method(
       ApiService,
-      'getInstanceSdf',
+      'fetchText',
       async () =>
         `inst\n  mock\n\n  1  0  0  0  0  0            999 V2000\n    0.0  0.0  0.0 H   0  0  0  0  0  0  0  0  0  0  0  0\nM  END\n$$$$`
     );
@@ -72,7 +73,8 @@ describe('MoleculeLoader', () => {
       { code: 'DDD', status: 'pending', pdbId: '9XYZ', authSeqId: '1', labelAsymId: 'B' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getInstanceSdf', async () => '> <model_server_result.job_id>\nabc123\n');
+    mock.method(ApiService, 'getInstanceSdf', () => 'http://bad');
+    mock.method(ApiService, 'fetchText', async () => '> <model_server_result.job_id>\nabc123\n');
     await loader.loadMolecule(repo.getMolecule('DDD'));
     assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
     assert.strictEqual(repo.getMolecule('DDD').status, 'error');

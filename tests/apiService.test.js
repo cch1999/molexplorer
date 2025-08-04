@@ -62,21 +62,18 @@ describe('ApiService', () => {
     assert.strictEqual(txt, 'sdf');
   });
 
-  it('getInstanceSdf builds ligand URL', async () => {
-    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    const txt = await ApiService.getInstanceSdf('1ABC', 7, 'B');
+  it('getInstanceSdf builds ligand URL', () => {
+    const url = ApiService.getInstanceSdf('1ABC', 7, 'B');
     assert.strictEqual(
-      global.fetch.mock.calls[0].arguments[0],
+      url,
       `${RCSB_MODEL_BASE_URL}/1abc/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
     );
-    assert.strictEqual(txt, 'sdf');
   });
 
-  it('getInstanceSdf adds filename when compId supplied', async () => {
-    global.fetch = mock.fn(async () => ({ ok: true, text: async () => 'sdf' }));
-    await ApiService.getInstanceSdf('2XYZ', 10, 'A', 'GLC');
+  it('getInstanceSdf adds filename when compId supplied', () => {
+    const url = ApiService.getInstanceSdf('2XYZ', 10, 'A', 'GLC');
     assert.strictEqual(
-      global.fetch.mock.calls[0].arguments[0],
+      url,
       `${RCSB_MODEL_BASE_URL}/2xyz/ligand?auth_seq_id=10&label_asym_id=A&encoding=sdf&filename=2xyz_a_glc.sdf`
     );
   });

@@ -51,15 +51,13 @@ describe('MoleculeCard downloadSdf', () => {
     assert.strictEqual(URL.revokeObjectURL.mock.callCount(), 1);
   });
 
-  it('downloads instance SDF with proper filename', async () => {
-    mock.method(ApiService, 'getInstanceSdf', async () => 'instdata');
+  it('downloads instance SDF with proper filename via direct link', async () => {
+    mock.method(ApiService, 'getInstanceSdf', () => 'http://inst.sdf');
     const info = { pdbId: '1ABC', authSeqId: 7, labelAsymId: 'B' };
     await card.downloadSdf('LIG', undefined, info);
     assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
-    assert.strictEqual(
-      createdAnchor.download,
-      '1abc_b_lig.sdf'
-    );
+    assert.strictEqual(createdAnchor.href, 'http://inst.sdf');
+    assert.strictEqual(createdAnchor.download, '1abc_b_lig.sdf');
     assert.strictEqual(createdAnchor.click.mock.callCount(), 1);
   });
 });
