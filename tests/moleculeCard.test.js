@@ -50,6 +50,18 @@ describe('MoleculeCard downloadSdf', () => {
     assert.strictEqual(global.document.body.children.length, 0);
     assert.strictEqual(URL.revokeObjectURL.mock.callCount(), 1);
   });
+
+  it('downloads instance SDF with proper filename', async () => {
+    mock.method(ApiService, 'getInstanceSdf', async () => 'instdata');
+    const info = { pdbId: '1ABC', authSeqId: 7, labelAsymId: 'B' };
+    await card.downloadSdf('LIG', undefined, info);
+    assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.strictEqual(
+      createdAnchor.download,
+      '1abc_b_lig.sdf'
+    );
+    assert.strictEqual(createdAnchor.click.mock.callCount(), 1);
+  });
 });
 
 describe('MoleculeCard compare button', () => {

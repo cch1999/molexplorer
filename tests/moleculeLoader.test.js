@@ -38,16 +38,22 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('ZZZ').status, 'loaded');
   });
 
-  it('uses instance SDF when details provided', async () => {
+  it('uses instance SDF even when local SMILES exists', async () => {
     const repo = new MoleculeRepository([
       { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
-    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    // Local TSV has matching code but should be ignored for instances
+    mock.method(
+      ApiService,
+      'getFragmentLibraryTsv',
+      async () => '0\t1\t2\tSMI\t4\t5\t6\t7\tCCC'
+    );
     mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
     await loader.loadMolecule(repo.getMolecule('CCC'));
     assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
     assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 0);
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
   });
 
