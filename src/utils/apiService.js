@@ -117,9 +117,17 @@ export default class ApiService {
    * @param {string} labelAsymId - Chain identifier
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
-  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
+  static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
+    const params = new URLSearchParams({
+      auth_seq_id: authSeqId,
+      label_asym_id: labelAsymId,
+      encoding: 'sdf',
+    });
+    if (compId) {
+      params.append('auth_comp_id', compId.toUpperCase());
+    }
     return this.fetchText(
-      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
+      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?${params.toString()}`
     );
   }
   /**
