@@ -13,6 +13,7 @@ class ProteinBrowser {
         this.moleculeManager = moleculeManager;
         this.searchBtn = null;
         this.searchInput = null;
+        this.similaritySelect = null;
         this.suggestedDropdown = null;
         this.resultsContainer = null;
         this.resultsBody = null;
@@ -32,6 +33,7 @@ class ProteinBrowser {
     init() {
         this.searchBtn = document.getElementById('protein-group-search-btn');
         this.searchInput = document.getElementById('protein-group-search');
+        this.similaritySelect = document.getElementById('protein-similarity-select');
         this.suggestedDropdown = document.getElementById('suggested-groups-dropdown');
         this.resultsContainer = document.getElementById('protein-results-table-container');
         this.resultsBody = document.getElementById('protein-results-tbody');
@@ -46,7 +48,8 @@ class ProteinBrowser {
             this.searchBtn.addEventListener('click', () => {
                 const queryId = this.searchInput.value.trim();
                 if (queryId) {
-                    this.fetchProteinEntries(queryId);
+                    const cluster = this.similaritySelect ? this.similaritySelect.value : '';
+                    this.fetchProteinEntries(queryId, cluster);
                 } else {
                     showNotification('Please enter a Group ID or UniProt ID.', 'info');
                 }
@@ -91,7 +94,8 @@ class ProteinBrowser {
                     if (this.searchInput) {
                         this.searchInput.value = selected;
                     }
-                    this.fetchProteinEntries(selected);
+                    const cluster = this.similaritySelect ? this.similaritySelect.value : '';
+                    this.fetchProteinEntries(selected, cluster);
                 }
             });
         }
@@ -105,7 +109,7 @@ class ProteinBrowser {
         return this;
     }
 
-    async fetchProteinEntries(identifier) {
+    async fetchProteinEntries(identifier, cluster = '') {
         this.loadingIndicator.style.display = 'block';
         this.resultsContainer.style.display = 'none';
         this.noResultsMessage.style.display = 'none';
@@ -122,7 +126,7 @@ class ProteinBrowser {
                 const data = await ApiService.getProteinGroup(identifier);
                 pdbIds = data.rcsb_group_container_identifiers.group_member_ids;
             } else {
-                pdbIds = await ApiService.getPdbEntriesForUniprot(identifier);
+                pdbIds = await ApiService.getPdbEntriesForUniprot(identifier, cluster);
             }
             this.allPdbIds = pdbIds;
             this.totalResults = pdbIds.length;

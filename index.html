@@ -115,6 +115,11 @@
                         <option value="P24941">CDK2 (Cyclin-Dependent Kinase 2)</option>
                     </select>
                     <input type="text" id="protein-group-search" placeholder="Enter RCSB Group ID or UniProt ID..." value="G_1002155">
+                    <select id="protein-similarity-select">
+                        <option value="">Exact only</option>
+                        <option value="UniRef90">+ Similar (90/80%)</option>
+                        <option value="UniRef50">+ Similar (50/80%)</option>
+                    </select>
                     <button id="protein-group-search-btn" class="action-btn">Search</button>
                     <div class="toggle-switch">
                         <input type="checkbox" id="hide-aids-toggle" class="toggle-switch-checkbox" checked>
