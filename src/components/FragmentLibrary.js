@@ -2,8 +2,7 @@ import ApiService from '../utils/apiService.js';
 
 class FragmentLibrary {
     constructor(moleculeManager, {
-        notify = (typeof window !== 'undefined' && window.showNotification)
-            || (typeof showNotification === 'function' ? showNotification : () => {}),
+        notify = () => {},
         rdkit = Promise.resolve(null)
     } = {}) {
         this.moleculeManager = moleculeManager;

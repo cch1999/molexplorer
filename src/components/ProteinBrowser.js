@@ -8,8 +8,9 @@ import {
 } from '../utils/constants.js';
 
 class ProteinBrowser {
-    constructor(moleculeManager) {
+    constructor(moleculeManager, notify = () => {}) {
         this.moleculeManager = moleculeManager;
+        this.showNotification = notify;
         this.searchBtn = null;
         this.searchInput = null;
         this.suggestedDropdown = null;
@@ -45,7 +46,7 @@ class ProteinBrowser {
                 if (queryId) {
                     this.fetchProteinEntries(queryId);
                 } else {
-                    showNotification('Please enter a Group ID or UniProt ID.', 'info');
+                    this.showNotification('Please enter a Group ID or UniProt ID.', 'info');
                 }
             });
         }
@@ -58,7 +59,7 @@ class ProteinBrowser {
                     if (queryId) {
                         this.fetchProteinEntries(queryId);
                     } else {
-                        showNotification('Please enter a Group ID or UniProt ID.', 'info');
+                        this.showNotification('Please enter a Group ID or UniProt ID.', 'info');
                     }
                     this.searchInput.blur();
                 }
@@ -129,9 +130,7 @@ class ProteinBrowser {
             const msg = error.status && error.url
                 ? `Failed to fetch protein data (status ${error.status}) from ${error.url}`
                 : 'Failed to fetch protein data.';
-            if (typeof showNotification === 'function') {
-                showNotification(msg, 'error');
-            }
+            this.showNotification(msg, 'error');
         } finally {
             this.loadingIndicator.style.display = 'none';
         }
@@ -160,9 +159,7 @@ class ProteinBrowser {
             this.updateResultsInfo();
         } catch (error) {
             console.error('Error loading more results:', error);
-            if (typeof showNotification === 'function') {
-                showNotification('Failed to load more protein entries.', 'error');
-            }
+            this.showNotification('Failed to load more protein entries.', 'error');
         } finally {
             this.loadingIndicator.style.display = 'none';
         }
@@ -287,9 +284,9 @@ class ProteinBrowser {
                             labelAsymId
                         });
                         if (success) {
-                            showNotification(`Adding molecule ${ccdCode}...`, 'success');
+                            this.showNotification(`Adding molecule ${ccdCode}...`, 'success');
                         } else {
-                            showNotification(`Molecule ${ccdCode} already exists`, 'info');
+                            this.showNotification(`Molecule ${ccdCode} already exists`, 'info');
                         }
                     });
                 });

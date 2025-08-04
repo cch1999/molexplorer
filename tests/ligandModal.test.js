@@ -24,7 +24,7 @@ describe('LigandModal orchestrator', () => {
     mock.method(PropertyCalculator, 'getProperties', async () => null);
     mock.method(ApiService, 'getPubChemMetadata', async () => null);
 
-    const lm = new LigandModal({});
+    const lm = new LigandModal({}, () => {});
     lm.show('ATP', 'sdf');
     lm.load2DStructure('ATP', 'container');
 
@@ -60,7 +60,7 @@ describe('LigandModal properties panel', () => {
     mock.method(PropertyCalculator, 'getProperties', async () => ({ molecularWeight: 55, formula: 'C2H6O', atomCount: 9, heavyAtomCount: 3, aromaticBondCount: 1 }));
     mock.method(ApiService, 'getPubChemMetadata', async () => ({ properties: null, synonyms: [], link: null }));
 
-    const lm = new LigandModal({});
+    const lm = new LigandModal({}, () => {});
     lm.show('ETH', 'sdf');
     await new Promise(setImmediate);
     assert.ok(propsEl.innerHTML.includes('55'));
@@ -88,7 +88,7 @@ describe('LigandModal properties panel', () => {
     mock.method(PropertyCalculator, 'getProperties', async () => { throw new Error('fail'); });
     mock.method(ApiService, 'getPubChemMetadata', async () => { throw new Error('fail'); });
 
-    const lm = new LigandModal({});
+    const lm = new LigandModal({}, () => {});
     lm.show('BAD', 'sdf');
     await new Promise(setImmediate);
     assert.strictEqual(propsEl.textContent, 'Properties unavailable');
@@ -120,7 +120,7 @@ describe('LigandModal metadata retrieval', () => {
       link: 'https://pubchem.ncbi.nlm.nih.gov/compound/123'
     }));
 
-    const lm = new LigandModal({});
+    const lm = new LigandModal({}, () => {});
     lm.show('WAT', 'sdf');
     await new Promise(setImmediate);
     assert.ok(propsEl.innerHTML.includes('Foo'));

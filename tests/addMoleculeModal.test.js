@@ -6,6 +6,7 @@ import AddMoleculeModal, { luckyDepCodes } from '../src/modal/AddMoleculeModal.j
 let dom;
 let manager;
 let luckyBtn;
+let showNotification;
 
 const setupDom = () => {
   dom = new JSDOM();
@@ -20,8 +21,7 @@ const setupDom = () => {
   dom.window.addEventListener = () => {};
   global.window = dom.window;
   global.document = document;
-  global.showNotification = mock.fn();
-  dom.window.showNotification = global.showNotification;
+  showNotification = mock.fn();
 
   const modal = document.createElement('div');
   const codeInput = document.createElement('input');
@@ -59,11 +59,12 @@ describe('AddMoleculeModal lucky button', () => {
 
   afterEach(() => {
     mock.restoreAll();
-    delete global.showNotification;
+    delete global.window;
+    delete global.document;
   });
 
   it('adds random molecule from luckyDepCodes', () => {
-    const modal = new AddMoleculeModal(manager);
+    const modal = new AddMoleculeModal(manager, showNotification);
 
     modal.handleLucky();
 

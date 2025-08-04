@@ -39,14 +39,15 @@ class MoleculeManager {
         });
 
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
-        this.ligandModal = new LigandModal(this);
+        this.ligandModal = new LigandModal(this, showNotification);
         this.boundLigandTable = new BoundLigandTable(
             molecule => this.addMolecule(molecule),
             code => this.showMoleculeDetails(code),
-            this.ligandModal
+            this.ligandModal,
+            showNotification
         );
-        this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
-        this.addModal = new AddMoleculeModal(this);
+        this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable, showNotification);
+        this.addModal = new AddMoleculeModal(this, showNotification);
         this.comparisonModal = new ComparisonModal();
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
@@ -281,7 +282,7 @@ if (confirmAddFragmentBtn) {
     });
 }
 
-const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+const proteinBrowser = new ProteinBrowser(moleculeManager, showNotification).init();
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -323,10 +324,6 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-window.moleculeManager = moleculeManager;
-window.fragmentLibrary = fragmentLibrary;
-window.proteinBrowser = proteinBrowser;
-window.showNotification = showNotification;
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');

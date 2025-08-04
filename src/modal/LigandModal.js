@@ -5,9 +5,9 @@ import PropertyCalculator from '../utils/propertyCalculator.js';
 import ApiService from '../utils/apiService.js';
 
 class LigandModal {
-    constructor(moleculeManager) {
+    constructor(moleculeManager, notify = () => {}) {
         this.details = new LigandDetails(moleculeManager);
-        this.similarLigandTable = new SimilarLigandTable(moleculeManager);
+        this.similarLigandTable = new SimilarLigandTable(moleculeManager, notify);
         this.pdbEntryList = new PdbEntryList(moleculeManager);
         this.propertiesContainer = document.getElementById('ligand-properties');
     }

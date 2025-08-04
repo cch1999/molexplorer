@@ -2,9 +2,10 @@ import ApiService from '../utils/apiService.js';
 import { PD_BE_STATIC_IMAGE_BASE_URL } from '../utils/constants.js';
 
 class SimilarLigandTable {
-    constructor(moleculeManager) {
+    constructor(moleculeManager, notify = () => {}) {
         this.moleculeManager = moleculeManager;
         this.currentSimilarLigands = [];
+        this.showNotification = notify;
     }
 
     async load(ccdCode) {
@@ -64,7 +65,7 @@ class SimilarLigandTable {
 
     addAllSimilarLigands() {
         if (!this.currentSimilarLigands || this.currentSimilarLigands.length === 0) {
-            showNotification('No similar ligands to add', 'info');
+            this.showNotification('No similar ligands to add', 'info');
             return;
         }
 
@@ -94,7 +95,7 @@ class SimilarLigandTable {
                         message = `All ${skippedCount} molecules already existed`;
                     }
 
-                    showNotification(message, addedCount > 0 ? 'success' : 'info');
+                    this.showNotification(message, addedCount > 0 ? 'success' : 'info');
                     addAllBtn.disabled = false;
                     addAllBtn.textContent = `Add All (${this.currentSimilarLigands.length})`;
                 }
@@ -165,9 +166,9 @@ class SimilarLigandTable {
         addButton.addEventListener('click', () => {
             const success = this.moleculeManager.addMolecule(ligand.chem_comp_id);
             if (success) {
-                showNotification(`Adding molecule ${ligand.chem_comp_id}...`, 'success');
+                this.showNotification(`Adding molecule ${ligand.chem_comp_id}...`, 'success');
             } else {
-                showNotification(`Molecule ${ligand.chem_comp_id} already exists`, 'info');
+                this.showNotification(`Molecule ${ligand.chem_comp_id} already exists`, 'info');
             }
         });
         addCell.appendChild(addButton);

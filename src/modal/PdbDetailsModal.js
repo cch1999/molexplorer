@@ -2,8 +2,9 @@ import ApiService from '../utils/apiService.js';
 import { RCSB_STRUCTURE_BASE_URL, PD_BE_ENTRY_BASE_URL } from '../utils/constants.js';
 
 class PdbDetailsModal {
-    constructor(boundLigandTable) {
+    constructor(boundLigandTable, notify = () => {}) {
         this.boundLigandTable = boundLigandTable;
+        this.showNotification = notify;
         this.modal = document.getElementById('pdb-details-modal');
         const closeBtn = document.getElementById('close-pdb-details-modal');
         if (closeBtn) {
@@ -89,8 +90,8 @@ class PdbDetailsModal {
             const msg = error.status && error.url
                 ? `Failed to load PDB details (status ${error.status}) from ${error.url}`
                 : 'Failed to load PDB entry details.';
-            if (typeof showNotification === 'function') {
-                showNotification(msg, 'error');
+            if (this.showNotification) {
+                this.showNotification(msg, 'error');
             }
         }
     }

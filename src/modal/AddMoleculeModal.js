@@ -3,8 +3,9 @@ export const luckyDepCodes = [
 ];
 
 class AddMoleculeModal {
-    constructor(moleculeManager) {
+    constructor(moleculeManager, notify = () => {}) {
         this.moleculeManager = moleculeManager;
+        this.showNotification = notify;
         this.modal = document.getElementById('add-molecule-modal');
         this.codeInput = document.getElementById('molecule-code');
         this.errorText = document.getElementById('ccd-error');
@@ -123,9 +124,9 @@ class AddMoleculeModal {
 
         const success = this.moleculeManager.addMolecule(code);
         if (success) {
-            window.showNotification(`Adding molecule ${code}...`, 'success');
+            this.showNotification(`Adding molecule ${code}...`, 'success');
         } else {
-            window.showNotification(`Molecule ${code} already exists`, 'info');
+            this.showNotification(`Molecule ${code} already exists`, 'info');
         }
         this.close();
     }
@@ -150,16 +151,16 @@ class AddMoleculeModal {
                 labelAsymId
             });
             if (success) {
-                window.showNotification(`Adding ligand ${code} from ${pdbId}...`, 'success');
+                this.showNotification(`Adding ligand ${code} from ${pdbId}...`, 'success');
             } else {
-                window.showNotification(`Ligand ${code} instance already exists`, 'info');
+                this.showNotification(`Ligand ${code} instance already exists`, 'info');
             }
         } else {
             const success = this.moleculeManager.addMolecule(code);
             if (success) {
-                window.showNotification(`Adding molecule ${code}...`, 'success');
+                this.showNotification(`Adding molecule ${code}...`, 'success');
             } else {
-                window.showNotification(`Molecule ${code} already exists`, 'info');
+                this.showNotification(`Molecule ${code} already exists`, 'info');
             }
         }
         this.close();

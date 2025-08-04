@@ -7,6 +7,7 @@ import ApiService from '../src/utils/apiService.js';
 let dom;
 let table;
 let addMoleculeStub;
+let showNotification;
 
 const setupDom = () => {
   dom = new JSDOM();
@@ -24,7 +25,7 @@ const setupDom = () => {
   };
   global.window = dom.window;
   global.document = document;
-  global.showNotification = mock.fn();
+  showNotification = mock.fn();
 
   const section = document.createElement('div');
   const tableEl = document.createElement('table');
@@ -41,12 +42,13 @@ const setupDom = () => {
 beforeEach(() => {
   setupDom();
   addMoleculeStub = mock.fn(() => true);
-  table = new BoundLigandTable(addMoleculeStub, () => {}, null);
+  table = new BoundLigandTable(addMoleculeStub, () => {}, null, showNotification);
 });
 
 afterEach(() => {
   mock.restoreAll();
-  delete global.showNotification;
+  delete global.window;
+  delete global.document;
 });
 
 describe('populateBoundLigands', () => {
