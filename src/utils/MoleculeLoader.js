@@ -42,7 +42,12 @@ class MoleculeLoader {
                 }
                 sdfData = await ApiService.getCcdSdf(code);
             }
-            if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
+            if (
+                !sdfData ||
+                sdfData.trim() === '' ||
+                sdfData.toLowerCase().includes('<html') ||
+                !MoleculeLoader.#isValidSdf(sdfData)
+            ) {
                 throw new Error('Received empty or invalid SDF data.');
             }
             this.repository.updateMoleculeStatus(identifier, 'loaded');
@@ -76,6 +81,16 @@ class MoleculeLoader {
             console.error('Error searching fragment library TSV:', error);
             return null;
         }
+    }
+
+    static #isValidSdf(sdf) {
+        const lines = sdf.split('\n');
+        if (lines.length < 4) {
+            return false;
+        }
+        const countsLine = lines[3];
+        const countsMatch = /^\s*\d+\s+\d+\s+\d+\s+\d+/.test(countsLine);
+        return countsMatch && sdf.includes('M  END');
     }
 }
 
