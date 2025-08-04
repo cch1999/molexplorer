@@ -1785,3 +1785,31 @@ body.dark-mode .molecule-viewer,
 body.dark-mode .details-viewer {
     background: #e0e0e0;
 }
+
+.viewer-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.viewer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.viewer-hide-btn,
+.viewer-remove-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.viewer-hide-btn {
+    color: #555;
+}
+
+.viewer-remove-btn {
+    color: #c00;
+}
