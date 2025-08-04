@@ -40,7 +40,7 @@ describe('MoleculeLoader', () => {
 
   it('uses instance SDF when details provided', async () => {
     const repo = new MoleculeRepository([
-      { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', labelAsymId: 'A' },
+      { code: 'CCC', status: 'pending', pdbId: '1ABC', authSeqId: '5', authAsymId: 'A' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
     mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
