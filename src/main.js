@@ -138,7 +138,7 @@ class MoleculeManager {
     }
 
     deleteAllMolecules() {
-        this.repository.clearAll();
+        this.repository.deleteAllMolecules();
         if (this.cardUI) {
             this.cardUI.clearAll();
         }
