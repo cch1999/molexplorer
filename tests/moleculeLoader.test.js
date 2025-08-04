@@ -80,6 +80,21 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('DDD').status, 'error');
   });
 
+  it('rejects SDF with zero atom count', async () => {
+    const repo = new MoleculeRepository([{ code: 'EEE', status: 'pending' }]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(
+      ApiService,
+      'getCcdSdf',
+      async () =>
+        `mol\n  mock\n\n  0  0  0  0  0  0            999 V2000\nM  END\n$$$$`
+    );
+    await loader.loadMolecule('EEE');
+    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('EEE').status, 'error');
+  });
+
   it('handles errors from remote fetch', async () => {
     const repo = new MoleculeRepository([{ code: 'BAD', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);

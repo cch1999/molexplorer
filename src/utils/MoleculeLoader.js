@@ -91,7 +91,11 @@ class MoleculeLoader {
         }
         const countsLine = lines[3];
         const countsMatch = /^\s*\d+\s+\d+\s+\d+\s+\d+/.test(countsLine);
-        return countsMatch && sdf.includes('M  END');
+        if (!countsMatch) {
+            return false;
+        }
+        const atomCount = parseInt(countsLine.slice(0, 3));
+        return atomCount > 0 && sdf.includes('M  END');
     }
 }
 
