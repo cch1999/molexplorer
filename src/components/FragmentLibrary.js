@@ -195,6 +195,14 @@ class FragmentLibrary {
             return false;
         }
 
+        const duplicate = this.fragments.some(
+            f => f.name.toLowerCase() === fragmentData.name.toLowerCase()
+        );
+        if (duplicate) {
+            this.notify(`Fragment "${fragmentData.name}" already exists.`, 'error');
+            return false;
+        }
+
         this.fragments.unshift({
             id: `custom-${Date.now()}`,
             name: fragmentData.name,
