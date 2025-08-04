@@ -13,6 +13,7 @@ import {
   RCSB_LIGAND_BASE_URL,
   RCSB_MODEL_BASE_URL,
   FRAGMENT_LIBRARY_URL,
+  CHEMBL_FRAGMENT_API_URL,
   PD_BE_SIMILARITY_BASE_URL,
   PD_BE_IN_PDB_BASE_URL,
   RCSB_ENTRY_BASE_URL,
@@ -143,6 +144,37 @@ export default class ApiService {
   static getFragmentLibraryTsv() {
     // Fetch fragment library TSV from GitHub
     return this.fetchText(FRAGMENT_LIBRARY_URL);
+  }
+
+  /**
+   * Fetch fragment-sized molecules from ChEMBL
+   *
+   * Retrieves small, rule-of-three compliant molecules from the ChEMBL API
+   * and maps them into the standard fragment object shape used by the
+   * application.
+   *
+   * @returns {Promise<Array<Object>>} Array of fragment objects
+   */
+  static async getChEMBLFragments() {
+    const data = await this.fetchJson(CHEMBL_FRAGMENT_API_URL);
+    if (!data || !Array.isArray(data.molecules)) return [];
+    return data.molecules
+      .filter(
+        (m) =>
+          m.molecule_structures && m.molecule_structures.canonical_smiles
+      )
+      .map((m) => ({
+        id: m.molecule_chembl_id,
+        name: m.pref_name || m.molecule_chembl_id,
+        kind: 'SMILES',
+        query: m.molecule_structures.canonical_smiles,
+        description: m.pref_name || '',
+        comment: '',
+        url: `https://www.ebi.ac.uk/chembl/compound_report_card/${m.molecule_chembl_id}`,
+        source: 'ChEMBL',
+        ccd: '',
+        in_ccd: false,
+      }));
   }
 
   /**
