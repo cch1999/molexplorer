@@ -59,7 +59,8 @@ class MoleculeCard {
 
         const viewerContainer = document.createElement('div');
         viewerContainer.className = 'molecule-viewer';
-        viewerContainer.id = `viewer-${ccdCode}`;
+        // Use unique molecule id so multiple instances of the same code can render independently
+        viewerContainer.id = `viewer-${id}`;
         card.appendChild(viewerContainer);
 
         const smilesLabel = document.createElement('div');
@@ -137,7 +138,8 @@ class MoleculeCard {
         card.appendChild(title);
 
         const viewerContainer = document.createElement('div');
-        viewerContainer.id = `viewer-${ccdCode}`;
+        // Use unique molecule id so instance SDFs don't collide with ideal structures
+        viewerContainer.id = `viewer-${id}`;
         viewerContainer.className = 'viewer-container';
         card.appendChild(viewerContainer);
 

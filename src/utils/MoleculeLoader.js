@@ -17,12 +17,15 @@ class MoleculeLoader {
     async loadMolecule(input) {
         const { code, pdbId, authSeqId, labelAsymId } =
             typeof input === 'string' ? { code: input } : input;
+        // Derive a unique identifier for the molecule so multiple instances of the same
+        // chemical component can be tracked independently
+        const id = this.repository.generateId({ code, pdbId, authSeqId, labelAsymId });
         try {
-            this.repository.updateMoleculeStatus(code, 'loading');
+            this.repository.updateMoleculeStatus(id, 'loading');
             const smilesData = await this.findMoleculeInLocalTsv(code);
             if (smilesData) {
-                this.repository.updateMoleculeStatus(code, 'loaded');
-                this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
+                this.repository.updateMoleculeStatus(id, 'loaded');
+                this.cardUI.createMoleculeCardFromSmiles(smilesData, code, id);
                 return;
             }
             let sdfData;
@@ -34,16 +37,16 @@ class MoleculeLoader {
             if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
                 throw new Error('Received empty or invalid SDF data.');
             }
-            this.repository.updateMoleculeStatus(code, 'loaded');
-            const molecule = this.repository.getMolecule(code);
+            this.repository.updateMoleculeStatus(id, 'loaded');
+            const molecule = this.repository.getMolecule(id);
             if (molecule) {
                 molecule.sdf = sdfData;
             }
-            this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
+            this.cardUI.createMoleculeCard(sdfData, code, 'sdf', id);
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
-            this.repository.updateMoleculeStatus(code, 'error');
-            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`);
+            this.repository.updateMoleculeStatus(id, 'error');
+            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`, id);
         }
     }
 

@@ -89,3 +89,37 @@ describe('MoleculeCard compare button', () => {
     delete global.window;
   });
 });
+
+describe('MoleculeCard viewer container', () => {
+  it('uses molecule id for unique viewer container ids', () => {
+    const makeEl = () => ({
+      style: {},
+      children: [],
+      appendChild(child) { this.children.push(child); return child; },
+      setAttribute: () => {},
+      addEventListener(type, handler) { this['on' + type] = handler; },
+      dispatchEvent(evt) { const h = this['on' + evt.type]; if (h) h(evt); },
+      innerHTML: '',
+      textContent: '',
+      className: ''
+    });
+
+    global.document = { createElement: makeEl };
+    global.window = {};
+    global.$3Dmol = { createViewer: () => ({ addModel: () => {}, setStyle: () => {}, render: () => {}, zoomTo: () => {} }) };
+    const originalTimeout = global.setTimeout;
+    global.setTimeout = (fn) => { fn(); };
+
+    const grid = makeEl();
+    const cardUI = new MoleculeCard(grid, {});
+    cardUI.createMoleculeCard('sdf', 'AAA', 'sdf', 'AAA_inst1');
+    const card = grid.children[0];
+    const viewerContainer = card.children.find(c => c.className === 'viewer-container');
+    assert.strictEqual(viewerContainer.id, 'viewer-AAA_inst1');
+
+    global.setTimeout = originalTimeout;
+    delete global.$3Dmol;
+    delete global.document;
+    delete global.window;
+  });
+});
