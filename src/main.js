@@ -1,6 +1,6 @@
 import MoleculeLoader from './utils/MoleculeLoader.js';
 import MoleculeRepository from './utils/MoleculeRepository.js';
-import { DEFAULT_MOLECULE_CODES } from './utils/constants.js';
+import { DEFAULT_MOLECULE_CODES, DEFAULT_PDB_INSTANCES } from './utils/constants.js';
 import BoundLigandTable from './components/BoundLigandTable.js';
 import FragmentLibrary from './components/FragmentLibrary.js';
 import LigandModal from './modal/LigandModal.js';
@@ -12,9 +12,10 @@ import ComparisonModal from './modal/ComparisonModal.js';
 
 class MoleculeManager {
     constructor() {
-        this.repository = new MoleculeRepository(
-            DEFAULT_MOLECULE_CODES.map(code => ({ code, status: 'pending' }))
-        );
+        this.repository = new MoleculeRepository([
+            ...DEFAULT_MOLECULE_CODES.map(code => ({ code, status: 'pending' })),
+            ...DEFAULT_PDB_INSTANCES.map(inst => ({ ...inst, status: 'pending' }))
+        ]);
         this.grid = null;
         this.loadingIndicator = null;
         this.cardUI = null;
