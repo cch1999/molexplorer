@@ -203,13 +203,13 @@ class ProteinBrowser {
             .map(
                 ligand => `
             <div class="ligand-img-container">
-                <img src="${PD_BE_STATIC_IMAGE_BASE_URL}/${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
-                <div class="ligand-img-overlay">
-                    <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}" data-pdb-id="${pdbId}" data-label-asym-id="${ligand.chain_id}" data-auth-seq-id="${ligand.author_residue_number}">+</button>
-                </div>
-            </div>
-        `
-            )
+                  <img src="${PD_BE_STATIC_IMAGE_BASE_URL}/${ligand.chem_comp_id}_200.svg" alt="${ligand.chem_comp_id}" title="${ligand.chem_comp_id}: ${ligand.chem_comp_name}" class="bound-ligand-img">
+                  <div class="ligand-img-overlay">
+                      <button class="ligand-action-btn add-ligand" data-ccd-code="${ligand.chem_comp_id}" data-pdb-id="${pdbId}" data-chain-id="${ligand.chain_id}" data-author-residue-number="${ligand.author_residue_number}">+</button>
+                  </div>
+              </div>
+          `
+              )
             .join('');
         const moreIndicator =
             ligands.length > 5
@@ -277,20 +277,20 @@ class ProteinBrowser {
                     window.open(`${PD_BE_ENTRY_BASE_URL}/${e.target.dataset.pdbId.toLowerCase()}`, '_blank');
                 });
 
-                row.querySelectorAll('.add-ligand').forEach(button => {
-                    button.addEventListener('click', e => {
-                        const { ccdCode, pdbId, authSeqId, labelAsymId } = e.currentTarget.dataset;
-                        const success = this.moleculeManager.addPdbInstance({
-                            code: ccdCode,
-                            pdbId,
-                            authSeqId,
-                            labelAsymId
-                        });
-                        if (success) {
-                            showNotification(`Adding molecule ${ccdCode}...`, 'success');
-                        } else {
-                            showNotification(`Molecule ${ccdCode} already exists`, 'info');
-                        }
+                  row.querySelectorAll('.add-ligand').forEach(button => {
+                      button.addEventListener('click', e => {
+                          const { ccdCode, pdbId, chainId, authorResidueNumber } = e.currentTarget.dataset;
+                          const success = this.moleculeManager.addPdbInstance({
+                              code: ccdCode,
+                              pdbId,
+                              chainId,
+                              authorResidueNumber
+                          });
+                          if (success) {
+                              showNotification(`Adding molecule ${ccdCode}...`, 'success');
+                          } else {
+                              showNotification(`Molecule ${ccdCode} already exists`, 'info');
+                          }
                     });
                 });
             }

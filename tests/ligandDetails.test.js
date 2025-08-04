@@ -47,12 +47,12 @@ describe('LigandDetails viewer focus', () => {
     global.window = { addEventListener: () => {} };
 
     const moleculeManager = {
-      getMolecule: () => ({
-        code: 'ATP',
-        pdbId: '1abc',
-        labelAsymId: 'B',
-        authSeqId: '5'
-      })
+        getMolecule: () => ({
+          code: 'ATP',
+          pdbId: '1abc',
+          chainId: 'B',
+          authorResidueNumber: '5'
+        })
     };
 
     mock.method(ApiService, 'getPdbFile', async () => 'PDBDATA');
@@ -76,7 +76,7 @@ describe('LigandDetails viewer focus', () => {
     assert.strictEqual(ApiService.getPdbFile.mock.callCount(), 1);
     assert.deepStrictEqual(ApiService.getPdbFile.mock.calls[0].arguments, ['1abc']);
     assert.strictEqual(viewer.zoomTo.mock.callCount(), 1);
-    assert.deepStrictEqual(viewer.zoomTo.mock.calls[0].arguments, [{ chain: 'B', resi: 5 }]);
+      assert.deepStrictEqual(viewer.zoomTo.mock.calls[0].arguments, [{ chain: 'B', resi: 5 }]);
     assert.strictEqual(viewer.addSurface.mock.callCount(), 1);
     assert.strictEqual(viewer.addSurface.mock.calls[0].arguments[0], 'MS');
     assert.deepStrictEqual(viewer.setStyle.mock.calls[0].arguments, [{}, { cartoon: { color: 'lightgrey' } }]);

@@ -30,9 +30,9 @@ const setupDom = () => {
   const cancelBtn = document.createElement('button');
   const closeBtn = document.createElement('button');
   luckyBtn = document.createElement('button');
-  const pdbIdInput = document.createElement('input');
-  const authSeqIdInput = document.createElement('input');
-  const labelAsymIdInput = document.createElement('input');
+    const pdbIdInput = document.createElement('input');
+    const authorResidueNumberInput = document.createElement('input');
+    const chainIdInput = document.createElement('input');
   const instanceError = document.createElement('p');
 
   document.registerElement('add-molecule-modal', modal);
@@ -42,9 +42,9 @@ const setupDom = () => {
   document.registerElement('cancel-btn', cancelBtn);
   document.registerElement('close-modal', closeBtn);
   document.registerElement('feeling-lucky-btn', luckyBtn);
-  document.registerElement('pdb-id', pdbIdInput);
-  document.registerElement('auth-seq-id', authSeqIdInput);
-  document.registerElement('label-asym-id', labelAsymIdInput);
+    document.registerElement('pdb-id', pdbIdInput);
+    document.registerElement('author-residue-number', authorResidueNumberInput);
+    document.registerElement('chain-id', chainIdInput);
   document.registerElement('instance-error', instanceError);
 };
 
