@@ -25,9 +25,13 @@ export default class PropertyCalculator {
       }
       const data = await response.json();
       const comp = data?.chem_comp || {};
+      const info = data?.rcsb_chem_comp_info || {};
       return {
         molecularWeight: comp.formula_weight ?? null,
         formula: comp.formula ?? null,
+        atomCount: info.atom_count ?? null,
+        heavyAtomCount: info.atom_count_heavy ?? null,
+        aromaticBondCount: info.bond_count_aromatic ?? null,
       };
     } catch (e) {
       console.error(`Failed to fetch properties for ${ccdCode}:`, e);
