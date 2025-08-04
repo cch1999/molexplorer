@@ -10,10 +10,10 @@ class Viewer {
         if (!container) return this;
 
         container.innerHTML = '';
+        container.classList.add('viewer-panel');
 
         const viewerDiv = document.createElement('div');
-        viewerDiv.style.width = '100%';
-        viewerDiv.style.height = '400px';
+        viewerDiv.className = 'viewer-canvas';
         container.appendChild(viewerDiv);
 
         this.listEl = document.createElement('ul');
@@ -24,6 +24,13 @@ class Viewer {
         this.viewer.render();
 
         return this;
+    }
+
+    resize() {
+        if (this.viewer) {
+            this.viewer.resize();
+            this.viewer.render();
+        }
     }
 
     renderList() {
@@ -51,6 +58,13 @@ class Viewer {
 
             this.listEl.appendChild(row);
         });
+
+        if (this.molecules.length === 0) {
+            const empty = document.createElement('li');
+            empty.className = 'viewer-empty';
+            empty.textContent = 'No molecules loaded';
+            this.listEl.appendChild(empty);
+        }
     }
 
     addMolecule({ code, sdf }) {

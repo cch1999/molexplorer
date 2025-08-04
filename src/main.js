@@ -112,6 +112,9 @@ class MoleculeManager {
                 panels.forEach((panel, i) => {
                     panel.style.display = i === index ? 'block' : 'none';
                 });
+                if (index === 1 && window.viewer) {
+                    window.viewer.resize();
+                }
             });
         });
 

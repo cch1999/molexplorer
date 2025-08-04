@@ -1786,7 +1786,22 @@ body.dark-mode .details-viewer {
     background: #e0e0e0;
 }
 
+#viewer-content.viewer-panel {
+    display: flex;
+    gap: 16px;
+}
+
+.viewer-canvas {
+    flex: 1;
+    height: 400px;
+    position: relative;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    background: #fff;
+}
+
 .viewer-list {
+    width: 200px;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -1812,4 +1827,10 @@ body.dark-mode .details-viewer {
 
 .viewer-remove-btn {
     color: #c00;
+}
+
+.viewer-empty {
+    color: #666;
+    font-style: italic;
+    padding: 4px 0;
 }
