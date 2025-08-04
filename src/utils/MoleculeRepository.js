@@ -59,10 +59,6 @@ class MoleculeRepository {
         return [...this.molecules];
     }
 
-    clearAll() {
-        this.molecules = [];
-    }
-
     removeHydrogensFromSdf(sdf) {
         const lines = sdf.split(/\r?\n/);
         if (lines.length < 4) return sdf;
