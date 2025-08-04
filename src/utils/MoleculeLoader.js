@@ -15,35 +15,70 @@ class MoleculeLoader {
     }
 
     async loadMolecule(input) {
-        const { code, pdbId, authSeqId, labelAsymId } =
+        const { code, pdbId, authSeqId, labelAsymId, id } =
             typeof input === 'string' ? { code: input } : input;
+        const identifier = id || code;
         try {
-            this.repository.updateMoleculeStatus(code, 'loading');
-            const smilesData = await this.findMoleculeInLocalTsv(code);
-            if (smilesData) {
-                this.repository.updateMoleculeStatus(code, 'loaded');
-                this.cardUI.createMoleculeCardFromSmiles(smilesData, code);
-                return;
-            }
+            this.repository.updateMoleculeStatus(identifier, 'loading');
             let sdfData;
+            let instanceInfo = null;
+
             if (pdbId && authSeqId && labelAsymId) {
-                sdfData = await ApiService.getInstanceSdf(pdbId, authSeqId, labelAsymId);
-            } else {
+                // For PDB instances try experimental coordinates first
+                const url = ApiService.getInstanceSdf(
+                    pdbId,
+                    authSeqId,
+                    labelAsymId,
+                    code
+                );
+                const instanceSdf = await ApiService.fetchText(url);
+                if (
+                    instanceSdf &&
+                    !instanceSdf.toLowerCase().includes('<html') &&
+                    MoleculeLoader.#isValidSdf(instanceSdf)
+                ) {
+                    sdfData = instanceSdf;
+                    instanceInfo = { pdbId, authSeqId, labelAsymId };
+                }
+            }
+
+            if (!sdfData) {
+                const smilesData = await this.findMoleculeInLocalTsv(code);
+                if (smilesData) {
+                    this.repository.updateMoleculeStatus(identifier, 'loaded');
+                    this.cardUI.createMoleculeCardFromSmiles(
+                        smilesData,
+                        code,
+                        identifier
+                    );
+                    return;
+                }
                 sdfData = await ApiService.getCcdSdf(code);
             }
-            if (!sdfData || sdfData.trim() === '' || sdfData.toLowerCase().includes('<html')) {
+
+            if (
+                !sdfData ||
+                sdfData.trim() === '' ||
+                sdfData.toLowerCase().includes('<html') ||
+                !MoleculeLoader.#isValidSdf(sdfData)
+            ) {
                 throw new Error('Received empty or invalid SDF data.');
             }
-            this.repository.updateMoleculeStatus(code, 'loaded');
-            const molecule = this.repository.getMolecule(code);
+
+            this.repository.updateMoleculeStatus(identifier, 'loaded');
+            const molecule = this.repository.getMolecule(identifier);
             if (molecule) {
                 molecule.sdf = sdfData;
             }
-            this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
+            this.cardUI.createMoleculeCard(sdfData, code, 'sdf', identifier, instanceInfo);
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
-            this.repository.updateMoleculeStatus(code, 'error');
-            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`);
+            this.repository.updateMoleculeStatus(identifier, 'error');
+            this.cardUI.createNotFoundCard(
+                code,
+                `Failed to load: ${error.message}`,
+                identifier
+            );
         }
     }
 
@@ -62,6 +97,20 @@ class MoleculeLoader {
             console.error('Error searching fragment library TSV:', error);
             return null;
         }
+    }
+
+    static #isValidSdf(sdf) {
+        const lines = sdf.split('\n');
+        if (lines.length < 4) {
+            return false;
+        }
+        const countsLine = lines[3];
+        const countsMatch = /^\s*\d+\s+\d+\s+\d+\s+\d+/.test(countsLine);
+        if (!countsMatch) {
+            return false;
+        }
+        const atomCount = parseInt(countsLine.slice(0, 3));
+        return atomCount > 0 && sdf.includes('M  END');
     }
 }
 

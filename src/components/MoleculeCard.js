@@ -86,7 +86,7 @@ class MoleculeCard {
         `;
     }
 
-    createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode) {
+    createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode, instanceInfo = null) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
@@ -114,7 +114,7 @@ class MoleculeCard {
         downloadBtn.title = `Download ${ccdCode} as SDF`;
         downloadBtn.addEventListener('click', e => {
             e.stopPropagation();
-            this.downloadSdf(ccdCode, data);
+            this.downloadSdf(ccdCode, data, instanceInfo);
         });
         card.appendChild(downloadBtn);
 
@@ -251,20 +251,36 @@ class MoleculeCard {
         this.draggedElement = null;
     }
 
-    async downloadSdf(ccdCode, sdfData) {
+    async downloadSdf(ccdCode, sdfData, instanceInfo) {
         try {
             let data = sdfData;
-            if (!data) {
+            let filename = `${ccdCode}.sdf`;
+
+            if (instanceInfo) {
+                const { pdbId, authSeqId, labelAsymId } = instanceInfo;
+                if (!data) {
+                    const url = ApiService.getInstanceSdf(
+                        pdbId,
+                        authSeqId,
+                        labelAsymId,
+                        ccdCode
+                    );
+                    data = await ApiService.fetchText(url);
+                }
+                filename = `${pdbId.toLowerCase()}_${labelAsymId}_${ccdCode}`.toLowerCase() + '.sdf';
+            } else if (!data) {
                 data = await ApiService.getCcdSdf(ccdCode);
             }
+
             if (!data) {
                 throw new Error('No SDF data available');
             }
+
             const blob = new Blob([data], { type: 'chemical/x-mdl-sdfile' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${ccdCode}.sdf`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

@@ -114,14 +114,25 @@ export default class ApiService {
    * instance within a PDB entry.
    *
    * @param {string} pdbId - The 4-character PDB ID
-   * @param {string|number} authSeqId - Author provided residue/sequence number
-   * @param {string} labelAsymId - Chain identifier
-   * @returns {Promise<string>} SDF file content for the ligand instance
-   */
-  static getInstanceSdf(pdbId, authSeqId, labelAsymId) {
-    return this.fetchText(
-      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?auth_seq_id=${authSeqId}&label_asym_id=${labelAsymId}&encoding=sdf`
-    );
+  * @param {string|number} authSeqId - Author provided residue/sequence number
+  * @param {string} labelAsymId - Chain identifier
+  * @param {string} [compId] - Chemical component ID used in the filename parameter
+   * @returns {string} URL pointing to the ligand instance SDF
+  */
+  static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
+    // Returns a string in the form:
+    // https://models.rcsb.org/v1/4tos/ligand?auth_seq_id=1402&label_asym_id=D&encoding=sdf&filename=4tos_D_355.sdf
+    const pdbIdLower = pdbId.toLowerCase();
+    const params = new URLSearchParams({
+      auth_seq_id: authSeqId,
+      label_asym_id: labelAsymId,
+      encoding: 'sdf',
+    });
+    if (compId) {
+      const filename = `${pdbIdLower}_${labelAsymId}_${compId}`.toLowerCase();
+      params.append('filename', `${filename}.sdf`);
+    }
+    return `${RCSB_MODEL_BASE_URL}/${pdbIdLower}/ligand?${params.toString()}`;
   }
   /**
    * Fetch fragment library data from local TSV file
