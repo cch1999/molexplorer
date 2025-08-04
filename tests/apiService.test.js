@@ -1,7 +1,11 @@
 import { describe, it, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import ApiService from '../src/utils/apiService.js';
-import { RCSB_LIGAND_BASE_URL, RCSB_MODEL_BASE_URL } from '../src/utils/constants.js';
+import {
+  RCSB_LIGAND_BASE_URL,
+  RCSB_MODEL_BASE_URL,
+  UNIPROT_ENTRY_BASE_URL
+} from '../src/utils/constants.js';
 
 describe('ApiService', () => {
   afterEach(() => {
@@ -66,6 +70,32 @@ describe('ApiService', () => {
       `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf`
     );
     assert.strictEqual(txt, 'sdf');
+  });
+
+  it('getPdbEntriesForUniprot parses PDB ids', async () => {
+    const mockData = {
+      uniProtKBCrossReferences: [
+        { database: 'PDB', id: '1ABC' },
+        { database: 'Other', id: 'XYZ' }
+      ]
+    };
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => mockData }));
+    const ids = await ApiService.getPdbEntriesForUniprot('P12345');
+    assert.deepStrictEqual(ids, ['1ABC']);
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
+    );
+  });
+
+  it('getPdbEntriesForUniprot uppercases accessions', async () => {
+    const mockData = { uniProtKBCrossReferences: [] };
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => mockData }));
+    await ApiService.getPdbEntriesForUniprot('p12345');
+    assert.strictEqual(
+      global.fetch.mock.calls[0].arguments[0],
+      `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
+    );
   });
 
   it('fetchText caches responses', async () => {

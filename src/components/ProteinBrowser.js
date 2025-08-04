@@ -33,11 +33,11 @@ class ProteinBrowser {
 
         if (this.searchBtn) {
             this.searchBtn.addEventListener('click', () => {
-                const groupId = this.searchInput.value.trim();
-                if (groupId) {
-                    this.fetchProteinGroup(groupId);
+                const queryId = this.searchInput.value.trim();
+                if (queryId) {
+                    this.fetchProteinEntries(queryId);
                 } else {
-                    showNotification('Please enter a Group ID.', 'info');
+                    showNotification('Please enter a Group ID or UniProt ID.', 'info');
                 }
             });
         }
@@ -57,7 +57,7 @@ class ProteinBrowser {
                     if (this.searchInput) {
                         this.searchInput.value = selected;
                     }
-                    this.fetchProteinGroup(selected);
+                    this.fetchProteinEntries(selected);
                 }
             });
         }
@@ -65,23 +65,28 @@ class ProteinBrowser {
         return this;
     }
 
-    async fetchProteinGroup(groupId) {
+    async fetchProteinEntries(identifier) {
         this.loadingIndicator.style.display = 'block';
         this.resultsContainer.style.display = 'none';
         this.noResultsMessage.style.display = 'none';
 
         try {
-            const data = await ApiService.getProteinGroup(groupId);
-            const memberIds = data.rcsb_group_container_identifiers.group_member_ids;
-            this.currentProteinDetails = await this.fetchMemberDetails(memberIds);
+            let pdbIds = [];
+            if (identifier.toUpperCase().startsWith('G_')) {
+                const data = await ApiService.getProteinGroup(identifier);
+                pdbIds = data.rcsb_group_container_identifiers.group_member_ids;
+            } else {
+                pdbIds = await ApiService.getPdbEntriesForUniprot(identifier);
+            }
+            this.currentProteinDetails = await this.fetchMemberDetails(pdbIds);
             this.displayResults(this.currentProteinDetails);
         } catch (error) {
-            console.error('Error fetching protein group:', error);
-            this.noResultsMessage.textContent = 'Could not fetch data for the given Group ID.';
+            console.error('Error fetching protein entries:', error);
+            this.noResultsMessage.textContent = 'Could not fetch data for the given identifier.';
             this.noResultsMessage.style.display = 'block';
             const msg = error.status && error.url
-                ? `Failed to fetch protein group (status ${error.status}) from ${error.url}`
-                : 'Failed to fetch protein group data.';
+                ? `Failed to fetch protein data (status ${error.status}) from ${error.url}`
+                : 'Failed to fetch protein data.';
             if (typeof showNotification === 'function') {
                 showNotification(msg, 'error');
             }
@@ -91,16 +96,15 @@ class ProteinBrowser {
     }
 
     async fetchMemberDetails(pdbIds) {
-        const details = [];
-        for (const pdbId of pdbIds) {
+        const limitedIds = pdbIds.slice(0, 20);
+        const promises = limitedIds.map(async pdbId => {
             try {
-                const data = await ApiService.getRcsbEntry(pdbId);
-                details.push(data);
+                return await ApiService.getRcsbEntry(pdbId);
             } catch (error) {
-                details.push({ rcsb_id: pdbId, error: 'Failed to fetch details' });
+                return { rcsb_id: pdbId, error: 'Failed to fetch details' };
             }
-        }
-        return details;
+        });
+        return Promise.all(promises);
     }
 
     async fetchBoundLigands(pdbId) {
