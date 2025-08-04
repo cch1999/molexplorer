@@ -12,10 +12,13 @@ const createDom = () => {
   const grid = document.createElement('div');
   const search = document.createElement('input');
   const source = document.createElement('select');
+  const sort = document.createElement('select');
+  sort.value = 'name-asc';
   const ccd = document.createElement('input');
   document.registerElement('fragment-grid', grid);
   document.registerElement('fragment-search', search);
   document.registerElement('fragment-filter-source', source);
+  document.registerElement('fragment-sort', sort);
   document.registerElement('ccd-toggle', ccd);
   global.window = dom.window;
   global.document = document;
@@ -123,5 +126,33 @@ describe('FragmentLibrary', () => {
     library.renderFragments();
     assert.strictEqual(library.grid.children.length, 1);
     assert.match(library.grid.textContent, /Beta/);
+  });
+
+  it('renderFragments sorts fragments based on selected option', () => {
+    library.fragments = [
+      { id: '1', name: 'Beta', source: 'ENAMINE', in_ccd: false, kind: 'OTHER', query: '' },
+      { id: '2', name: 'Alpha', source: 'PDBe', in_ccd: false, kind: 'OTHER', query: '' },
+      { id: '3', name: 'Gamma', source: 'DSI', in_ccd: false, kind: 'OTHER', query: '' }
+    ];
+
+    library.sourceFilter.value = 'all';
+    library.ccdToggle.checked = false;
+
+    library.sortSelect.value = 'name-asc';
+    library.renderFragments();
+    let order = library.grid.children.map(c => c.textContent);
+    assert.deepStrictEqual(order, ['Alpha', 'Beta', 'Gamma']);
+
+    library.grid.innerHTML = '';
+    library.sortSelect.value = 'name-desc';
+    library.renderFragments();
+    order = library.grid.children.map(c => c.textContent);
+    assert.deepStrictEqual(order, ['Gamma', 'Beta', 'Alpha']);
+
+    library.grid.innerHTML = '';
+    library.sortSelect.value = 'source';
+    library.renderFragments();
+    order = library.grid.children.map(c => c.textContent);
+    assert.deepStrictEqual(order, ['Gamma', 'Beta', 'Alpha']);
   });
 });

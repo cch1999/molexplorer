@@ -11,6 +11,7 @@ class FragmentLibrary {
         this.grid = null;
         this.searchInput = null;
         this.sourceFilter = null;
+        this.sortSelect = null;
         this.ccdToggle = null;
         this.notify = notify;
         this.rdkitPromise = rdkit;
@@ -20,6 +21,7 @@ class FragmentLibrary {
         this.grid = document.getElementById('fragment-grid');
         this.searchInput = document.getElementById('fragment-search');
         this.sourceFilter = document.getElementById('fragment-filter-source');
+        this.sortSelect = document.getElementById('fragment-sort');
         this.ccdToggle = document.getElementById('ccd-toggle');
 
         this.addEventListeners();
@@ -32,6 +34,9 @@ class FragmentLibrary {
         }
         if (this.sourceFilter) {
             this.sourceFilter.addEventListener('change', () => this.renderFragments());
+        }
+        if (this.sortSelect) {
+            this.sortSelect.addEventListener('change', () => this.renderFragments());
         }
         if (this.ccdToggle) {
             this.ccdToggle.addEventListener('change', () => this.renderFragments());
@@ -73,6 +78,7 @@ class FragmentLibrary {
 
         const searchTerm = this.searchInput ? this.searchInput.value.toLowerCase() : '';
         const source = this.sourceFilter ? this.sourceFilter.value : 'all';
+        const sortOption = this.sortSelect ? this.sortSelect.value : 'name-asc';
         const onlyInCCD = this.ccdToggle ? this.ccdToggle.checked : false;
 
         const filtered = this.fragments.filter(fragment => {
@@ -86,6 +92,18 @@ class FragmentLibrary {
             this.grid.innerHTML = '<p>No fragments match your criteria.</p>';
             return;
         }
+
+        filtered.sort((a, b) => {
+            switch (sortOption) {
+                case 'name-desc':
+                    return b.name.localeCompare(a.name);
+                case 'source':
+                    return a.source.localeCompare(b.source) || a.name.localeCompare(b.name);
+                case 'name-asc':
+                default:
+                    return a.name.localeCompare(b.name);
+            }
+        });
 
         const fragmentContainer = document.createDocumentFragment();
         filtered.forEach(fragment => {
