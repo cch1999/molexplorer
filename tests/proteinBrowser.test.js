@@ -13,3 +13,35 @@ describe('fetchMemberDetails', () => {
     assert.deepStrictEqual(result.map(r => r.rcsb_id), pdbIds.slice(20, 30));
   });
 });
+
+describe('displayResults', () => {
+  it('renders citation link when publication data available', async () => {
+    const rowStub = {
+      innerHTML: '',
+      querySelector: () => ({ addEventListener: () => {}, dataset: {} }),
+      querySelectorAll: () => []
+    };
+    const browser = new ProteinBrowser({});
+    browser.resultsBody = {
+      innerHTML: '',
+      insertRow: () => rowStub
+    };
+    browser.hideAidsToggle = { checked: false };
+    browser.resultsContainer = { style: {} };
+    browser.noResultsMessage = { style: {}, textContent: '' };
+    mock.method(browser, 'fetchBoundLigands', async () => []);
+
+    const details = [{
+      rcsb_id: '1ABC',
+      struct: { title: 'Structure' },
+      rcsb_entry_info: { resolution_combined: [1.5] },
+      rcsb_accession_info: { initial_release_date: '2024-01-01' },
+      rcsb_primary_citation: { title: 'The Paper', pdbx_database_id_doi: '10.1000/xyz' }
+    }];
+
+    await browser.displayResults(details);
+
+    assert.ok(rowStub.innerHTML.includes('The Paper'));
+    assert.ok(rowStub.innerHTML.includes('doi.org/10.1000/xyz'));
+  });
+});
