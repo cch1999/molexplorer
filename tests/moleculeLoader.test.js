@@ -51,6 +51,20 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
   });
 
+  it('prefers instance SDF over local TSV data when details provided', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'ATP', status: 'pending', pdbId: '4TOS', authSeqId: '1402', labelAsymId: 'D' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '0\t1\t2\tC1=O\t4\t5\t6\t7\tATP');
+    mock.method(ApiService, 'getInstanceSdf', async () => 'instancedata');
+    await loader.loadMolecule(repo.getMolecule('ATP'));
+    assert.strictEqual(ApiService.getInstanceSdf.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 0);
+    assert.strictEqual(repo.getMolecule('ATP').status, 'loaded');
+  });
+
   it('handles errors from remote fetch', async () => {
     const repo = new MoleculeRepository([{ code: 'BAD', status: 'pending' }]);
     const loader = new MoleculeLoader(repo, cardUI);
