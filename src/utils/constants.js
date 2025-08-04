@@ -45,3 +45,4 @@ export const CRYSTALLIZATION_AIDS = [
   'ACE', 'ACT', 'BME', 'DMS', 'FMT', 'IMD', 'MES',
   'PEG', 'PGE', 'TRS'
 ];
+export const ION_LIGANDS = ['ZN', 'MG', 'CA', 'NA', 'K', 'CL'];
