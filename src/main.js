@@ -9,6 +9,7 @@ import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import { initJoy } from './joy.js';
 
 class MoleculeManager {
     constructor() {
@@ -263,6 +264,8 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, 3000);
 }
+
+initJoy();
 
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
