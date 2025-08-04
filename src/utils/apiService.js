@@ -115,6 +115,7 @@ export default class ApiService {
    * @param {string} pdbId - The 4-character PDB ID
    * @param {string|number} authSeqId - Author provided residue/sequence number
    * @param {string} labelAsymId - Chain identifier
+   * @param {string} [compId] - Chemical component ID used in the filename parameter
    * @returns {Promise<string>} SDF file content for the ligand instance
    */
   static getInstanceSdf(pdbId, authSeqId, labelAsymId, compId) {
@@ -124,11 +125,11 @@ export default class ApiService {
       encoding: 'sdf',
     });
     if (compId) {
-      params.append('auth_comp_id', compId.toUpperCase());
+      const filename = `${pdbId}_${labelAsymId}_${compId}`.toUpperCase();
+      params.append('filename', `${filename}.sdf`);
     }
-    return this.fetchText(
-      `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?${params.toString()}`
-    );
+    const url = `${RCSB_MODEL_BASE_URL}/${pdbId.toUpperCase()}/ligand?${params.toString()}`;
+    return this.fetchText(url);
   }
   /**
    * Fetch fragment library data from local TSV file

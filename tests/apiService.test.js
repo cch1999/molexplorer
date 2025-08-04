@@ -63,7 +63,7 @@ describe('ApiService', () => {
     const txt = await ApiService.getInstanceSdf('1abc', 7, 'B', 'ATP');
     assert.strictEqual(
       global.fetch.mock.calls[0].arguments[0],
-      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf&auth_comp_id=ATP`
+      `${RCSB_MODEL_BASE_URL}/1ABC/ligand?auth_seq_id=7&label_asym_id=B&encoding=sdf&filename=1ABC_B_ATP.sdf`
     );
     assert.strictEqual(txt, 'sdf');
   });
