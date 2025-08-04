@@ -15,6 +15,8 @@ import {
   PD_BE_LIGAND_MONOMERS_BASE_URL,
   PD_BE_SIMILARITY_BASE_URL,
   PD_BE_SUMMARY_BASE_URL,
+  RCSB_GROUP_BASE_URL,
+  UNIPROT_ENTRY_BASE_URL,
   PUBCHEM_COMPOUND_BASE_URL,
   PUBCHEM_COMPOUND_LINK_BASE,
   RCSB_ENTRY_BASE_URL,
@@ -344,6 +346,23 @@ export default class ApiService {
       properties,
       link: cid ? `${PUBCHEM_COMPOUND_LINK_BASE}/${cid}` : null
     };
+  }
+
+  /**
+   * Fetch PDB entry IDs linked to a UniProt accession.
+   *
+   * Queries the UniProt REST API for cross-references and extracts all
+   * associated PDB identifiers.
+   *
+  * @param {string} uniprotId - UniProt accession (e.g., 'P0DTC2').
+  * @returns {Promise<string[]>} Array of PDB IDs.
+  */
+  static async getPdbEntriesForUniprot(uniprotId) {
+    const accession = uniprotId.toUpperCase();
+    const url = `${UNIPROT_ENTRY_BASE_URL}/${accession}.json`;
+    const data = await this.fetchJson(url);
+    const refs = data?.uniProtKBCrossReferences ?? [];
+    return refs.filter(ref => ref.database === 'PDB').map(ref => ref.id);
   }
 
   /**

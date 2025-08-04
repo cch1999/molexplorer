@@ -228,6 +228,59 @@ const fragmentLibrary = new FragmentLibrary(moleculeManager, {
 }).init();
 fragmentLibrary.loadFragments();
 
+// Add Fragment Modal handlers
+const addFragmentModal = document.getElementById('add-fragment-modal');
+const addFragmentBtn = document.getElementById('add-fragment-btn');
+const cancelAddFragmentBtn = document.getElementById('cancel-add-fragment-btn');
+const closeFragmentModalBtn = document.getElementById('close-fragment-modal');
+const confirmAddFragmentBtn = document.getElementById('confirm-add-fragment-btn');
+
+const openFragmentModal = () => {
+    if (addFragmentModal) {
+        addFragmentModal.style.display = 'block';
+    }
+};
+
+const closeFragmentModal = () => {
+    if (addFragmentModal) {
+        addFragmentModal.style.display = 'none';
+    }
+};
+
+if (addFragmentBtn) {
+    addFragmentBtn.addEventListener('click', openFragmentModal);
+}
+if (cancelAddFragmentBtn) {
+    cancelAddFragmentBtn.addEventListener('click', closeFragmentModal);
+}
+if (closeFragmentModalBtn) {
+    closeFragmentModalBtn.addEventListener('click', closeFragmentModal);
+}
+if (confirmAddFragmentBtn) {
+    confirmAddFragmentBtn.addEventListener('click', () => {
+        const nameEl = document.getElementById('fragment-name');
+        const queryEl = document.getElementById('fragment-query');
+        const sourceEl = document.getElementById('fragment-source');
+        const descEl = document.getElementById('fragment-description');
+
+        const fragmentData = {
+            name: nameEl ? nameEl.value.trim() : '',
+            query: queryEl ? queryEl.value.trim() : '',
+            source: sourceEl ? sourceEl.value.trim() : '',
+            description: descEl ? descEl.value.trim() : ''
+        };
+
+        const added = fragmentLibrary.addFragment(fragmentData);
+        if (added) {
+            if (nameEl) nameEl.value = '';
+            if (queryEl) queryEl.value = '';
+            if (sourceEl) sourceEl.value = 'custom';
+            if (descEl) descEl.value = '';
+            closeFragmentModal();
+        }
+    });
+}
+
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
 
 function showNotification(message, type = 'info') {
