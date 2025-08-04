@@ -87,3 +87,63 @@ describe('LigandDetails viewer focus', () => {
     delete global.window;
   });
 });
+
+describe('LigandDetails interaction filters', () => {
+  it('renders and filters interactions by type', async () => {
+    const dom = new JSDOM();
+    const { document } = dom.window;
+
+    const reg = (id, el = document.createElement('div')) => {
+      el.style = {};
+      document.registerElement(id, el);
+      return el;
+    };
+
+    reg('molecule-details-modal');
+    reg('details-title');
+    reg('details-code');
+    reg('details-source');
+    reg('details-type');
+    reg('details-structure');
+    reg('details-viewer-container');
+    reg('details-json');
+    reg('details-pdb-id');
+    reg('details-chain');
+    reg('details-residue');
+
+    const filtersEl = reg('interaction-type-filters');
+    const countsEl = reg('interaction-counts');
+    const tableEl = reg('interaction-summary-table', document.createElement('table'));
+    const tbodyEl = document.createElement('tbody');
+    document.registerElement('interaction-summary-body', tbodyEl);
+    tableEl.appendChild(tbodyEl);
+    reg('no-interaction-data');
+
+    global.document = document;
+    global.window = { addEventListener: () => {} };
+    document.querySelectorAll = () => [];
+
+    const interactions = [
+      { type: 'hbond', residue: 'A45', distance: 2.7 },
+      { type: 'hydrophobic', residue: 'B12', distance: 3.5 },
+      { type: 'hbond', residue: 'A46', distance: 2.8 }
+    ];
+    mock.method(ApiService, 'getLigandInteractions', async () => interactions);
+
+    const ld = new LigandDetails({ getMolecule: () => ({}) });
+    await ld.loadInteractions('AAA', {});
+
+    assert.strictEqual(tbodyEl.children.length, 3);
+    assert.ok(countsEl.textContent.includes('2 Hbond'));
+
+    ld.selectedInteractionTypes = new Set(['hydrophobic']);
+    ld.renderInteractions();
+
+    assert.strictEqual(tbodyEl.children.length, 1);
+    assert.strictEqual(countsEl.textContent, '1 Hydrophobic');
+
+    mock.restoreAll();
+    delete global.document;
+    delete global.window;
+  });
+});

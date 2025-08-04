@@ -289,6 +289,26 @@ export default class ApiService {
   }
 
   /**
+   * Fetch interaction summary data for a ligand.
+   *
+   * Currently a placeholder that returns an empty array. Implementations can
+   * replace this with calls to a real interaction service.
+   *
+   * @param {string} pdbId - PDB identifier, optional.
+   * @param {string} ccdCode - Ligand chemical component ID.
+   * @param {string} authSeqId - Residue number for bound ligands.
+   * @param {string} labelAsymId - Chain identifier for bound ligands.
+   * @returns {Promise<Array>} Array of interaction objects.
+   */
+  static async getLigandInteractions(pdbId, ccdCode, authSeqId, labelAsymId) {
+    void pdbId;
+    void ccdCode;
+    void authSeqId;
+    void labelAsymId;
+    return [];
+  }
+
+  /**
    * Fetch compound synonyms from PubChem.
    *
    * @param {string} name - Compound name or identifier.
