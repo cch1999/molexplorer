@@ -68,16 +68,41 @@ describe('MoleculeLoader', () => {
     assert.strictEqual(repo.getMolecule('CCC').status, 'loaded');
   });
 
-  it('rejects instance SDF lacking structure data', async () => {
+  it('falls back to CCD SDF when instance SDF lacks structure data', async () => {
     const repo = new MoleculeRepository([
       { code: 'DDD', status: 'pending', pdbId: '9XYZ', authSeqId: '1', labelAsymId: 'B' },
     ]);
     const loader = new MoleculeLoader(repo, cardUI);
     mock.method(ApiService, 'getInstanceSdf', () => 'http://bad');
     mock.method(ApiService, 'fetchText', async () => '> <model_server_result.job_id>\nabc123\n');
+    mock.method(ApiService, 'getFragmentLibraryTsv', async () => '');
+    mock.method(
+      ApiService,
+      'getCcdSdf',
+      async () =>
+        `mol\n  mock\n\n  1  0  0  0  0  0            999 V2000\n    0.0  0.0  0.0 H   0  0  0  0  0  0  0  0  0  0  0  0\nM  END\n$$$$`
+    );
     await loader.loadMolecule(repo.getMolecule('DDD'));
-    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 1);
-    assert.strictEqual(repo.getMolecule('DDD').status, 'error');
+    assert.strictEqual(cardUI.createMoleculeCard.mock.callCount(), 1);
+    assert.strictEqual(cardUI.createNotFoundCard.mock.callCount(), 0);
+    assert.strictEqual(repo.getMolecule('DDD').status, 'loaded');
+  });
+
+  it('falls back to SMILES when instance SDF invalid but local data exists', async () => {
+    const repo = new MoleculeRepository([
+      { code: 'FFF', status: 'pending', pdbId: '2XYZ', authSeqId: '3', labelAsymId: 'C' },
+    ]);
+    const loader = new MoleculeLoader(repo, cardUI);
+    mock.method(ApiService, 'getInstanceSdf', () => 'http://bad');
+    mock.method(ApiService, 'fetchText', async () => '');
+    mock.method(
+      ApiService,
+      'getFragmentLibraryTsv',
+      async () => '0\t1\t2\tC1=O\t4\t5\t6\t7\tFFF'
+    );
+    await loader.loadMolecule(repo.getMolecule('FFF'));
+    assert.strictEqual(cardUI.createMoleculeCardFromSmiles.mock.callCount(), 1);
+    assert.strictEqual(repo.getMolecule('FFF').status, 'loaded');
   });
 
   it('rejects SDF with zero atom count', async () => {

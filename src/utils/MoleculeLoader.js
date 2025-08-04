@@ -21,16 +21,28 @@ class MoleculeLoader {
         try {
             this.repository.updateMoleculeStatus(identifier, 'loading');
             let sdfData;
+            let instanceInfo = null;
+
             if (pdbId && authSeqId && labelAsymId) {
-                // For PDB instances always fetch experimental coordinates
+                // For PDB instances try experimental coordinates first
                 const url = ApiService.getInstanceSdf(
                     pdbId,
                     authSeqId,
                     labelAsymId,
                     code
                 );
-                sdfData = await ApiService.fetchText(url);
-            } else {
+                const instanceSdf = await ApiService.fetchText(url);
+                if (
+                    instanceSdf &&
+                    !instanceSdf.toLowerCase().includes('<html') &&
+                    MoleculeLoader.#isValidSdf(instanceSdf)
+                ) {
+                    sdfData = instanceSdf;
+                    instanceInfo = { pdbId, authSeqId, labelAsymId };
+                }
+            }
+
+            if (!sdfData) {
                 const smilesData = await this.findMoleculeInLocalTsv(code);
                 if (smilesData) {
                     this.repository.updateMoleculeStatus(identifier, 'loaded');
@@ -43,6 +55,7 @@ class MoleculeLoader {
                 }
                 sdfData = await ApiService.getCcdSdf(code);
             }
+
             if (
                 !sdfData ||
                 sdfData.trim() === '' ||
@@ -51,19 +64,21 @@ class MoleculeLoader {
             ) {
                 throw new Error('Received empty or invalid SDF data.');
             }
+
             this.repository.updateMoleculeStatus(identifier, 'loaded');
             const molecule = this.repository.getMolecule(identifier);
             if (molecule) {
                 molecule.sdf = sdfData;
             }
-            const instanceInfo = pdbId && authSeqId && labelAsymId
-                ? { pdbId, authSeqId, labelAsymId }
-                : null;
             this.cardUI.createMoleculeCard(sdfData, code, 'sdf', identifier, instanceInfo);
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
             this.repository.updateMoleculeStatus(identifier, 'error');
-            this.cardUI.createNotFoundCard(code, `Failed to load: ${error.message}`, identifier);
+            this.cardUI.createNotFoundCard(
+                code,
+                `Failed to load: ${error.message}`,
+                identifier
+            );
         }
     }
 
