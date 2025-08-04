@@ -378,6 +378,19 @@ main {
     border-radius: 4px;
 }
 
+#viewer-content .viewer-container {
+    display: flex;
+    gap: 20px;
+}
+
+#viewer-content .viewer-sidebar {
+    width: 250px;
+}
+
+#viewer-content .viewer-display {
+    flex: 1;
+}
+
 .add-btn:active {
     transform: scale(0.95);
 }
