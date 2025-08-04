@@ -1,4 +1,10 @@
 import ApiService from '../utils/apiService.js';
+import {
+    MOLJS_BG_COLOR_DARK,
+    MOLJS_BG_COLOR_LIGHT,
+    MOLJS_DEFAULT_STICK_STYLE,
+    MOLJS_HIDE_HYDROGENS_SELECTION
+} from '../utils/constants.js';
 
 class MoleculeCard {
     constructor(grid, repository, callbacks = {}) {
@@ -146,12 +152,14 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const bgColor = document.body?.classList?.contains('dark-mode')
+                    ? MOLJS_BG_COLOR_DARK
+                    : MOLJS_BG_COLOR_LIGHT;
                 const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
                 viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
-                viewer.setStyle({}, { stick: {} });
-                viewer.setStyle({ elem: 'H' }, {});
+                viewer.setStyle({}, MOLJS_DEFAULT_STICK_STYLE);
+                viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
                 viewer.zoomTo();
                 viewer.render();
             } catch (e) {

@@ -46,3 +46,10 @@ export const CRYSTALLIZATION_AIDS = [
   'PEG', 'PGE', 'TRS'
 ];
 export const ION_LIGANDS = ['ZN', 'MG', 'CA', 'NA', 'K', 'CL'];
+
+// MolJs viewer constants
+export const MOLJS_BG_COLOR_LIGHT = 'white';
+export const MOLJS_BG_COLOR_DARK = '#e0e0e0';
+export const MOLJS_VIEWER_DIMENSIONS = { width: '100%', height: '100%' };
+export const MOLJS_DEFAULT_STICK_STYLE = { stick: {} };
+export const MOLJS_HIDE_HYDROGENS_SELECTION = { elem: 'H' };

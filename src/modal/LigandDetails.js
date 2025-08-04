@@ -1,4 +1,10 @@
 import ApiService from '../utils/apiService.js';
+import {
+    MOLJS_BG_COLOR_DARK,
+    MOLJS_BG_COLOR_LIGHT,
+    MOLJS_VIEWER_DIMENSIONS,
+    MOLJS_HIDE_HYDROGENS_SELECTION
+} from '../utils/constants.js';
 
 class LigandDetails {
     constructor(moleculeManager) {
@@ -63,20 +69,21 @@ class LigandDetails {
                 .then(pdbData => {
                     setTimeout(() => {
                         try {
-                            const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                            const bgColor = document.body?.classList?.contains('dark-mode')
+                                ? MOLJS_BG_COLOR_DARK
+                                : MOLJS_BG_COLOR_LIGHT;
                             const viewer = $3Dmol.createViewer(this.detailsViewer, {
                                 backgroundColor: bgColor,
-                                width: '100%',
-                                height: '100%'
+                                ...MOLJS_VIEWER_DIMENSIONS
                             });
                             this.detailsViewer.viewer = viewer;
                             viewer.addModel(pdbData, 'pdb');
                             // Show overall protein as light grey cartoon
                             viewer.setStyle({}, { cartoon: { color: 'lightgrey' } });
-              const ligandSel = {
-                                  chain: molecule.chainId,
-                                  resi: parseInt(molecule.authorResidueNumber, 10)
-                              };
+                            const ligandSel = {
+                                chain: molecule.chainId,
+                                resi: parseInt(molecule.authorResidueNumber, 10)
+                            };
                             const pocketSel = { within: { distance: 5, sel: ligandSel } };
                             // Surrounding residues as element-coloured sticks
                             viewer.setStyle(pocketSel, {
@@ -92,6 +99,7 @@ class LigandDetails {
                                 { opacity: 0.6, color: 'white' },
                                 pocketSel
                             );
+                            viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
                             viewer.zoomTo(ligandSel);
                             viewer.render();
                             this.viewer = viewer;
@@ -108,11 +116,12 @@ class LigandDetails {
         } else if (sdfData) {
             setTimeout(() => {
                 try {
-                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                    const bgColor = document.body?.classList?.contains('dark-mode')
+                        ? MOLJS_BG_COLOR_DARK
+                        : MOLJS_BG_COLOR_LIGHT;
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
                         backgroundColor: bgColor,
-                        width: '100%',
-                        height: '100%'
+                        ...MOLJS_VIEWER_DIMENSIONS
                     });
                     this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
@@ -120,7 +129,7 @@ class LigandDetails {
                         stick: { radius: 0.2, colorscheme: 'element' },
                         sphere: { scale: 0.3, colorscheme: 'element' }
                     });
-                    viewer.setStyle({ elem: 'H' }, {});
+                    viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();
                     viewer.render();
                     this.viewer = viewer;
