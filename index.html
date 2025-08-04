@@ -43,6 +43,7 @@
     <main>
         <div class="tabs">
             <button class="tab-button active">Molecules</button>
+            <button class="tab-button">Viewer</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
         </div>
@@ -68,6 +69,12 @@
                 </div>
                 <div id="molecule-grid" class="molecule-grid">
                     <div class="loading-indicator">Loading molecules...</div>
+                </div>
+            </div>
+            <div id="viewer-content" class="content-panel" style="display:none;">
+                <div class="viewer-container">
+                    <div class="viewer-sidebar"></div>
+                    <div class="viewer-display"></div>
                 </div>
             </div>
             <div id="fragment-library-content" class="content-panel" style="display: none;">

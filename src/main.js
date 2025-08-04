@@ -97,10 +97,11 @@ class MoleculeManager {
             closeExport();
         });
 
-        // Tab switching for Molecules, Fragments, Proteins
+        // Tab switching for Molecules, Viewer, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [
             document.getElementById('molecule-library-content'),
+            document.getElementById('viewer-content'),
             document.getElementById('fragment-library-content'),
             document.getElementById('protein-browser-content')
         ];
