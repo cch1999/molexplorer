@@ -1608,6 +1608,15 @@ main {
     }
 }
 
+.interaction-filters label {
+    margin-right: 10px;
+}
+
+.interaction-counts {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
 /* General mobile layout adjustments */
 @media (max-width: 600px) {
     header {
