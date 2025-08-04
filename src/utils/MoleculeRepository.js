@@ -1,6 +1,7 @@
 class MoleculeRepository {
     constructor(initial = []) {
         this.molecules = initial.map(m => ({ ...m, id: this.generateId(m) }));
+        this.viewerMolecules = [];
     }
 
     generateId(data) {
@@ -61,6 +62,24 @@ class MoleculeRepository {
 
     clearAll() {
         this.molecules = [];
+    }
+
+    addViewerMolecule(mol) {
+        if (!mol || !mol.code || !mol.sdf) return;
+        if (this.viewerMolecules.find(m => m.code === mol.code)) return;
+        this.viewerMolecules.push({ code: mol.code, sdf: mol.sdf });
+    }
+
+    removeViewerMolecule(code) {
+        this.viewerMolecules = this.viewerMolecules.filter(m => m.code !== code);
+    }
+
+    getViewerMolecules() {
+        return [...this.viewerMolecules];
+    }
+
+    clearViewerState() {
+        this.viewerMolecules = [];
     }
 
     removeHydrogensFromSdf(sdf) {

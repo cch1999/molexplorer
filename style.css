@@ -1307,6 +1307,45 @@ main {
     pointer-events: none;
 }
 
+.view-btn {
+    position: absolute;
+    top: 8px;
+    right: 104px;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    user-select: none;
+    z-index: 10;
+    opacity: 0.5;
+    background-color: transparent;
+    color: #757575;
+}
+
+.view-btn:hover {
+    opacity: 1;
+    background-color: #fff3e0;
+    color: #ef6c00;
+    transform: scale(1.1);
+}
+
+.view-btn:active {
+    transform: scale(0.9);
+    background-color: #ffe0b2;
+}
+
+.molecule-card:hover .view-btn {
+    opacity: 0.7;
+}
+
+.view-btn svg {
+    pointer-events: none;
+}
+
 .molecule-card.dragging {
     opacity: 0.5;
     transform: rotate(5deg);
@@ -1520,6 +1559,26 @@ main {
 
 .add-ligand-btn:hover {
     background-color: #5838b4;
+}
+
+.view-ligand-btn {
+    background-color: #009688;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    line-height: 28px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-ligand-btn:hover {
+    background-color: #00796b;
 }
 
 /* Disclaimer Modal Styles */
