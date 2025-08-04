@@ -1,85 +1,92 @@
-let viewer = null;
-let listEl = null;
-const molecules = [];
-
-function init() {
-    const container = document.getElementById('viewer-content');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const viewerDiv = document.createElement('div');
-    viewerDiv.style.width = '100%';
-    viewerDiv.style.height = '400px';
-    container.appendChild(viewerDiv);
-
-    listEl = document.createElement('ul');
-    listEl.className = 'viewer-list';
-    container.appendChild(listEl);
-
-    viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
-    viewer.render();
-}
-
-function renderList() {
-    if (!listEl) return;
-    listEl.innerHTML = '';
-    molecules.forEach(({ code, visible }) => {
-        const row = document.createElement('li');
-        row.className = 'viewer-row';
-
-        const codeSpan = document.createElement('span');
-        codeSpan.textContent = code;
-        row.appendChild(codeSpan);
-
-        const toggleBtn = document.createElement('button');
-        toggleBtn.className = 'viewer-hide-btn';
-        toggleBtn.innerHTML = visible ? '&#128065;' : '&#128068;';
-        toggleBtn.addEventListener('click', () => toggleVisibility(code));
-        row.appendChild(toggleBtn);
-
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'viewer-remove-btn';
-        removeBtn.innerHTML = '&#10006;';
-        removeBtn.addEventListener('click', () => removeMolecule(code));
-        row.appendChild(removeBtn);
-
-        listEl.appendChild(row);
-    });
-}
-
-function addMolecule({ code, sdf }) {
-    if (!viewer || molecules.some(m => m.code === code)) {
-        return false;
+class Viewer {
+    constructor() {
+        this.viewer = null;
+        this.listEl = null;
+        this.molecules = [];
     }
-    const model = viewer.addModel(sdf, 'sdf');
-    model.setStyle({}, { stick: {} });
-    viewer.zoomTo();
-    viewer.render();
-    molecules.push({ code, model, visible: true });
-    renderList();
-    return true;
-}
 
-function toggleVisibility(code) {
-    const entry = molecules.find(m => m.code === code);
-    if (!entry) return;
-    entry.visible = !entry.visible;
-    entry.model.setStyle({}, entry.visible ? { stick: {} } : {});
-    viewer.render();
-    renderList();
-}
+    init() {
+        const container = document.getElementById('viewer-content');
+        if (!container) return this;
 
-function removeMolecule(code) {
-    const index = molecules.findIndex(m => m.code === code);
-    if (index === -1) return;
-    const { model } = molecules[index];
-    if (model) {
-        viewer.removeModel(model);
-        viewer.render();
+        container.innerHTML = '';
+
+        const viewerDiv = document.createElement('div');
+        viewerDiv.style.width = '100%';
+        viewerDiv.style.height = '400px';
+        container.appendChild(viewerDiv);
+
+        this.listEl = document.createElement('ul');
+        this.listEl.className = 'viewer-list';
+        container.appendChild(this.listEl);
+
+        this.viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
+        this.viewer.render();
+
+        return this;
     }
-    molecules.splice(index, 1);
-    renderList();
+
+    renderList() {
+        if (!this.listEl) return;
+        this.listEl.innerHTML = '';
+        this.molecules.forEach(({ code, visible }) => {
+            const row = document.createElement('li');
+            row.className = 'viewer-row';
+
+            const codeSpan = document.createElement('span');
+            codeSpan.textContent = code;
+            row.appendChild(codeSpan);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'viewer-hide-btn';
+            toggleBtn.innerHTML = visible ? '&#128065;' : '&#128068;';
+            toggleBtn.addEventListener('click', () => this.toggleVisibility(code));
+            row.appendChild(toggleBtn);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'viewer-remove-btn';
+            removeBtn.innerHTML = '&#10006;';
+            removeBtn.addEventListener('click', () => this.removeMolecule(code));
+            row.appendChild(removeBtn);
+
+            this.listEl.appendChild(row);
+        });
+    }
+
+    addMolecule({ code, sdf }) {
+        if (!this.viewer || this.molecules.some(m => m.code === code)) {
+            return false;
+        }
+        const model = this.viewer.addModel(sdf, 'sdf');
+        model.setStyle({}, { stick: {} });
+        this.viewer.zoomTo();
+        this.viewer.render();
+        this.molecules.push({ code, model, visible: true });
+        this.renderList();
+        return true;
+    }
+
+    toggleVisibility(code) {
+        const entry = this.molecules.find(m => m.code === code);
+        if (!entry) return;
+        entry.visible = !entry.visible;
+        entry.model.setStyle({}, entry.visible ? { stick: {} } : {});
+        this.viewer.render();
+        this.renderList();
+    }
+
+    removeMolecule(code) {
+        const index = this.molecules.findIndex(m => m.code === code);
+        if (index === -1) return;
+        const { model } = this.molecules[index];
+        if (model) {
+            this.viewer.removeModel(model);
+            this.viewer.render();
+        }
+        this.molecules.splice(index, 1);
+        this.renderList();
+    }
 }
 
-export default { init, addMolecule, toggleVisibility, removeMolecule };
+export default Viewer;
+
