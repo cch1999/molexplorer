@@ -16,6 +16,8 @@ class LigandDetails {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.viewer = null;
+        this.interactionShapes = [];
+        this.interactionToggle = null;
 
         const closeBtn = document.getElementById('close-details-modal');
         if (closeBtn) {
@@ -58,6 +60,32 @@ class LigandDetails {
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';
+        this.clearInteractions();
+        if (isInstance && this.detailsViewer?.parentElement) {
+            if (!this.interactionToggle) {
+                const container = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'interaction-toggle';
+                checkbox.checked = true;
+                const label = document.createElement('label');
+                label.htmlFor = 'interaction-toggle';
+                label.textContent = 'Show interactions';
+                container.appendChild(checkbox);
+                container.appendChild(label);
+                this.detailsViewer.parentElement.insertBefore(container, this.detailsViewer);
+                checkbox.addEventListener('change', () => this.updateInteractionVisibility());
+                this.interactionToggle = checkbox;
+            } else {
+                this.interactionToggle.checked = true;
+                if (this.interactionToggle.parentElement) {
+                    this.interactionToggle.parentElement.style.display = 'block';
+                }
+            }
+        } else if (this.interactionToggle?.parentElement) {
+            this.interactionToggle.parentElement.style.display = 'none';
+        }
+
         if (isInstance) {
             ApiService.getPdbFile(molecule.pdbId)
                 .then(pdbData => {
@@ -93,6 +121,15 @@ class LigandDetails {
                             viewer.zoomTo(ligandSel);
                             viewer.render();
                             this.viewer = viewer;
+                            if (this.interactionToggle) {
+                                ApiService.getLigandInteractions(
+                                    molecule.pdbId,
+                                    molecule.labelAsymId,
+                                    molecule.authSeqId
+                                )
+                                    .then(data => this.renderInteractions(data, molecule))
+                                    .catch(err => console.error('Interaction fetch error:', err));
+                            }
                         } catch (e) {
                             console.error(`Error initializing PDB viewer for ${ccdCode}:`, e);
                             this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
@@ -176,6 +213,59 @@ class LigandDetails {
         if (this.detailsViewer) {
             this.detailsViewer.innerHTML = '';
         }
+        this.clearInteractions();
+    }
+
+    renderInteractions(data, molecule) {
+        if (!this.viewer || !data) return;
+        const pdbId = Object.keys(data)[0];
+        const chain = molecule.labelAsymId;
+        const res = String(molecule.authSeqId);
+        const entries = data?.[pdbId]?.[chain]?.[res] || [];
+        entries.forEach(inter => {
+            const ligandAtom = inter?.ligand_atom?.atom || inter?.ligand_atom || inter?.atom;
+            const partnerChain = inter?.partner_chain || inter?.chain_id || inter?.partner?.chain_id;
+            const partnerRes = parseInt(
+                inter?.partner_residue_number || inter?.residue_number || inter?.partner?.residue_number,
+                10
+            );
+            const partnerAtom = inter?.partner_atom || inter?.atom2 || inter?.partner?.atom;
+            const [a1] = this.viewer.getModel().selectedAtoms({ chain, resi: parseInt(res, 10), atom: ligandAtom });
+            const [a2] = this.viewer.getModel().selectedAtoms({ chain: partnerChain, resi: partnerRes, atom: partnerAtom });
+            if (a1 && a2) {
+                const shape = this.viewer.addCylinder({
+                    start: { x: a1.x, y: a1.y, z: a1.z },
+                    end: { x: a2.x, y: a2.y, z: a2.z },
+                    radius: 0.1,
+                    color: 'magenta',
+                    dashed: true
+                });
+                this.interactionShapes.push(shape);
+            }
+        });
+        this.updateInteractionVisibility();
+    }
+
+    updateInteractionVisibility() {
+        const visible = !this.interactionToggle || this.interactionToggle.checked;
+        this.interactionShapes.forEach(shape => {
+            shape.hidden = !visible;
+        });
+        if (this.viewer?.render) this.viewer.render();
+    }
+
+    clearInteractions() {
+        if (this.viewer && this.interactionShapes.length) {
+            this.interactionShapes.forEach(shape => {
+                if (this.viewer.removeShape) {
+                    this.viewer.removeShape(shape);
+                } else {
+                    shape.hidden = true;
+                }
+            });
+            if (this.viewer.render) this.viewer.render();
+        }
+        this.interactionShapes = [];
     }
 }
 
