@@ -217,9 +217,14 @@ class MoleculeManager {
 const moleculeManager = new MoleculeManager().init();
 moleculeManager.loadAllMolecules();
 
+const rdkitPromise =
+    typeof initRDKitModule === 'function'
+        ? initRDKitModule()
+        : Promise.resolve(null);
+
 const fragmentLibrary = new FragmentLibrary(moleculeManager, {
     notify: showNotification,
-    smilesDrawer: window.SmilesDrawer
+    rdkit: rdkitPromise
 }).init();
 fragmentLibrary.loadFragments();
 
