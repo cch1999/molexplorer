@@ -37,7 +37,8 @@ describe('ComparisonModal', () => {
       const viewer = {
         addModel: mock.fn(() => (call++ === 0 ? model1 : model2)),
         zoomTo: mock.fn(),
-        render: mock.fn()
+        render: mock.fn(),
+        setStyle: mock.fn()
       };
 
       global.$3Dmol = { createViewer: mock.fn(() => viewer) };
