@@ -137,6 +137,9 @@ class MoleculeManager {
         if (this.repository.removeMolecule(code)) {
             const card = this.grid.querySelector(`[data-molecule-code="${code}"]`);
             if (card) card.remove();
+            if (typeof window !== 'undefined' && window.viewer) {
+                window.viewer.removeMolecule(code);
+            }
             return true;
         }
         return false;
@@ -146,6 +149,9 @@ class MoleculeManager {
         this.repository.clearAll();
         if (this.cardUI) {
             this.cardUI.clearAll();
+        }
+        if (typeof window !== 'undefined' && window.viewer) {
+            window.viewer.clear();
         }
         showNotification('All molecules deleted successfully!', 'info');
     }
@@ -220,9 +226,8 @@ class MoleculeManager {
 }
 
 const moleculeManager = new MoleculeManager().init();
-moleculeManager.loadAllMolecules();
-
 const viewer = new Viewer().init();
+moleculeManager.loadAllMolecules();
 
 const rdkitPromise =
     typeof initRDKitModule === 'function'

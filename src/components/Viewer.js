@@ -117,6 +117,14 @@ class Viewer {
         this.molecules.splice(index, 1);
         this.renderList();
     }
+
+    clear() {
+        if (!this.viewer) return;
+        this.molecules.forEach(({ model }) => this.viewer.removeModel(model));
+        this.viewer.render();
+        this.molecules = [];
+        this.renderList();
+    }
 }
 
 export default Viewer;

@@ -40,6 +40,9 @@ class MoleculeLoader {
                 molecule.sdf = sdfData;
             }
             this.cardUI.createMoleculeCard(sdfData, code, 'sdf');
+            if (typeof window !== 'undefined' && window.viewer) {
+                window.viewer.addMolecule({ code, sdf: sdfData });
+            }
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
             this.repository.updateMoleculeStatus(code, 'error');
