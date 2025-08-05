@@ -14,7 +14,7 @@ describe('PdbDetailsModal author truncation', () => {
       rcsb_id: 'abcd'
     };
     const html = PdbDetailsModal.prototype.createPDBDetailsHTML(data);
-    assert.ok(html.includes('Author1, Author2, Author3, ..., Author6, Author7, Author8'));
-    assert.ok(html.includes('title="Author1, Author2, Author3, Author4, Author5, Author6, Author7, Author8"'));
+    assert.ok(html.includes('Author1, Author2, ..., Author7, Author8'));
+    assert.ok(html.includes('<div class="authors-tooltip">Author1, Author2, Author3, Author4, Author5, Author6, Author7, Author8</div>'));
   });
 });

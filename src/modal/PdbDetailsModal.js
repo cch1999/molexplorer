@@ -109,8 +109,8 @@ class PdbDetailsModal {
         if (authorList.length > 0) {
             fullAuthors = authorList.join(', ');
             displayAuthors = fullAuthors;
-            if (authorList.length > 6) {
-                displayAuthors = `${authorList.slice(0, 3).join(', ')}, ..., ${authorList.slice(-3).join(', ')}`;
+            if (authorList.length > 4) {
+                displayAuthors = `${authorList.slice(0, 2).join(', ')}, ..., ${authorList.slice(-2).join(', ')}`;
             }
         }
         const releaseDate = data.rcsb_accession_info?.initial_release_date ? new Date(data.rcsb_accession_info.initial_release_date).toLocaleDateString() : 'Not available';
@@ -152,7 +152,10 @@ class PdbDetailsModal {
                     </div>
                     <div class="pdb-info-item" style="grid-column: 1 / -1;">
                         <div class="pdb-info-label">Authors</div>
-                        <div class="pdb-info-value authors-list" title="${fullAuthors}">${displayAuthors}</div>
+                        <div class="pdb-info-value authors-list">
+                            <span class="authors-display">${displayAuthors}</span>
+                            <div class="authors-tooltip">${fullAuthors}</div>
+                        </div>
                     </div>
                 </div>
                 <div class="pdb-external-links">
