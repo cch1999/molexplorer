@@ -73,7 +73,11 @@
             <div id="fragment-library-content" class="content-panel" style="display: none;">
                 <div class="database-header">
                     <h2>Fragment Library</h2>
-                    <button id="add-fragment-btn" class="add-btn" title="Add new fragment">+</button>
+                    <div class="header-buttons">
+                        <button id="add-fragment-btn" class="add-btn" title="Add new fragment">+</button>
+                        <button id="import-fragment-btn" class="add-btn" title="Import fragments from SDF">📁</button>
+                        <input type="file" id="fragment-sdf-input" accept=".sdf" style="display:none" />
+                    </div>
                 </div>
                 <div class="fragment-controls">
                     <input type="text" id="fragment-search" placeholder="Search fragments...">
