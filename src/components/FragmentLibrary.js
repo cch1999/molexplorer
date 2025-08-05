@@ -87,7 +87,8 @@ class FragmentLibrary {
         const onlyInCCD = this.ccdToggle ? this.ccdToggle.checked : false;
 
         const filtered = this.fragments.filter(fragment => {
-            const nameMatch = fragment.name.toLowerCase().includes(searchTerm);
+            const nameMatch = fragment.name.toLowerCase().includes(searchTerm)
+                || fragment.source.toLowerCase().includes(searchTerm);
             const sourceMatch = source === 'all' || fragment.source === source;
             const ccdMatch = !onlyInCCD || fragment.in_ccd;
             return nameMatch && sourceMatch && ccdMatch;
@@ -243,6 +244,7 @@ class FragmentLibrary {
             in_ccd: false
         });
 
+        this.ensureSourceOption(fragmentData.source || 'custom');
         this.renderFragments();
         this.notify(`Fragment "${fragmentData.name}" added successfully!`, 'success');
         return true;
@@ -250,8 +252,16 @@ class FragmentLibrary {
 
     handleSdfUpload(file) {
         if (!file) return;
+        const defaultName = file.name.replace(/\.sdf$/i, '');
+        let libraryName = defaultName;
+        if (typeof window !== 'undefined' && typeof window.prompt === 'function') {
+            const input = window.prompt('Enter fragment library name', defaultName);
+            if (input && input.trim()) {
+                libraryName = input.trim();
+            }
+        }
         file.text().then(text => {
-            const count = this.importFragmentsFromSdf(text, file.name.replace(/\.sdf$/i, ''));
+            const count = this.importFragmentsFromSdf(text, libraryName);
             if (count > 0) {
                 this.notify(`${count} fragments imported from ${file.name}`, 'success');
             } else {
@@ -291,9 +301,22 @@ class FragmentLibrary {
             added++;
         });
         if (added > 0) {
+            this.ensureSourceOption(source);
             this.renderFragments();
         }
         return added;
+    }
+
+    ensureSourceOption(source) {
+        if (!this.sourceFilter) return;
+        const exists = Array.from(this.sourceFilter.children)
+            .some(opt => opt.value === source);
+        if (!exists) {
+            const option = document.createElement('option');
+            option.value = source;
+            option.textContent = source;
+            this.sourceFilter.appendChild(option);
+        }
     }
 
     sanitizeSMILES(smiles) {
