@@ -9,6 +9,7 @@ import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import Viewer from './components/Viewer.js';
 
 class MoleculeManager {
     constructor() {
@@ -97,10 +98,11 @@ class MoleculeManager {
             closeExport();
         });
 
-        // Tab switching for Molecules, Fragments, Proteins
+        // Tab switching for Molecules, Viewer, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [
             document.getElementById('molecule-library-content'),
+            document.getElementById('viewer-content'),
             document.getElementById('fragment-library-content'),
             document.getElementById('protein-browser-content')
         ];
@@ -110,6 +112,9 @@ class MoleculeManager {
                 panels.forEach((panel, i) => {
                     panel.style.display = i === index ? 'block' : 'none';
                 });
+                if (index === 1 && window.viewer) {
+                    window.viewer.resize();
+                }
             });
         });
 
@@ -132,6 +137,9 @@ class MoleculeManager {
         if (this.repository.removeMolecule(code)) {
             const card = this.grid.querySelector(`[data-molecule-code="${code}"]`);
             if (card) card.remove();
+            if (typeof window !== 'undefined' && window.viewer) {
+                window.viewer.removeMolecule(code);
+            }
             return true;
         }
         return false;
@@ -141,6 +149,9 @@ class MoleculeManager {
         this.repository.deleteAllMolecules();
         if (this.cardUI) {
             this.cardUI.clearAll();
+        }
+        if (typeof window !== 'undefined' && window.viewer) {
+            window.viewer.clear();
         }
         showNotification('All molecules deleted successfully!', 'info');
     }
@@ -215,6 +226,7 @@ class MoleculeManager {
 }
 
 const moleculeManager = new MoleculeManager().init();
+const viewer = new Viewer().init();
 moleculeManager.loadAllMolecules();
 
 const rdkitPromise =
@@ -326,6 +338,7 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.viewer = viewer;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {
