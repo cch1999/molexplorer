@@ -115,10 +115,9 @@ export default class ApiService {
    * SMILES string and returns matching CCD codes with their similarity scores.
    *
    * @param {string} smiles - Query SMILES string.
-   * @param {number} [cutoff=0.6] - Similarity cutoff between 0 and 1.
    * @returns {Promise<Array<{id: string, score: number}>>} Array of results.
    */
-  static async searchCcdsBySmiles(smiles, cutoff = 0.6) {
+  static async searchCcdsBySmiles(smiles) {
     const body = {
       query: {
         type: 'terminal',
@@ -126,14 +125,10 @@ export default class ApiService {
         parameters: {
           value: smiles,
           type: 'descriptor',
-          descriptor_type: 'SMILES',
-          match_type: 'fingerprint-similarity',
-          similarity_cutoff: cutoff
+          descriptor_type: 'SMILES'
         }
       },
-      request_options: {
-        return_type: 'chem_comp'
-      }
+      return_type: 'mol_definition'
     };
 
     const response = await fetch(RCSB_SEARCH_API_URL, {

@@ -111,8 +111,11 @@ describe('ApiService', () => {
     const res = await ApiService.searchCcdsBySmiles('CCO');
     assert.strictEqual(global.fetch.mock.calls[0].arguments[0], RCSB_SEARCH_API_URL);
     const opts = global.fetch.mock.calls[0].arguments[1];
+    const body = JSON.parse(opts.body);
     assert.strictEqual(opts.method, 'POST');
-    assert.deepStrictEqual(JSON.parse(opts.body).query.parameters.value, 'CCO');
+    assert.strictEqual(body.return_type, 'mol_definition');
+    assert.strictEqual(body.query.parameters.descriptor_type, 'SMILES');
+    assert.strictEqual(body.query.parameters.value, 'CCO');
     assert.deepStrictEqual(res, [{ id: 'PAR', score: 0.8 }]);
   });
 
