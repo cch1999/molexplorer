@@ -7,6 +7,7 @@ import LigandModal from './modal/LigandModal.js';
 import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
+import SmilesSearchModal from './modal/SmilesSearchModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
 
@@ -24,6 +25,7 @@ class MoleculeManager {
         this.boundLigandTable = null;
         this.pdbDetailsModal = null;
         this.addModal = null;
+        this.smilesSearchModal = null;
         this.comparisonModal = null;
         this.compareQueue = [];
     }
@@ -47,6 +49,7 @@ class MoleculeManager {
         );
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
         this.addModal = new AddMoleculeModal(this);
+        this.smilesSearchModal = new SmilesSearchModal(this);
         this.comparisonModal = new ComparisonModal();
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
@@ -54,6 +57,15 @@ class MoleculeManager {
                 this.addModal.open();
             }
         });
+
+        const smilesBtn = document.getElementById('smiles-search-open-btn');
+        if (smilesBtn) {
+            smilesBtn.addEventListener('click', () => {
+                if (this.smilesSearchModal) {
+                    this.smilesSearchModal.open();
+                }
+            });
+        }
 
         document.getElementById('delete-all-btn').addEventListener('click', () => {
             if (confirm('Delete all molecules?')) {
