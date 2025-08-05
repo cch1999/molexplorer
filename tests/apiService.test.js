@@ -4,7 +4,8 @@ import ApiService from '../src/utils/apiService.js';
 import {
   RCSB_LIGAND_BASE_URL,
   RCSB_MODEL_BASE_URL,
-  UNIPROT_ENTRY_BASE_URL
+  UNIPROT_ENTRY_BASE_URL,
+  RCSB_SEARCH_API_URL
 } from '../src/utils/constants.js';
 
 describe('ApiService', () => {
@@ -102,6 +103,17 @@ describe('ApiService', () => {
       global.fetch.mock.calls[0].arguments[0],
       `${UNIPROT_ENTRY_BASE_URL}/P12345.json`
     );
+  });
+
+  it('searchCcdsBySmiles posts query and maps results', async () => {
+    const mockData = { result_set: [{ identifier: 'PAR', score: 0.8 }] };
+    global.fetch = mock.fn(async () => ({ ok: true, json: async () => mockData }));
+    const res = await ApiService.searchCcdsBySmiles('CCO');
+    assert.strictEqual(global.fetch.mock.calls[0].arguments[0], RCSB_SEARCH_API_URL);
+    const opts = global.fetch.mock.calls[0].arguments[1];
+    assert.strictEqual(opts.method, 'POST');
+    assert.deepStrictEqual(JSON.parse(opts.body).query.parameters.value, 'CCO');
+    assert.deepStrictEqual(res, [{ id: 'PAR', score: 0.8 }]);
   });
 
   it('fetchText caches responses', async () => {
