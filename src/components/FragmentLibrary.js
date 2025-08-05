@@ -63,6 +63,24 @@ class FragmentLibrary {
                     in_ccd: columns[9].trim() === 'True'
                 };
             }).filter(Boolean);
+            const RDKit = await this.rdkitPromise;
+            if (RDKit) {
+                this.fragments.forEach(fragment => {
+                    if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
+                        try {
+                            const mol = RDKit.get_mol(this.sanitizeSMILES(fragment.query));
+                            const descriptors = JSON.parse(
+                                mol.get_descriptors(JSON.stringify(["MolWt", "NumHeavyAtoms"]))
+                            );
+                            fragment.molecularWeight = descriptors.MolWt;
+                            fragment.size = descriptors.NumHeavyAtoms;
+                            mol.delete();
+                        } catch (err) {
+                            console.error('Error computing properties for ' + fragment.name, err);
+                        }
+                    }
+                });
+            }
             this.renderFragments();
         } catch (error) {
             console.error('Failed to load fragment library:', error);
@@ -99,6 +117,14 @@ class FragmentLibrary {
                     return b.name.localeCompare(a.name);
                 case 'source':
                     return a.source.localeCompare(b.source) || a.name.localeCompare(b.name);
+                case 'mw-asc':
+                    return (a.molecularWeight ?? 0) - (b.molecularWeight ?? 0);
+                case 'mw-desc':
+                    return (b.molecularWeight ?? 0) - (a.molecularWeight ?? 0);
+                case 'size-asc':
+                    return (a.size ?? 0) - (b.size ?? 0);
+                case 'size-desc':
+                    return (b.size ?? 0) - (a.size ?? 0);
                 case 'name-asc':
                 default:
                     return a.name.localeCompare(b.name);
