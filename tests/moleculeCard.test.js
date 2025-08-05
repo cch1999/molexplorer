@@ -53,19 +53,19 @@ describe('MoleculeCard downloadSdf', () => {
 });
 
 describe('MoleculeCard compare button', () => {
-  it('adds a compare button and triggers callback on click', () => {
-    const makeEl = () => ({
-      style: {},
-      children: [],
-      appendChild(child) { this.children.push(child); return child; },
-      setAttribute: () => {},
-      addEventListener(type, handler) { this['on' + type] = handler; },
-      dispatchEvent(evt) { const h = this['on' + evt.type]; if (h) h(evt); },
-      innerHTML: '',
-      textContent: '',
-      className: ''
-    });
+  const makeEl = () => ({
+    style: {},
+    children: [],
+    appendChild(child) { this.children.push(child); return child; },
+    setAttribute: () => {},
+    addEventListener(type, handler) { this['on' + type] = handler; },
+    dispatchEvent(evt) { const h = this['on' + evt.type]; if (h) h(evt); },
+    innerHTML: '',
+    textContent: '',
+    className: ''
+  });
 
+  it('adds a compare button and triggers callback on createMoleculeCard', () => {
     global.document = { createElement: makeEl };
     global.window = {};
     global.$3Dmol = { createViewer: () => ({ addModel: () => {}, setStyle: () => {}, render: () => {}, zoomTo: () => {} }) };
@@ -85,6 +85,44 @@ describe('MoleculeCard compare button', () => {
 
     global.setTimeout = originalTimeout;
     delete global.$3Dmol;
+    delete global.document;
+    delete global.window;
+  });
+
+  it('adds a compare button for createMoleculeCardFromSmiles', () => {
+    global.document = { createElement: makeEl };
+    global.window = {};
+
+    const grid = makeEl();
+    const onCompare = mock.fn();
+    const cardUI = new MoleculeCard(grid, {}, { onCompare });
+    cardUI.createMoleculeCardFromSmiles('C', 'BBB');
+    const card = grid.children[0];
+    const compareBtn = card.children.find(c => c.className === 'compare-btn');
+    assert.ok(compareBtn);
+    compareBtn.dispatchEvent({ type: 'click', stopPropagation: () => {} });
+    assert.strictEqual(onCompare.mock.callCount(), 1);
+    assert.strictEqual(onCompare.mock.calls[0].arguments[0], 'BBB');
+
+    delete global.document;
+    delete global.window;
+  });
+
+  it('adds a compare button for createNotFoundCard', () => {
+    global.document = { createElement: makeEl };
+    global.window = {};
+
+    const grid = makeEl();
+    const onCompare = mock.fn();
+    const cardUI = new MoleculeCard(grid, {}, { onCompare });
+    cardUI.createNotFoundCard('CCC');
+    const card = grid.children[0];
+    const compareBtn = card.children.find(c => c.className === 'compare-btn');
+    assert.ok(compareBtn);
+    compareBtn.dispatchEvent({ type: 'click', stopPropagation: () => {} });
+    assert.strictEqual(onCompare.mock.callCount(), 1);
+    assert.strictEqual(onCompare.mock.calls[0].arguments[0], 'CCC');
+
     delete global.document;
     delete global.window;
   });

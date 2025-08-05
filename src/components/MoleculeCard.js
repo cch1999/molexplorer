@@ -10,7 +10,7 @@ class MoleculeCard {
         this.draggedElement = null;
     }
 
-    createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
+    createBaseCard(ccdCode, id = ccdCode, sdfData) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
@@ -38,7 +38,7 @@ class MoleculeCard {
         downloadBtn.title = `Download ${ccdCode} as SDF`;
         downloadBtn.addEventListener('click', e => {
             e.stopPropagation();
-            this.downloadSdf(ccdCode);
+            this.downloadSdf(ccdCode, sdfData);
         });
         card.appendChild(downloadBtn);
 
@@ -51,6 +51,12 @@ class MoleculeCard {
             if (this.onCompare) this.onCompare(ccdCode);
         });
         card.appendChild(compareBtn);
+
+        return card;
+    }
+
+    createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
+        const card = this.createBaseCard(ccdCode, id);
 
         const codeLabel = document.createElement('div');
         codeLabel.className = 'molecule-code';
@@ -87,46 +93,7 @@ class MoleculeCard {
     }
 
     createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode) {
-        const card = document.createElement('div');
-        card.className = 'molecule-card';
-        card.draggable = true;
-        card.setAttribute('data-molecule-code', ccdCode);
-        card.setAttribute('data-molecule-id', id);
-
-        const dragHandle = document.createElement('div');
-        dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = '⋯';
-        card.appendChild(dragHandle);
-
-        const deleteBtn = document.createElement('div');
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ccdCode}`;
-        deleteBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            if (this.onDelete) this.onDelete(ccdCode);
-        });
-        card.appendChild(deleteBtn);
-
-        const downloadBtn = document.createElement('div');
-        downloadBtn.className = 'download-btn';
-        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
-        downloadBtn.title = `Download ${ccdCode} as SDF`;
-        downloadBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            this.downloadSdf(ccdCode, data);
-        });
-        card.appendChild(downloadBtn);
-
-        const compareBtn = document.createElement('div');
-        compareBtn.className = 'compare-btn';
-        compareBtn.textContent = '⇆';
-        compareBtn.title = `Compare ${ccdCode}`;
-        compareBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            if (this.onCompare) this.onCompare(ccdCode);
-        });
-        card.appendChild(compareBtn);
+        const card = this.createBaseCard(ccdCode, id, data);
 
         const title = document.createElement('h3');
         title.textContent = ccdCode;
@@ -162,36 +129,7 @@ class MoleculeCard {
     }
 
     createNotFoundCard(ccdCode, message = 'Not found', id = ccdCode) {
-        const card = document.createElement('div');
-        card.className = 'molecule-card';
-        card.draggable = true;
-        card.setAttribute('data-molecule-code', ccdCode);
-        card.setAttribute('data-molecule-id', id);
-
-        const dragHandle = document.createElement('div');
-        dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = '⋯';
-        card.appendChild(dragHandle);
-
-        const deleteBtn = document.createElement('div');
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ccdCode}`;
-        deleteBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            if (this.onDelete) this.onDelete(ccdCode);
-        });
-        card.appendChild(deleteBtn);
-
-        const downloadBtn = document.createElement('div');
-        downloadBtn.className = 'download-btn';
-        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
-        downloadBtn.title = `Download ${ccdCode} as SDF`;
-        downloadBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            this.downloadSdf(ccdCode);
-        });
-        card.appendChild(downloadBtn);
+        const card = this.createBaseCard(ccdCode, id);
 
         const content = document.createElement('div');
         content.className = 'not-found-content';
@@ -281,3 +219,4 @@ class MoleculeCard {
 }
 
 export default MoleculeCard;
+
