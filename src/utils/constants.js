@@ -1,6 +1,8 @@
 export const RCSB_LIGAND_BASE_URL = 'https://files.rcsb.org/ligands/view';
 export const RCSB_MODEL_BASE_URL = 'https://models.rcsb.org/v1';
 export const FRAGMENT_LIBRARY_URL = 'https://raw.githubusercontent.com/cch1999/cch1999.github.io/refs/heads/new_website/assets/files/fragment_library_ccd.tsv';
+export const CHEMBL_FRAGMENT_API_URL =
+  'https://www.ebi.ac.uk/chembl/api/data/molecule.json?molecule_properties__mw_freebase__lte=150&molecule_properties__hba__lte=3&molecule_properties__hbd__lte=3&molecule_properties__rtb__lte=3&limit=100';
 export const PD_BE_SIMILARITY_BASE_URL = 'https://www.ebi.ac.uk/pdbe/graph-api/compound/similarity';
 export const PD_BE_IN_PDB_BASE_URL = 'https://www.ebi.ac.uk/pdbe/graph-api/compound/in_pdb';
 export const RCSB_ENTRY_BASE_URL = 'https://data.rcsb.org/rest/v1/core/entry';

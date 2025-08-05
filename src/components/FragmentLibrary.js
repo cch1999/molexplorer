@@ -40,9 +40,13 @@ class FragmentLibrary {
 
     async loadFragments() {
         try {
-            const tsvData = await ApiService.getFragmentLibraryTsv();
+            const [tsvData, chemblFragments] = await Promise.all([
+                ApiService.getFragmentLibraryTsv(),
+                ApiService.getChEMBLFragments()
+            ]);
+
             const rows = tsvData.split('\n').slice(1); // Skip header
-            this.fragments = rows.map((row, index) => {
+            const tsvFragments = rows.map((row, index) => {
                 const columns = row.split('\t');
                 if (columns.length < 10) return null;
                 return {
@@ -58,6 +62,8 @@ class FragmentLibrary {
                     in_ccd: columns[9].trim() === 'True'
                 };
             }).filter(Boolean);
+
+            this.fragments = [...tsvFragments, ...chemblFragments];
             this.renderFragments();
         } catch (error) {
             console.error('Failed to load fragment library:', error);
