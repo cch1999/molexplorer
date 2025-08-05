@@ -12,6 +12,8 @@ class FragmentLibrary {
         this.searchInput = null;
         this.sourceFilter = null;
         this.ccdToggle = null;
+        this.importButton = null;
+        this.fileInput = null;
         this.notify = notify;
         this.rdkitPromise = rdkit;
     }
@@ -21,6 +23,8 @@ class FragmentLibrary {
         this.searchInput = document.getElementById('fragment-search');
         this.sourceFilter = document.getElementById('fragment-filter-source');
         this.ccdToggle = document.getElementById('ccd-toggle');
+        this.importButton = document.getElementById('import-fragment-btn');
+        this.fileInput = document.getElementById('fragment-sdf-input');
 
         this.addEventListeners();
         return this;
@@ -35,6 +39,13 @@ class FragmentLibrary {
         }
         if (this.ccdToggle) {
             this.ccdToggle.addEventListener('change', () => this.renderFragments());
+        }
+        if (this.importButton && this.fileInput) {
+            this.importButton.addEventListener('click', () => this.fileInput.click());
+            this.fileInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                this.handleSdfUpload(file);
+            });
         }
     }
 
@@ -167,7 +178,7 @@ class FragmentLibrary {
             if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
                 this.rdkitPromise.then((RDKit) => {
                     if (!RDKit) {
-                        canvasContainer.innerHTML = `<p class="render-error">RDKit not available</p>`;
+                        canvasContainer.innerHTML = `<p class=\"render-error\">RDKit not available</p>`;
                         return;
                     }
                     try {
@@ -178,7 +189,23 @@ class FragmentLibrary {
                         canvasContainer.innerHTML = svg;
                     } catch (err) {
                         console.error('Error rendering SMILES for ' + fragment.name, err);
-                        canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
+                        canvasContainer.innerHTML = `<p class=\"render-error\">Render error for query: ${fragment.query}</p>`;
+                    }
+                });
+            } else if (fragment.kind === 'SDF' && fragment.query) {
+                this.rdkitPromise.then((RDKit) => {
+                    if (!RDKit) {
+                        canvasContainer.innerHTML = `<p class=\"render-error\">RDKit not available</p>`;
+                        return;
+                    }
+                    try {
+                        const mol = RDKit.get_mol(fragment.query);
+                        const svg = mol.get_svg(200, 150);
+                        mol.delete();
+                        canvasContainer.innerHTML = svg;
+                    } catch (err) {
+                        console.error('Error rendering SDF for ' + fragment.name, err);
+                        canvasContainer.innerHTML = `<p class=\"render-error\">Render error for SDF</p>`;
                     }
                 });
             } else {
@@ -219,6 +246,54 @@ class FragmentLibrary {
         this.renderFragments();
         this.notify(`Fragment "${fragmentData.name}" added successfully!`, 'success');
         return true;
+    }
+
+    handleSdfUpload(file) {
+        if (!file) return;
+        file.text().then(text => {
+            const count = this.importFragmentsFromSdf(text, file.name.replace(/\.sdf$/i, ''));
+            if (count > 0) {
+                this.notify(`${count} fragments imported from ${file.name}`, 'success');
+            } else {
+                this.notify('No fragments were imported from SDF', 'error');
+            }
+            this.fileInput.value = '';
+        }).catch(err => {
+            console.error('Failed to import SDF file:', err);
+            this.notify('Failed to import SDF file', 'error');
+            this.fileInput.value = '';
+        });
+    }
+
+    importFragmentsFromSdf(sdfText, source = 'custom') {
+        if (!sdfText) return 0;
+        const blocks = sdfText.split(/\$\$\$\$/).map(b => b.trim()).filter(Boolean);
+        let added = 0;
+        blocks.forEach((block, idx) => {
+            const lines = block.split(/\r?\n/);
+            const name = lines[0] ? lines[0].trim() : `Fragment ${idx + 1}`;
+            const duplicate = this.fragments.some(
+                f => f.name.toLowerCase() === name.toLowerCase()
+            );
+            if (duplicate) return;
+            this.fragments.unshift({
+                id: `custom-${Date.now()}-${idx}`,
+                name,
+                kind: 'SDF',
+                query: block,
+                description: '',
+                comment: 'Custom fragment',
+                url: '',
+                source,
+                ccd: '',
+                in_ccd: false
+            });
+            added++;
+        });
+        if (added > 0) {
+            this.renderFragments();
+        }
+        return added;
     }
 
     sanitizeSMILES(smiles) {

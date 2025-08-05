@@ -92,6 +92,17 @@ describe('FragmentLibrary', () => {
     assert.match(msg, /already exists/i);
   });
 
+  it('importFragmentsFromSdf parses and adds fragments', () => {
+    library.fragments = [];
+    library.renderFragments = () => {};
+    const sdf = `Frag1\nM  END\n$$$$\nFrag2\nM  END\n$$$$`;
+    const count = library.importFragmentsFromSdf(sdf, 'SDFLIB');
+    assert.strictEqual(count, 2);
+    assert.strictEqual(library.fragments.length, 2);
+    assert.strictEqual(library.fragments[0].source, 'SDFLIB');
+    assert.strictEqual(library.fragments[0].kind, 'SDF');
+  });
+
   it('renderFragments filters by search text, source filter, and CCD toggle', () => {
     library.fragments = [
       { id: '1', name: 'Alpha', source: 'custom', in_ccd: false, kind: 'OTHER', query: '' },
