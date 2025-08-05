@@ -5,6 +5,16 @@ class Viewer {
         this.molecules = [];
     }
 
+    getColor(code) {
+        // Simple deterministic color based on code
+        let hash = 0;
+        for (let i = 0; i < code.length; i++) {
+            hash = code.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = hash % 360;
+        return `hsl(${hue}, 65%, 50%)`;
+    }
+
     init() {
         const container = document.getElementById('viewer-content');
         if (!container) return this;
@@ -16,7 +26,7 @@ class Viewer {
         viewerDiv.className = 'viewer-canvas';
         container.appendChild(viewerDiv);
 
-        this.listEl = document.createElement('ul');
+        this.listEl = document.createElement('div');
         this.listEl.className = 'viewer-list';
         container.appendChild(this.listEl);
 
@@ -36,11 +46,17 @@ class Viewer {
     renderList() {
         if (!this.listEl) return;
         this.listEl.innerHTML = '';
-        this.molecules.forEach(({ code, visible }) => {
-            const row = document.createElement('li');
+        this.molecules.forEach(({ code, visible, color }) => {
+            const row = document.createElement('div');
             row.className = 'viewer-row';
 
+            const colorBox = document.createElement('span');
+            colorBox.className = 'viewer-color';
+            colorBox.style.background = color;
+            row.appendChild(colorBox);
+
             const codeSpan = document.createElement('span');
+            codeSpan.className = 'viewer-code';
             codeSpan.textContent = code;
             row.appendChild(codeSpan);
 
@@ -60,7 +76,7 @@ class Viewer {
         });
 
         if (this.molecules.length === 0) {
-            const empty = document.createElement('li');
+            const empty = document.createElement('div');
             empty.className = 'viewer-empty';
             empty.textContent = 'No molecules loaded';
             this.listEl.appendChild(empty);
@@ -71,11 +87,12 @@ class Viewer {
         if (!this.viewer || this.molecules.some(m => m.code === code)) {
             return false;
         }
+        const color = this.getColor(code);
         const model = this.viewer.addModel(sdf, 'sdf');
-        model.setStyle({}, { stick: {} });
+        model.setStyle({}, { stick: { color } });
         this.viewer.zoomTo();
         this.viewer.render();
-        this.molecules.push({ code, model, visible: true });
+        this.molecules.push({ code, model, visible: true, color });
         this.renderList();
         return true;
     }
