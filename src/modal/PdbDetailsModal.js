@@ -75,7 +75,7 @@ class PdbDetailsModal {
                         stick: { radius: 0.5, colorscheme: 'element' }
                     });
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
-                    this.addBindingInteractions(viewer);
+                    this.addBindingInteractions(viewer, pdbId);
                     viewer.zoomTo();
                     viewer.render();
                     this.addInteractionLegend(viewerContainer);
@@ -103,65 +103,43 @@ class PdbDetailsModal {
         }
     }
 
-    addBindingInteractions(viewer) {
+    async addBindingInteractions(viewer, pdbId) {
         try {
             const model = viewer?.getModel(0);
             if (!model) return;
-            const atoms = model.selectedAtoms({});
+            const data = await ApiService.getLigandInteractions(pdbId);
+            const interactions = data?.[pdbId.toLowerCase()] || [];
 
-            const hbPairs = [];
-            const saltPairs = [];
+            interactions.forEach((ligand) => {
+                const hbs = ligand?.interactions?.hydrogen_bonds || [];
+                const salts = ligand?.interactions?.salt_bridges || [];
 
-            const donorsAcceptors = atoms.filter(a => (a.elem === 'N' || a.elem === 'O'));
-            for (let i = 0; i < donorsAcceptors.length; i++) {
-                const a = donorsAcceptors[i];
-                if (['HOH', 'H2O', 'WAT'].includes(a.resn)) continue;
-                for (let j = i + 1; j < donorsAcceptors.length; j++) {
-                    const b = donorsAcceptors[j];
-                    if (a.hetflag === b.hetflag) continue;
-                    if (['HOH', 'H2O', 'WAT'].includes(b.resn)) continue;
-                    const dx = a.x - b.x;
-                    const dy = a.y - b.y;
-                    const dz = a.z - b.z;
-                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                    if (dist <= 3.5) hbPairs.push([a, b]);
-                }
-            }
-
-            const positiveResidues = ['ARG', 'LYS', 'HIS'];
-            const negativeResidues = ['ASP', 'GLU'];
-            const positiveAtoms = atoms.filter(a => positiveResidues.includes(a.resn) && a.elem === 'N');
-            const negativeAtoms = atoms.filter(a => negativeResidues.includes(a.resn) && a.elem === 'O');
-            for (const a of positiveAtoms) {
-                for (const b of negativeAtoms) {
-                    if (a.hetflag === b.hetflag) continue;
-                    const dx = a.x - b.x;
-                    const dy = a.y - b.y;
-                    const dz = a.z - b.z;
-                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                    if (dist <= 4.0) saltPairs.push([a, b]);
-                }
-            }
-
-            hbPairs.forEach(([a, b]) => {
-                viewer.addLine({
-                    start: { x: a.x, y: a.y, z: a.z },
-                    end: { x: b.x, y: b.y, z: b.z },
-                    dashed: true,
-                    color: '#00aaff'
+                hbs.forEach((pair) => {
+                    const a = model.selectedAtoms({ serial: pair.atom1_serial })[0];
+                    const b = model.selectedAtoms({ serial: pair.atom2_serial })[0];
+                    if (!a || !b) return;
+                    viewer.addLine({
+                        start: { x: a.x, y: a.y, z: a.z },
+                        end: { x: b.x, y: b.y, z: b.z },
+                        dashed: true,
+                        color: '#00aaff'
+                    });
                 });
-            });
 
-            saltPairs.forEach(([a, b]) => {
-                viewer.addLine({
-                    start: { x: a.x, y: a.y, z: a.z },
-                    end: { x: b.x, y: b.y, z: b.z },
-                    dashed: true,
-                    color: '#ff00ff'
+                salts.forEach((pair) => {
+                    const a = model.selectedAtoms({ serial: pair.atom1_serial })[0];
+                    const b = model.selectedAtoms({ serial: pair.atom2_serial })[0];
+                    if (!a || !b) return;
+                    viewer.addLine({
+                        start: { x: a.x, y: a.y, z: a.z },
+                        end: { x: b.x, y: b.y, z: b.z },
+                        dashed: true,
+                        color: '#ff00ff'
+                    });
                 });
             });
         } catch (e) {
-            console.error('Error computing interactions:', e);
+            console.error('Error fetching interactions:', e);
         }
     }
 

@@ -19,6 +19,7 @@ import {
   PD_BE_SUMMARY_BASE_URL,
   RCSB_PDB_DOWNLOAD_BASE_URL,
   PD_BE_LIGAND_MONOMERS_BASE_URL,
+  PD_BE_LIGAND_INTERACTIONS_BASE_URL,
   RCSB_GROUP_BASE_URL,
   UNIPROT_ENTRY_BASE_URL,
   PUBCHEM_COMPOUND_BASE_URL,
@@ -301,6 +302,16 @@ export default class ApiService {
    */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch ligand interaction data from PDBe.
+   *
+   * @param {string} pdbId - The 4-character PDB ID
+   * @returns {Promise<Object>} Interaction metadata keyed by PDB ID
+   */
+  static getLigandInteractions(pdbId) {
+    return this.fetchJson(`${PD_BE_LIGAND_INTERACTIONS_BASE_URL}/${pdbId}`);
   }
 
   /**
