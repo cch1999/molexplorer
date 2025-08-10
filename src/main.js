@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import PyMolView from './components/PyMolView.js';
 import ComparisonModal from './modal/ComparisonModal.js';
 
 class MoleculeManager {
@@ -97,12 +98,13 @@ class MoleculeManager {
             closeExport();
         });
 
-        // Tab switching for Molecules, Fragments, Proteins
+        // Tab switching for Molecules, Fragments, Proteins, PyMOL
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [
             document.getElementById('molecule-library-content'),
             document.getElementById('fragment-library-content'),
-            document.getElementById('protein-browser-content')
+            document.getElementById('protein-browser-content'),
+            document.getElementById('pymol-view-content')
         ];
         tabButtons.forEach((button, index) => {
             button.addEventListener('click', () => {
@@ -110,6 +112,10 @@ class MoleculeManager {
                 panels.forEach((panel, i) => {
                     panel.style.display = i === index ? 'block' : 'none';
                 });
+                if (index === 3 && window.pyMolView) {
+                    // Ensure viewer sizes are correct after becoming visible
+                    window.pyMolView.resize();
+                }
             });
         });
 
@@ -282,6 +288,7 @@ if (confirmAddFragmentBtn) {
 }
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+const pyMolView = new PyMolView(moleculeManager).init();
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -326,6 +333,7 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.pyMolView = pyMolView;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {
