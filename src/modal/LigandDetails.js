@@ -16,6 +16,7 @@ class LigandDetails {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.copyBtn = document.getElementById('copy-json-btn');
+        this.detailsNotes = document.getElementById('details-notes');
         this.viewer = null;
 
         const closeBtn = document.getElementById('close-details-modal');
@@ -73,9 +74,15 @@ class LigandDetails {
               if (this.detailsChain) this.detailsChain.textContent = molecule.chainId;
               if (this.detailsResidue) this.detailsResidue.textContent = molecule.authorResidueNumber;
         } else {
-            if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
-            if (this.detailsChain) this.detailsChain.textContent = '-';
-            if (this.detailsResidue) this.detailsResidue.textContent = '-';
+        if (this.detailsPdbId) this.detailsPdbId.textContent = '-';
+        if (this.detailsChain) this.detailsChain.textContent = '-';
+        if (this.detailsResidue) this.detailsResidue.textContent = '-';
+        }
+
+        if (this.detailsNotes) {
+            const note = window.notebook?.getNote(ccdCode) || '';
+            this.detailsNotes.value = note;
+            this.detailsNotes.oninput = () => window.notebook?.setNoteForMolecule(ccdCode, this.detailsNotes.value);
         }
 
         this.detailsViewer.innerHTML = '<p>Loading structure...</p>';

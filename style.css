@@ -476,6 +476,10 @@ main {
     min-height: 80px;
 }
 
+#details-notes {
+    min-height: 120px;
+}
+
 .modal-body input[type="text"]:focus {
     outline: none;
     border-color: #6e45e2;

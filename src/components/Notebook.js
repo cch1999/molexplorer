@@ -14,6 +14,7 @@ class Notebook {
         this.exportBtn = document.getElementById('export-session-btn');
         this.currentMolecule = null;
         this.tags = {};
+        this.notes = {};
         this.snapshots = [];
         this.timeline = [];
 
@@ -30,6 +31,9 @@ class Notebook {
         if (this.tagsInput) {
             this.tagsInput.addEventListener('change', () => this.saveTags());
         }
+        if (this.notesEditor) {
+            this.notesEditor.addEventListener('input', () => this.saveNote());
+        }
         if (this.snapshotBtn) {
             this.snapshotBtn.addEventListener('click', () => this.captureSnapshot());
         }
@@ -45,6 +49,7 @@ class Notebook {
         this.currentMolecule = code;
         const tags = this.tags[code] || [];
         if (this.tagsInput) this.tagsInput.value = tags.join(', ');
+        if (this.notesEditor) this.notesEditor.value = this.notes[code] || '';
     }
 
     saveTags() {
@@ -54,6 +59,22 @@ class Notebook {
             .map(t => t.trim())
             .filter(Boolean);
         this.tags[this.currentMolecule] = tags;
+    }
+
+    saveNote() {
+        if (!this.currentMolecule || !this.notesEditor) return;
+        this.notes[this.currentMolecule] = this.notesEditor.value;
+    }
+
+    getNote(code) {
+        return this.notes[code] || '';
+    }
+
+    setNoteForMolecule(code, note) {
+        this.notes[code] = note;
+        if (this.currentMolecule === code && this.notesEditor) {
+            this.notesEditor.value = note;
+        }
     }
 
     logAction(action, thumbnail) {
@@ -105,7 +126,7 @@ class Notebook {
     exportSession() {
         const data = {
             molecules: this.moleculeManager?.getAllMolecules ? this.moleculeManager.getAllMolecules() : [],
-            notes: this.notesEditor ? this.notesEditor.value : '',
+            notes: this.notes,
             tags: this.tags,
             snapshots: this.snapshots,
             timeline: this.timeline,

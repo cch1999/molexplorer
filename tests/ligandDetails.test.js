@@ -28,6 +28,7 @@ describe('LigandDetails viewer focus', () => {
     const resEl = makeEl();
     const viewerEl = makeEl();
     const jsonEl = makeEl();
+    const notesEl = makeEl();
 
     document.registerElement('molecule-details-modal', modalEl);
     document.registerElement('details-title', titleEl);
@@ -40,6 +41,7 @@ describe('LigandDetails viewer focus', () => {
     document.registerElement('details-residue', resEl);
     document.registerElement('details-viewer-container', viewerEl);
     document.registerElement('details-json', jsonEl);
+    document.registerElement('details-notes', notesEl);
 
     global.document = document;
     global.document.querySelectorAll = (sel) =>
