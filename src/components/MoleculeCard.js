@@ -4,81 +4,71 @@ class MoleculeCard {
     constructor(grid, repository, callbacks = {}) {
         this.grid = grid;
         this.repository = repository;
-        this.onDelete = callbacks.onDelete;
         this.onShowDetails = callbacks.onShowDetails;
-        this.onCompare = callbacks.onCompare;
         this.draggedElement = null;
     }
 
-    createBaseCard(ccdCode, id = ccdCode, sdfData) {
+    createBaseCard(ccdCode, status = 'pending', id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
         card.draggable = true;
         card.setAttribute('data-molecule-code', ccdCode);
         card.setAttribute('data-molecule-id', id);
 
-        const dragHandle = document.createElement('div');
-        dragHandle.className = 'drag-handle';
-        dragHandle.innerHTML = '⋯';
-        card.appendChild(dragHandle);
-
-        const deleteBtn = document.createElement('div');
-        deleteBtn.className = 'delete-btn';
-        deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/></svg>';
-        deleteBtn.title = `Delete ${ccdCode}`;
-        deleteBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            if (this.onDelete) this.onDelete(ccdCode);
-        });
-        card.appendChild(deleteBtn);
-
-        const downloadBtn = document.createElement('div');
-        downloadBtn.className = 'download-btn';
-        downloadBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z"/></svg>';
-        downloadBtn.title = `Download ${ccdCode} as SDF`;
-        downloadBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            this.downloadSdf(ccdCode, sdfData);
-        });
-        card.appendChild(downloadBtn);
-
-        const compareBtn = document.createElement('div');
-        compareBtn.className = 'compare-btn';
-        compareBtn.textContent = '⇆';
-        compareBtn.title = `Compare ${ccdCode}`;
-        compareBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            if (this.onCompare) this.onCompare(ccdCode);
-        });
-        card.appendChild(compareBtn);
-
-        return card;
-    }
-
-    createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
-        const card = this.createBaseCard(ccdCode, id);
-
-        const codeLabel = document.createElement('div');
-        codeLabel.className = 'molecule-code';
-        codeLabel.textContent = ccdCode;
-        card.appendChild(codeLabel);
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        const codeEl = document.createElement('span');
+        codeEl.className = 'ccd-code';
+        codeEl.textContent = ccdCode;
+        const badge = document.createElement('span');
+        badge.className = `status-badge ${status}`;
+        badge.textContent = status;
+        header.appendChild(codeEl);
+        header.appendChild(badge);
+        card.appendChild(header);
 
         const viewerContainer = document.createElement('div');
-        viewerContainer.className = 'molecule-viewer';
+        viewerContainer.className = 'viewer-container skeleton';
         viewerContainer.id = `viewer-${ccdCode}`;
         card.appendChild(viewerContainer);
 
-        const smilesLabel = document.createElement('div');
-        smilesLabel.className = 'smiles-label';
-        smilesLabel.textContent = `SMILES: ${smiles}`;
-        smilesLabel.style.fontSize = '10px';
-        smilesLabel.style.color = '#666';
-        smilesLabel.style.marginTop = '5px';
-        card.appendChild(smilesLabel);
+        const footer = document.createElement('div');
+        footer.className = 'card-footer';
+        const detailsBtn = document.createElement('button');
+        detailsBtn.className = 'btn-primary details-btn';
+        detailsBtn.textContent = 'Details';
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn-primary download-btn';
+        downloadBtn.textContent = 'Download SDF';
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn-secondary copy-btn';
+        copyBtn.textContent = 'Copy CCD';
+        footer.append(detailsBtn, downloadBtn, copyBtn);
+        card.appendChild(footer);
 
         this.grid.appendChild(card);
-        this.renderSmilesIn2D(smiles, viewerContainer);
         this.addDragEvents(card);
+
+        return { card, viewerContainer, detailsBtn, downloadBtn, copyBtn };
+    }
+
+    createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
+        const status = this.repository.getMolecule(ccdCode)?.status || 'unknown';
+        const { viewerContainer, detailsBtn, downloadBtn, copyBtn } = this.createBaseCard(ccdCode, status, id);
+        this.renderSmilesIn2D(smiles, viewerContainer);
+        viewerContainer.classList.remove('skeleton');
+        detailsBtn.addEventListener('click', () => {
+            if (this.onShowDetails) this.onShowDetails(ccdCode, smiles, 'smiles');
+        });
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadSdf(ccdCode);
+        });
+        copyBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            navigator.clipboard?.writeText(ccdCode);
+            window.showNotification?.(`${ccdCode} copied`, 'success');
+        });
     }
 
     renderSmilesIn2D(smiles, container) {
@@ -93,23 +83,20 @@ class MoleculeCard {
     }
 
     createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode) {
-        const card = this.createBaseCard(ccdCode, id, data);
-
-        const title = document.createElement('h3');
-        title.textContent = ccdCode;
-        title.style.cursor = 'pointer';
-        title.addEventListener('click', () => {
+        const status = this.repository.getMolecule(ccdCode)?.status || 'unknown';
+        const { viewerContainer, detailsBtn, downloadBtn, copyBtn } = this.createBaseCard(ccdCode, status, id);
+        detailsBtn.addEventListener('click', () => {
             if (this.onShowDetails) this.onShowDetails(ccdCode, data, format);
         });
-        card.appendChild(title);
-
-        const viewerContainer = document.createElement('div');
-        viewerContainer.id = `viewer-${ccdCode}`;
-        viewerContainer.className = 'viewer-container';
-        card.appendChild(viewerContainer);
-
-        this.grid.appendChild(card);
-        this.addDragEvents(card);
+        downloadBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            this.downloadSdf(ccdCode, data);
+        });
+        copyBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            navigator.clipboard?.writeText(ccdCode);
+            window.showNotification?.(`${ccdCode} copied`, 'success');
+        });
 
         setTimeout(() => {
             try {
@@ -124,20 +111,19 @@ class MoleculeCard {
             } catch (e) {
                 console.error(`Error initializing 3Dmol viewer for ${ccdCode}:`, e);
                 viewerContainer.innerHTML = '<p style="text-align:center;padding:20px;">Render Error</p>';
+            } finally {
+                viewerContainer.classList.remove('skeleton');
             }
         }, 100);
     }
 
     createNotFoundCard(ccdCode, message = 'Not found', id = ccdCode) {
-        const card = this.createBaseCard(ccdCode, id);
-
-        const content = document.createElement('div');
-        content.className = 'not-found-content';
-        content.innerHTML = `<h3>${ccdCode}</h3><p>${message}</p>`;
-        card.appendChild(content);
-
-        this.grid.appendChild(card);
-        this.addDragEvents(card);
+        const status = this.repository.getMolecule(ccdCode)?.status || 'error';
+        const { viewerContainer, detailsBtn, downloadBtn } = this.createBaseCard(ccdCode, status, id);
+        viewerContainer.classList.remove('skeleton');
+        viewerContainer.innerHTML = `<p style="text-align:center;padding:20px;">${message}</p>`;
+        detailsBtn.disabled = true;
+        downloadBtn.disabled = true;
     }
 
     addDragEvents(card) {
