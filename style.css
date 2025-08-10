@@ -1412,6 +1412,40 @@ main {
     position: relative;
 }
 
+.interaction-legend {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.interaction-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.interaction-legend .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.interaction-legend .legend-color.hbond {
+    background: #00aaff;
+}
+
+.interaction-legend .legend-color.salt {
+    background: #ff00ff;
+}
+
 .pdb-info-column,
 .pdb-abstract-column {
     display: flex;

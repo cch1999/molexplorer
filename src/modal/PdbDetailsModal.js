@@ -75,8 +75,10 @@ class PdbDetailsModal {
                         stick: { radius: 0.5, colorscheme: 'element' }
                     });
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
+                    this.addBindingInteractions(viewer, pdbId);
                     viewer.zoomTo();
                     viewer.render();
+                    this.addInteractionLegend(viewerContainer);
                 } catch (e) {
                     console.error('Error creating 3Dmol viewer:', e);
                     viewerContainer.innerHTML = '<div class="no-pdb-entries">Could not render 3D structure.</div>';
@@ -99,6 +101,57 @@ class PdbDetailsModal {
         if (this.modal) {
             this.modal.style.display = 'none';
         }
+    }
+
+    async addBindingInteractions(viewer, pdbId) {
+        try {
+            const model = viewer?.getModel(0);
+            if (!model) return;
+            const data = await ApiService.getLigandInteractions(pdbId);
+            const interactions = data?.[pdbId.toLowerCase()] || [];
+
+            interactions.forEach((ligand) => {
+                const hbs = ligand?.interactions?.hydrogen_bonds || [];
+                const salts = ligand?.interactions?.salt_bridges || [];
+
+                hbs.forEach((pair) => {
+                    const a = model.selectedAtoms({ serial: pair.atom1_serial })[0];
+                    const b = model.selectedAtoms({ serial: pair.atom2_serial })[0];
+                    if (!a || !b) return;
+                    viewer.addLine({
+                        start: { x: a.x, y: a.y, z: a.z },
+                        end: { x: b.x, y: b.y, z: b.z },
+                        dashed: true,
+                        color: '#00aaff'
+                    });
+                });
+
+                salts.forEach((pair) => {
+                    const a = model.selectedAtoms({ serial: pair.atom1_serial })[0];
+                    const b = model.selectedAtoms({ serial: pair.atom2_serial })[0];
+                    if (!a || !b) return;
+                    viewer.addLine({
+                        start: { x: a.x, y: a.y, z: a.z },
+                        end: { x: b.x, y: b.y, z: b.z },
+                        dashed: true,
+                        color: '#ff00ff'
+                    });
+                });
+            });
+        } catch (e) {
+            console.error('Error fetching interactions:', e);
+        }
+    }
+
+    addInteractionLegend(container) {
+        if (!container) return;
+        const legend = document.createElement('div');
+        legend.className = 'interaction-legend';
+        legend.innerHTML = `
+            <span class="legend-item"><span class="legend-color hbond"></span>H-bond</span>
+            <span class="legend-item"><span class="legend-color salt"></span>Salt bridge</span>
+        `;
+        container.appendChild(legend);
     }
 
     createPDBDetailsHTML(data) {
