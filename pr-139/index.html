@@ -7,8 +7,8 @@
     <title>Ligand Surfer</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
-  <script type="module" crossorigin src="./assets/index-CbUlQLs9.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-C2ke9fDu.css">
+  <script type="module" crossorigin src="./assets/index-BBXGw-dR.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Dz_ZTc5i.css">
 </head>
 
 <body>
@@ -47,6 +47,7 @@
             <button class="tab-button">Viewer</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
+            <button class="tab-button">PyMOL</button>
         </div>
         <div class="content">
             <div id="molecule-library-content" class="content-panel">
@@ -155,6 +156,59 @@
                     <p id="no-protein-results-message" style="display: none;">No results found.</p>
                     <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
                         data...</div>
+                </div>
+            </div>
+            <div id="pymol-interface-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>PyMOL-style Viewer</h2>
+                </div>
+                <div class="protein-controls">
+                    <input type="text" id="pymol-pdb-id" placeholder="Enter PDB ID (e.g., 1CBS)">
+                    <button id="pymol-load-btn" class="action-btn">Load</button>
+                    <select id="pymol-color-scheme" title="Color scheme">
+                        <option value="chain">Color: Chain</option>
+                        <option value="spectrum">Color: Spectrum</option>
+                        <option value="element">Color: Element</option>
+                    </select>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-hide-solvent" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="pymol-hide-solvent"></label>
+                        <span>Hide Solvent</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-hide-ions" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="pymol-hide-ions"></label>
+                        <span>Hide Ions</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-spin" class="toggle-switch-checkbox">
+                        <label class="toggle-switch-label" for="pymol-spin"></label>
+                        <span>Spin</span>
+                    </div>
+                </div>
+                <div class="protein-controls">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-cartoon" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="pymol-cartoon"></label>
+                        <span>Cartoon</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-sticks" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="pymol-sticks"></label>
+                        <span>Ligand Sticks</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="pymol-surface" class="toggle-switch-checkbox">
+                        <label class="toggle-switch-label" for="pymol-surface"></label>
+                        <span>Surface</span>
+                    </div>
+                    <label for="pymol-surface-opacity">Surface opacity</label>
+                    <input id="pymol-surface-opacity" type="range" min="0" max="1" step="0.05" value="0.5">
+                    <button id="pymol-zoom-ligands" class="action-btn">Zoom Ligands</button>
+                    <button id="pymol-reset-view" class="action-btn">Reset View</button>
+                </div>
+                <div id="pymol-viewer" class="details-viewer">
+                    <p>Load a PDB to begin...</p>
                 </div>
             </div>
         </div>
