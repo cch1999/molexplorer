@@ -29,9 +29,16 @@ describe('FragmentLibrary', () => {
       addMolecule: () => true,
       showMoleculeDetails: () => {}
     };
+    let callCount = 0;
+    const rdkitStub = {
+      get_mol: () => ({
+        get_smiles: () => `SMI${++callCount}`,
+        delete: () => {}
+      })
+    };
     library = new FragmentLibrary(moleculeManager, {
       notify: () => {},
-      rdkit: Promise.resolve(null)
+      rdkit: Promise.resolve(rdkitStub)
     });
     library.init();
     // Stub createFragmentCard to simplify DOM interactions
@@ -92,6 +99,19 @@ describe('FragmentLibrary', () => {
     assert.match(msg, /already exists/i);
   });
 
+  it('importFragmentsFromSdf parses and adds fragments and source option', async () => {
+    library.fragments = [];
+    library.renderFragments = () => {};
+    const sdf = `Frag1\nM  END\n$$$$\nFrag2\nM  END\n$$$$`;
+    const count = await library.importFragmentsFromSdf(sdf, 'SDFLIB');
+    assert.strictEqual(count, 2);
+    assert.strictEqual(library.fragments.length, 2);
+    assert.strictEqual(library.fragments[0].source, 'SDFLIB');
+    assert.strictEqual(library.fragments[0].kind, 'SDF');
+    assert.strictEqual(library.fragments[0].name, 'SMI2');
+    assert.ok(library.sourceFilter.children.some(o => o.value === 'SDFLIB'));
+  });
+
   it('renderFragments filters by search text, source filter, and CCD toggle', () => {
     library.fragments = [
       { id: '1', name: 'Alpha', source: 'custom', in_ccd: false, kind: 'OTHER', query: '' },
@@ -123,5 +143,20 @@ describe('FragmentLibrary', () => {
     library.renderFragments();
     assert.strictEqual(library.grid.children.length, 1);
     assert.match(library.grid.textContent, /Beta/);
+  });
+
+  it('renderFragments can search by library name', () => {
+    library.fragments = [
+      { id: '1', name: 'FragA', source: 'LibOne', in_ccd: false, kind: 'OTHER', query: '' },
+      { id: '2', name: 'FragB', source: 'LibTwo', in_ccd: false, kind: 'OTHER', query: '' }
+    ];
+
+    library.searchInput.value = ' libone ';
+    library.sourceFilter.value = 'all';
+    library.ccdToggle.checked = false;
+    library.renderFragments();
+
+    assert.strictEqual(library.grid.children.length, 1);
+    assert.match(library.grid.textContent, /FragA/);
   });
 });

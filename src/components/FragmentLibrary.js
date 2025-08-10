@@ -12,6 +12,8 @@ class FragmentLibrary {
         this.searchInput = null;
         this.sourceFilter = null;
         this.ccdToggle = null;
+        this.importButton = null;
+        this.fileInput = null;
         this.notify = notify;
         this.rdkitPromise = rdkit;
     }
@@ -21,6 +23,8 @@ class FragmentLibrary {
         this.searchInput = document.getElementById('fragment-search');
         this.sourceFilter = document.getElementById('fragment-filter-source');
         this.ccdToggle = document.getElementById('ccd-toggle');
+        this.importButton = document.getElementById('import-fragment-btn');
+        this.fileInput = document.getElementById('fragment-sdf-input');
 
         this.addEventListeners();
         return this;
@@ -35,6 +39,13 @@ class FragmentLibrary {
         }
         if (this.ccdToggle) {
             this.ccdToggle.addEventListener('change', () => this.renderFragments());
+        }
+        if (this.importButton && this.fileInput) {
+            this.importButton.addEventListener('click', () => this.fileInput.click());
+            this.fileInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                this.handleSdfUpload(file);
+            });
         }
     }
 
@@ -71,12 +82,15 @@ class FragmentLibrary {
         if (!this.grid) return;
         this.grid.innerHTML = '';
 
-        const searchTerm = this.searchInput ? this.searchInput.value.toLowerCase() : '';
+        const searchTerm = this.searchInput
+            ? this.searchInput.value.toLowerCase().trim()
+            : '';
         const source = this.sourceFilter ? this.sourceFilter.value : 'all';
         const onlyInCCD = this.ccdToggle ? this.ccdToggle.checked : false;
 
         const filtered = this.fragments.filter(fragment => {
-            const nameMatch = fragment.name.toLowerCase().includes(searchTerm);
+            const nameMatch = fragment.name.toLowerCase().includes(searchTerm)
+                || fragment.source.toLowerCase().includes(searchTerm);
             const sourceMatch = source === 'all' || fragment.source === source;
             const ccdMatch = !onlyInCCD || fragment.in_ccd;
             return nameMatch && sourceMatch && ccdMatch;
@@ -167,7 +181,7 @@ class FragmentLibrary {
             if ((fragment.kind === 'SMILES' || fragment.kind === 'SMARTS') && fragment.query) {
                 this.rdkitPromise.then((RDKit) => {
                     if (!RDKit) {
-                        canvasContainer.innerHTML = `<p class="render-error">RDKit not available</p>`;
+                        canvasContainer.innerHTML = `<p class=\"render-error\">RDKit not available</p>`;
                         return;
                     }
                     try {
@@ -178,7 +192,23 @@ class FragmentLibrary {
                         canvasContainer.innerHTML = svg;
                     } catch (err) {
                         console.error('Error rendering SMILES for ' + fragment.name, err);
-                        canvasContainer.innerHTML = `<p class="render-error">Render error for query: ${fragment.query}</p>`;
+                        canvasContainer.innerHTML = `<p class=\"render-error\">Render error for query: ${fragment.query}</p>`;
+                    }
+                });
+            } else if (fragment.kind === 'SDF' && fragment.query) {
+                this.rdkitPromise.then((RDKit) => {
+                    if (!RDKit) {
+                        canvasContainer.innerHTML = `<p class=\"render-error\">RDKit not available</p>`;
+                        return;
+                    }
+                    try {
+                        const mol = RDKit.get_mol(fragment.query);
+                        const svg = mol.get_svg(200, 150);
+                        mol.delete();
+                        canvasContainer.innerHTML = svg;
+                    } catch (err) {
+                        console.error('Error rendering SDF for ' + fragment.name, err);
+                        canvasContainer.innerHTML = `<p class=\"render-error\">Render error for SDF</p>`;
                     }
                 });
             } else {
@@ -216,9 +246,96 @@ class FragmentLibrary {
             in_ccd: false
         });
 
+        this.ensureSourceOption(fragmentData.source || 'custom');
         this.renderFragments();
         this.notify(`Fragment "${fragmentData.name}" added successfully!`, 'success');
         return true;
+    }
+
+    handleSdfUpload(file) {
+        if (!file) return;
+        const defaultName = file.name.replace(/\.sdf$/i, '');
+        let libraryName = defaultName;
+        if (typeof window !== 'undefined' && typeof window.prompt === 'function') {
+            const input = window.prompt('Enter fragment library name', defaultName);
+            if (input && input.trim()) {
+                libraryName = input.trim();
+            }
+        }
+        file
+            .text()
+            .then(text => this.importFragmentsFromSdf(text, libraryName))
+            .then(count => {
+                if (count > 0) {
+                    this.notify(`${count} fragments imported from ${file.name}`, 'success');
+                } else {
+                    this.notify('No fragments were imported from SDF', 'error');
+                }
+                this.fileInput.value = '';
+            })
+            .catch(err => {
+                console.error('Failed to import SDF file:', err);
+                this.notify('Failed to import SDF file', 'error');
+                this.fileInput.value = '';
+            });
+    }
+
+    async importFragmentsFromSdf(sdfText, source = 'custom') {
+        if (!sdfText) return 0;
+        const RDKit = await this.rdkitPromise;
+        const blocks = sdfText.split(/\$\$\$\$/).map(b => b.trim()).filter(Boolean);
+        let added = 0;
+        for (let idx = 0; idx < blocks.length; idx++) {
+            const block = blocks[idx];
+            let smiles = '';
+            if (RDKit) {
+                try {
+                    const mol = RDKit.get_mol(block);
+                    smiles = mol.get_smiles();
+                    mol.delete();
+                } catch (err) {
+                    console.error('Failed to compute SMILES for fragment', err);
+                }
+            }
+            if (!smiles) {
+                const lines = block.split(/\r?\n/);
+                smiles = lines[0] ? lines[0].trim() : `Fragment ${idx + 1}`;
+            }
+            const duplicate = this.fragments.some(
+                f => f.name.toLowerCase() === smiles.toLowerCase()
+            );
+            if (duplicate) continue;
+            this.fragments.unshift({
+                id: `custom-${Date.now()}-${idx}`,
+                name: smiles,
+                kind: 'SDF',
+                query: block,
+                description: '',
+                comment: 'Custom fragment',
+                url: '',
+                source,
+                ccd: '',
+                in_ccd: false
+            });
+            added++;
+        }
+        if (added > 0) {
+            this.ensureSourceOption(source);
+            this.renderFragments();
+        }
+        return added;
+    }
+
+    ensureSourceOption(source) {
+        if (!this.sourceFilter) return;
+        const exists = Array.from(this.sourceFilter.children)
+            .some(opt => opt.value === source);
+        if (!exists) {
+            const option = document.createElement('option');
+            option.value = source;
+            option.textContent = source;
+            this.sourceFilter.appendChild(option);
+        }
     }
 
     sanitizeSMILES(smiles) {
