@@ -16,17 +16,44 @@
     </header>
     <main>
         <div class="tabs">
-            <button class="tab-button active">Molecules</button>
-            <button class="tab-button">Patterns</button>
-            <button class="tab-button">Reactions</button>
+            <button class="tab-button active" data-tab="molecules">Molecules</button>
+            <button class="tab-button" data-tab="patterns">Patterns</button>
+            <button class="tab-button" data-tab="reactions">Reactions</button>
+            <button class="tab-button" data-tab="viewer">Viewer</button>
         </div>
-        <div class="content">
+        <div class="tab-content" data-tab-content="molecules" style="display: block;">
             <div class="database-header">
                 <h2>Molecular Database</h2>
                 <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
             </div>
             <div id="molecule-grid" class="molecule-grid">
                 <div class="loading-indicator">Loading molecules...</div>
+            </div>
+        </div>
+        <div class="tab-content" data-tab-content="patterns" style="display: none;">
+            <div class="database-header">
+                <h2>Patterns</h2>
+            </div>
+            <p style="color:#666;">Coming soon.</p>
+        </div>
+        <div class="tab-content" data-tab-content="reactions" style="display: none;">
+            <div class="database-header">
+                <h2>Reactions</h2>
+            </div>
+            <p style="color:#666;">Coming soon.</p>
+        </div>
+        <div class="tab-content" data-tab-content="viewer" style="display: none;">
+            <div class="database-header">
+                <h2>PyMOL-style Viewer</h2>
+            </div>
+            <div class="viewer-layout">
+                <div id="pymol-viewer" class="pymol-viewer">
+                    <div class="viewer-empty">Select molecules to render</div>
+                </div>
+                <div class="pymol-sidebar">
+                    <div class="pymol-sidebar-header">Molecules</div>
+                    <div id="pymol-molecule-list" class="pymol-molecule-list"></div>
+                </div>
             </div>
         </div>
     </main>

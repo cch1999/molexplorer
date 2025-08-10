@@ -64,8 +64,9 @@ class MoleculeManager {
             return false;
         }
 
-        this.molecules.push({ code: code, status: 'pending' });
+        this.molecules.push({ code: code, status: 'pending', sdfData: null });
         this.loadMolecule(code);
+        if (window.refreshPymolList) window.refreshPymolList();
         return true;
     }
 
@@ -86,6 +87,7 @@ class MoleculeManager {
             card.remove();
         }
 
+        if (window.refreshPymolList) window.refreshPymolList();
         return true;
     }
 
@@ -142,7 +144,10 @@ class MoleculeManager {
 
             const sdfData = await response.text();
             this.updateMoleculeStatus(code, 'loaded');
+            const mol = this.getMolecule(code);
+            if (mol) mol.sdfData = sdfData;
             this.createMoleculeCard(sdfData, code);
+            if (window.refreshPymolList) window.refreshPymolList();
         } catch (error) {
             console.error(`Could not fetch or process data for ${code}:`, error);
             this.updateMoleculeStatus(code, 'error');
@@ -1409,8 +1414,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initializeApp = () => {
         const moleculeManager = new MoleculeManager();
+        moleculeManager.init();
         moleculeManager.addMolecule('ATP'); // Start with a default molecule
         window.moleculeManager = moleculeManager; // Make it globally accessible
+
+        // Initialize tabs after app is ready
+        setupTabs();
+        // Prepare refresh hook for viewer list (lazy-initialized)
+        window.refreshPymolList = () => {
+            const list = document.getElementById('pymol-molecule-list');
+            if (list) buildPymolList();
+        };
     };
 
     if (disclaimerModal && acceptBtn) {
@@ -1425,6 +1439,133 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeApp();
     }
 });
+
+// --- PyMOL-style Viewer Tab ---
+let _pymolState = { initialized: false, viewer: null, selected: new Set() };
+
+function setupTabs() {
+    const buttons = document.querySelectorAll('.tab-button');
+    const contents = document.querySelectorAll('.tab-content');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            contents.forEach(c => {
+                const match = c.getAttribute('data-tab-content') === tab;
+                c.style.display = match ? 'block' : 'none';
+            });
+            if (tab === 'viewer' && !_pymolState.initialized) {
+                initPymolTab();
+            }
+        });
+    });
+}
+
+function initPymolTab() {
+    const container = document.getElementById('pymol-viewer');
+    if (!container) return;
+    try {
+        _pymolState.viewer = $3Dmol.createViewer(container, { backgroundColor: 'white' });
+        _pymolState.initialized = true;
+        buildPymolList();
+        renderPymol(true);
+    } catch (e) {
+        console.error('Failed to initialize PyMOL-style viewer:', e);
+    }
+}
+
+function buildPymolList() {
+    const list = document.getElementById('pymol-molecule-list');
+    if (!list || !window.moleculeManager) return;
+    list.innerHTML = '';
+    const molecules = window.moleculeManager.getAllMolecules();
+    molecules.forEach(mol => {
+        const row = document.createElement('div');
+        row.className = 'pymol-item';
+
+        const left = document.createElement('div');
+        left.style.display = 'flex';
+        left.style.alignItems = 'center';
+        left.style.gap = '8px';
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = _pymolState.selected.has(mol.code);
+        cb.addEventListener('change', async (e) => {
+            await toggleMolSelection(mol.code, e.target.checked);
+        });
+
+        const label = document.createElement('span');
+        label.className = 'code';
+        label.textContent = mol.code;
+
+        left.appendChild(cb);
+        left.appendChild(label);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+        const fitBtn = document.createElement('button');
+        fitBtn.className = 'pymol-mini-btn';
+        fitBtn.textContent = 'Fit';
+        fitBtn.title = 'Zoom to selection';
+        fitBtn.addEventListener('click', () => renderPymol(true));
+        actions.appendChild(fitBtn);
+
+        row.appendChild(left);
+        row.appendChild(actions);
+        list.appendChild(row);
+    });
+}
+
+async function toggleMolSelection(code, checked) {
+    const mm = window.moleculeManager;
+    if (!mm) return;
+    if (checked) {
+        const mol = mm.getMolecule(code);
+        if (!mol || !mol.sdfData) {
+            try {
+                await mm.loadMolecule(code);
+            } catch (e) {
+                console.warn('Failed to load molecule for viewer:', code, e);
+            }
+        }
+        _pymolState.selected.add(code);
+    } else {
+        _pymolState.selected.delete(code);
+    }
+    renderPymol(true);
+}
+
+function renderPymol(fit = false) {
+    const viewer = _pymolState.viewer;
+    const container = document.getElementById('pymol-viewer');
+    if (!viewer || !window.moleculeManager) return;
+    viewer.clear();
+
+    let any = false;
+    for (const code of _pymolState.selected) {
+        const mol = window.moleculeManager.getMolecule(code);
+        if (mol && mol.sdfData) {
+            viewer.addModel(mol.sdfData, 'sdf');
+            any = true;
+        }
+    }
+
+    const overlay = container ? container.querySelector('.viewer-empty') : null;
+    if (!any) {
+        if (overlay) overlay.style.display = 'flex';
+        viewer.render();
+        return;
+    } else if (overlay) {
+        overlay.style.display = 'none';
+    }
+
+    viewer.setStyle({}, { stick: { radius: 0.18 } });
+    viewer.setStyle({ elem: 'H' }, {});
+    if (fit) viewer.zoomTo();
+    viewer.render();
+}
 
 // Modal functionality
 function initializeModal() {
