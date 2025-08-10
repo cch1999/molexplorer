@@ -1790,6 +1790,7 @@ body.dark-mode .details-viewer {
     display: flex;
     gap: 8px;
     height: 400px;
+    flex-wrap: nowrap;
 }
 
 .viewer-canvas {
@@ -1809,6 +1810,7 @@ body.dark-mode .details-viewer {
     background: #f5f5f5;
     border: 1px solid #eee;
     border-radius: 4px;
+    flex-shrink: 0;
 }
 
 .viewer-row {

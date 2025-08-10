@@ -124,6 +124,11 @@ class MoleculeManager {
     addMolecule(molecule) {
         const added = this.repository.addMolecule(molecule);
         if (added) {
+            // If the SDF is already available, add immediately
+            if (molecule.sdf && typeof window !== 'undefined' && window.viewer) {
+                window.viewer.addMolecule({ code: molecule.code, sdf: molecule.sdf });
+            }
+            // Always load so cards and any missing data are populated
             this.loader.loadMolecule(molecule);
         }
         return added;
@@ -227,6 +232,11 @@ class MoleculeManager {
 
 const moleculeManager = new MoleculeManager().init();
 const viewer = new Viewer().init();
+
+// Expose early so loaders can register molecules as they arrive
+window.moleculeManager = moleculeManager;
+window.viewer = viewer;
+
 moleculeManager.loadAllMolecules();
 
 const rdkitPromise =
@@ -335,10 +345,8 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
-window.viewer = viewer;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {

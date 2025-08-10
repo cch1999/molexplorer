@@ -22,13 +22,14 @@ class Viewer {
         container.innerHTML = '';
         container.classList.add('viewer-panel');
 
-        const viewerDiv = document.createElement('div');
-        viewerDiv.className = 'viewer-canvas';
-        container.appendChild(viewerDiv);
-
+        // Sidebar list comes first so it appears on the left
         this.listEl = document.createElement('div');
         this.listEl.className = 'viewer-list';
         container.appendChild(this.listEl);
+
+        const viewerDiv = document.createElement('div');
+        viewerDiv.className = 'viewer-canvas';
+        container.appendChild(viewerDiv);
 
         this.viewer = $3Dmol.createViewer(viewerDiv, { backgroundColor: 'white' });
         this.viewer.render();
