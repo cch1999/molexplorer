@@ -34,9 +34,7 @@ class MoleculeManager {
         this.loadingIndicator = document.querySelector('.loading-indicator');
 
         this.cardUI = new MoleculeCard(this.grid, this.repository, {
-            onDelete: code => this.confirmDelete(code),
-            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format),
-            onCompare: code => this.queueComparison(code)
+            onShowDetails: (code, data, format) => this.showMoleculeDetails(code, data, format)
         });
 
         this.loader = new MoleculeLoader(this.repository, this.cardUI);
@@ -56,8 +54,8 @@ class MoleculeManager {
             }
         });
 
-        document.getElementById('delete-all-btn').addEventListener('click', () => {
-            if (confirm('Delete all molecules?')) {
+        document.getElementById('delete-all-btn').addEventListener('click', async () => {
+            if (await showConfirmation('Delete all molecules?')) {
                 this.deleteAllMolecules();
             }
         });
@@ -213,8 +211,8 @@ class MoleculeManager {
         }
     }
 
-    confirmDelete(code) {
-        if (confirm(`Delete ${code}?`)) {
+    async confirmDelete(code) {
+        if (await showConfirmation(`Delete ${code}?`)) {
             this.deleteMolecule(code);
         }
     }
@@ -294,40 +292,42 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    Object.assign(notification.style, {
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        padding: '12px 20px',
-        borderRadius: '6px',
-        color: 'white',
-        fontWeight: '500',
-        zIndex: '1001',
-        opacity: '0',
-        transform: 'translateY(-20px)',
-        transition: 'all 0.3s ease'
-    });
-    if (type === 'success') {
-        notification.style.background = '#4CAF50';
-    } else if (type === 'error') {
-        notification.style.background = '#f44336';
-    } else {
-        notification.style.background = '#6e45e2';
-    }
     document.body.appendChild(notification);
+    requestAnimationFrame(() => notification.classList.add('show'));
     setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateY(0)';
-    }, 10);
-    setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+function showConfirmation(message) {
+    return new Promise(resolve => {
+        const modal = document.getElementById('confirm-modal');
+        if (!modal) {
+            resolve(false);
+            return;
+        }
+        const msgEl = document.getElementById('confirm-message');
+        const okBtn = document.getElementById('confirm-ok');
+        const cancelBtn = document.getElementById('confirm-cancel');
+        msgEl.textContent = message;
+        modal.style.display = 'block';
+        const cleanup = () => {
+            modal.style.display = 'none';
+            okBtn.removeEventListener('click', onOk);
+            cancelBtn.removeEventListener('click', onCancel);
+        };
+        const onOk = () => {
+            cleanup();
+            resolve(true);
+        };
+        const onCancel = () => {
+            cleanup();
+            resolve(false);
+        };
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+    });
 }
 
 window.moleculeManager = moleculeManager;
@@ -335,6 +335,7 @@ window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.pyMolInterface = pyMolInterface;
 window.showNotification = showNotification;
+window.showConfirmation = showConfirmation;
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');

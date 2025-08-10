@@ -35,10 +35,13 @@
     </div>
 
     <!-- Main App Content -->
-    <header>
-        <h1>Ligand Surfer</h1>
-        <p>Interactive exploration of ligands, fragments, and proteins</p>
-        <p class="author">By Charlie Harris 🛡️</p>
+    <header class="top-bar">
+        <h1 class="app-title">Ligand Surfer</h1>
+        <div class="toolbar">
+            <input type="text" id="global-search" placeholder="Search...">
+            <button id="add-molecule-btn" class="toolbar-btn">Add</button>
+            <button id="settings-btn" class="toolbar-btn">⚙️</button>
+        </div>
     </header>
     <main>
         <div class="tabs">
@@ -52,7 +55,6 @@
                 <div class="database-header">
                     <h2>Molecular Database</h2>
                     <div class="header-buttons">
-                        <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
                         <button id="delete-all-btn" class="delete-all-btn" title="Delete all molecules">
                             <svg viewBox="0 0 24 24" width="18" height="18">
                                 <path fill="currentColor"
@@ -480,6 +482,21 @@
             <div class="modal-body" style="padding: 10px;">
                 <div id="quick-view-viewer" style="width: 100%; height: 300px; position: relative;">
                     <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal confirm-modal">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+            </div>
+            <div class="modal-footer">
+                <div>
+                    <button id="confirm-cancel" class="btn-secondary">Cancel</button>
+                    <button id="confirm-ok" class="btn-primary">Confirm</button>
                 </div>
             </div>
         </div>

@@ -1,73 +1,91 @@
+
+:root {
+    --color-bg: #f4f6f8;
+    --color-text: #333;
+    --color-primary: #6e45e2;
+    --color-accent: #88d3ce;
+    --color-success: #4CAF50;
+    --color-error: #f44336;
+    --spacing-8: 8px;
+    --spacing-12: 12px;
+    --spacing-16: 16px;
+    --spacing-24: 24px;
+    --radius-4: 4px;
+    --radius-8: 8px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    background-color: #f4f6f8;
-    color: #333;
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
-header {
-    background: linear-gradient(90deg, #6e45e2 0%, #88d3ce 100%);
-    color: white;
-    padding: 20px 40px;
-    text-align: center;
-    position: relative;
+header.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-12) var(--spacing-24);
+    background: #fff;
+    box-shadow: var(--shadow-sm);
 }
 
-header h1 {
+.app-title {
     margin: 0;
     font-weight: 500;
+    color: var(--color-primary);
+    font-size: 1.25rem;
 }
 
-header p {
-    margin: 5px 0 0;
-    font-weight: 300;
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-12);
 }
 
-header .author {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    margin: 0;
-    font-size: 12px;
-    font-weight: 400;
-    opacity: 0.8;
-    font-style: italic;
+.toolbar input[type="text"] {
+    padding: var(--spacing-8) var(--spacing-12);
+    border: 1px solid #ddd;
+    border-radius: var(--radius-4);
+    font-size: 14px;
+}
+
+.toolbar-btn {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-4);
+    padding: var(--spacing-8) var(--spacing-12);
+    cursor: pointer;
 }
 
 main {
-    padding: 20px;
+    padding: var(--spacing-24);
 }
 
 .tabs {
-    display: flex;
-    border-bottom: 1px solid #ddd;
-    margin-bottom: 20px;
+    display: inline-flex;
+    border: 1px solid #ddd;
+    border-radius: var(--radius-8);
+    overflow: hidden;
+    margin-bottom: var(--spacing-24);
 }
 
 .tab-button {
-    background: none;
+    background: transparent;
     border: none;
-    padding: 15px 20px;
+    padding: var(--spacing-12) var(--spacing-16);
     cursor: pointer;
     font-size: 16px;
     font-weight: 500;
-    color: #555;
-    position: relative;
-    transition: color 0.3s;
+    color: var(--color-text);
 }
 
 .tab-button.active {
-    color: #6e45e2;
-}
-
-.tab-button.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: #6e45e2;
+    background: var(--color-primary);
+    color: #fff;
 }
 
 .content {
@@ -406,6 +424,10 @@ main {
     max-width: 500px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     animation: modalSlideIn 0.3s ease-out;
+}
+
+#confirm-modal .modal-content {
+    max-width: 300px;
 }
 
 @keyframes modalSlideIn {
@@ -1163,193 +1185,80 @@ main {
 .molecule-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    gap: var(--spacing-16);
 }
 
 .molecule-card {
-    background: white;
+    background: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-8);
+    padding: var(--spacing-16);
+    box-shadow: var(--shadow-sm);
     transition: box-shadow 0.3s;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: var(--spacing-12);
     position: relative;
-}
-
-.drag-handle {
-    position: absolute;
-    top: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    cursor: grab;
-    color: #ccc;
-    font-size: 16px;
-    padding: 2px 6px;
-    border-radius: 3px;
-    transition: color 0.3s;
-    user-select: none;
-    z-index: 10;
-}
-
-.drag-handle:hover {
-    color: #6e45e2;
-    background-color: rgba(110, 69, 226, 0.1);
-}
-
-.drag-handle:active {
-    cursor: grabbing;
-}
-
-.delete-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    user-select: none;
-    z-index: 10;
-    opacity: 0.5;
-    background-color: transparent;
-    color: #757575;
-}
-
-.delete-btn:hover {
-    opacity: 1;
-    background-color: #ffebee;
-    color: #d32f2f;
-    transform: scale(1.1);
-}
-
-.delete-btn:active {
-    transform: scale(0.9);
-    background-color: #ffcdd2;
-}
-
-.molecule-card:hover .delete-btn {
-    opacity: 0.7;
-}
-
-.delete-btn svg {
-    pointer-events: none;
-}
-
-.download-btn {
-    position: absolute;
-    top: 8px;
-    right: 40px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    user-select: none;
-    z-index: 10;
-    opacity: 0.5;
-    background-color: transparent;
-    color: #757575;
-}
-
-.download-btn:hover {
-    opacity: 1;
-    background-color: #e3f2fd;
-    color: #1976d2;
-    transform: scale(1.1);
-}
-
-.download-btn:active {
-    transform: scale(0.9);
-    background-color: #bbdefb;
-}
-
-.molecule-card:hover .download-btn {
-    opacity: 0.7;
-}
-
-.download-btn svg {
-    pointer-events: none;
-}
-
-.compare-btn {
-    position: absolute;
-    top: 8px;
-    right: 72px;
-    cursor: pointer;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    user-select: none;
-    z-index: 10;
-    opacity: 0.5;
-    background-color: transparent;
-    color: #757575;
-}
-
-.compare-btn:hover {
-    opacity: 1;
-    background-color: #e8f5e9;
-    color: #388e3c;
-    transform: scale(1.1);
-}
-
-.compare-btn:active {
-    transform: scale(0.9);
-    background-color: #c8e6c9;
-}
-
-.molecule-card:hover .compare-btn {
-    opacity: 0.7;
-}
-
-.compare-btn svg {
-    pointer-events: none;
 }
 
 .molecule-card.dragging {
     opacity: 0.5;
-    transform: rotate(5deg);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
-.molecule-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
 }
 
-.molecule-card h3 {
-    margin: 0 0 5px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6e45e2;
+.card-header .ccd-code {
+    font-weight: 600;
 }
 
-.molecule-card .formula {
-    margin: 0 0 10px;
+.status-badge {
+    padding: 0 var(--spacing-8);
+    border-radius: var(--radius-4);
     font-size: 12px;
-    color: #888;
+    text-transform: capitalize;
 }
 
-.molecule-card .viewer-container {
+.status-badge.loaded {
+    background: var(--color-success);
+    color: #fff;
+}
+
+.status-badge.error {
+    background: var(--color-error);
+    color: #fff;
+}
+
+.status-badge.loading {
+    background: #ddd;
+    color: #333;
+}
+
+.viewer-container {
     width: 100%;
     height: 200px;
-    /* Adjust as needed */
-    position: relative;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    border-radius: var(--radius-4);
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-footer {
+    display: flex;
+    gap: var(--spacing-8);
+    margin-top: auto;
+}
+
+.card-footer .btn-primary,
+.card-footer .btn-secondary {
+    flex: 1;
+    padding: var(--spacing-8) var(--spacing-12);
 }
 
 .fragment-card .viewer-container {
@@ -1390,6 +1299,52 @@ main {
     padding: 40px;
     font-size: 18px;
     color: #888;
+}
+
+.skeleton {
+    background: linear-gradient(90deg, #eee 25%, #ddd 37%, #eee 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.notification {
+    position: fixed;
+    top: var(--spacing-24);
+    right: var(--spacing-24);
+    padding: var(--spacing-12) var(--spacing-16);
+    border-radius: var(--radius-4);
+    color: #fff;
+    font-weight: 500;
+    z-index: 1001;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification.success {
+    background: var(--color-success);
+}
+
+.notification.error {
+    background: var(--color-error);
+}
+
+.notification.info {
+    background: var(--color-primary);
 }
 
 .pdb-details-modal {
