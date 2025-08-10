@@ -16,6 +16,11 @@ class LigandDetails {
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
         this.viewer = null;
+        this.downloadPh4Btn = document.getElementById('download-ph4-btn');
+        this.pharmacophoreFeatures = [];
+        if (this.downloadPh4Btn) {
+            this.downloadPh4Btn.addEventListener('click', () => this.downloadPharmacophore());
+        }
 
         const closeBtn = document.getElementById('close-details-modal');
         if (closeBtn) {
@@ -30,6 +35,7 @@ class LigandDetails {
 
     show(ccdCode, sdfData) {
         this.cleanupViewer();
+        this.currentCode = ccdCode;
         this.detailsTitle.textContent = `Molecule Details: ${ccdCode}`;
         this.detailsCode.textContent = ccdCode;
 
@@ -95,6 +101,13 @@ class LigandDetails {
                             viewer.zoomTo(ligandSel);
                             viewer.render();
                             this.viewer = viewer;
+                            this.pharmacophoreFeatures = this.detectPharmacophore(viewer, ligandSel);
+                            if (this.pharmacophoreFeatures.length) {
+                                this.renderPharmacophore(viewer, this.pharmacophoreFeatures);
+                                if (this.downloadPh4Btn) this.downloadPh4Btn.style.display = 'inline-block';
+                            } else if (this.downloadPh4Btn) {
+                                this.downloadPh4Btn.style.display = 'none';
+                            }
                         } catch (e) {
                             console.error(`Error initializing PDB viewer for ${ccdCode}:`, e);
                             this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
@@ -124,6 +137,13 @@ class LigandDetails {
                     viewer.zoomTo();
                     viewer.render();
                     this.viewer = viewer;
+                    this.pharmacophoreFeatures = this.detectPharmacophore(viewer, {});
+                    if (this.pharmacophoreFeatures.length) {
+                        this.renderPharmacophore(viewer, this.pharmacophoreFeatures);
+                        if (this.downloadPh4Btn) this.downloadPh4Btn.style.display = 'inline-block';
+                    } else if (this.downloadPh4Btn) {
+                        this.downloadPh4Btn.style.display = 'none';
+                    }
                 } catch (e) {
                     console.error(`Error initializing details viewer for ${ccdCode}:`, e);
                     this.detailsViewer.innerHTML = '<p style="color: #666;">Structure rendering error</p>';
@@ -158,6 +178,62 @@ class LigandDetails {
         this.modal.style.display = 'block';
     }
 
+    detectPharmacophore(viewer, sel = {}) {
+        try {
+            const model = viewer?.getModel ? viewer.getModel() : null;
+            if (!model || typeof model.selectedAtoms !== 'function') return [];
+            const atoms = model.selectedAtoms(sel);
+            const features = [];
+            const allAtoms = model.atoms || atoms;
+            atoms.forEach(atom => {
+                const { elem, x, y, z, bonds, aromatic } = atom;
+                if (!elem) return;
+                const neigh = (bonds || []).map(i => allAtoms[i]).filter(Boolean);
+                const hasHydrogen = neigh.some(n => n.elem === 'H');
+                if (elem === 'N' || elem === 'O') {
+                    if (hasHydrogen) features.push({ type: 'donor', x, y, z });
+                    else features.push({ type: 'acceptor', x, y, z });
+                } else if (elem === 'C') {
+                    features.push({ type: 'hydrophobic', x, y, z });
+                }
+                if (aromatic) {
+                    features.push({ type: 'aromatic', x, y, z });
+                }
+            });
+            return features;
+        } catch {
+            return [];
+        }
+    }
+
+    renderPharmacophore(viewer, features) {
+        const colors = { donor: 'blue', acceptor: 'red', hydrophobic: 'green', aromatic: 'orange' };
+        features.forEach(f => {
+            viewer.addSphere({
+                center: { x: f.x, y: f.y, z: f.z },
+                radius: 0.8,
+                color: colors[f.type] || 'gray',
+                opacity: 0.4
+            });
+        });
+        viewer.render();
+    }
+
+    downloadPharmacophore() {
+        if (!this.pharmacophoreFeatures.length) return;
+        const data = JSON.stringify(this.pharmacophoreFeatures, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const code = this.currentCode || 'pharmacophore';
+        link.download = `${code}.ph4.json`;
+        document.body?.appendChild?.(link);
+        if (typeof link.click === 'function') link.click();
+        document.body?.removeChild?.(link);
+        URL.revokeObjectURL(url);
+    }
+
     close() {
         this.cleanupViewer();
         this.modal.style.display = 'none';
@@ -181,6 +257,10 @@ class LigandDetails {
             this.detailsViewer.innerHTML = '';
             this.detailsViewer.viewer = null;
         }
+        if (this.downloadPh4Btn) {
+            this.downloadPh4Btn.style.display = 'none';
+        }
+        this.pharmacophoreFeatures = [];
     }
 }
 
