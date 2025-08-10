@@ -138,8 +138,8 @@ class PyMolInterface {
 
     // Sticks for hetero
     if (showSticks) {
-      const stickScheme = scheme === 'element' ? 'element' : scheme; // element/chain/spectrum
-      this.viewer.setStyle(hetSelection, { stick: { radius: 0.2, colorscheme: stickScheme } });
+      // Always color ligands (hetero) by element
+      this.viewer.setStyle(hetSelection, { stick: { radius: 0.2, colorscheme: 'element' } });
     }
 
     // Surface for polymer
@@ -173,4 +173,3 @@ class PyMolInterface {
 }
 
 export default PyMolInterface;
-
