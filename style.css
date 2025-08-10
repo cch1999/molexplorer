@@ -1393,8 +1393,8 @@ main {
 }
 
 .pdb-details-modal {
-    max-width: 900px;
-    width: 90%;
+    max-width: 1000px;
+    width: 95%;
 }
 
 .pdb-details-grid {
@@ -1438,6 +1438,36 @@ main {
     font-size: 14px;
     color: #333;
     line-height: 1.4;
+}
+
+.pdb-info-value.authors-list {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+
+.pdb-info-value.authors-list .authors-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    background: #333;
+    color: #fff;
+    padding: 6px;
+    border-radius: 4px;
+    white-space: normal;
+    z-index: 10;
+    width: max-content;
+    max-width: 400px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: opacity 0.2s;
+}
+
+.pdb-info-value.authors-list:hover .authors-tooltip {
+    visibility: visible;
+    opacity: 1;
 }
 
 .pdb-info-value a {
