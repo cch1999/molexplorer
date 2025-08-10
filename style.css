@@ -1785,3 +1785,88 @@ body.dark-mode .molecule-viewer,
 body.dark-mode .details-viewer {
     background: #e0e0e0;
 }
+
+/* PyMOL-style tab */
+.pymol-layout {
+    display: flex;
+    gap: 16px;
+    height: calc(100vh - 280px);
+    min-height: 420px;
+}
+
+#pymol-viewer.viewer-container {
+    flex: 1 1 auto;
+    min-height: 420px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+}
+
+.pymol-sidebar {
+    width: 320px;
+    max-width: 35vw;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.pymol-sidebar-title {
+    margin: 12px 12px 4px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.pymol-list {
+    overflow: auto;
+    padding: 8px 8px 12px;
+}
+
+.pymol-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    margin: 6px 4px;
+    background: #fafafa;
+}
+
+.pymol-item-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pymol-item-code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-weight: 600;
+    color: #333;
+}
+
+.pymol-item-status {
+    font-size: 12px;
+    color: #999;
+}
+
+.pymol-item-actions .small {
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+/* Dark mode tweaks for PyMOL tab */
+body.dark-mode .pymol-sidebar {
+    background: #1a1a1a;
+    border-color: #333;
+}
+body.dark-mode #pymol-viewer.viewer-container {
+    border-color: #333;
+}
+body.dark-mode .pymol-list-item {
+    background: #151515;
+    border-color: #333;
+}
+body.dark-mode .pymol-item-code { color: #eee; }
+body.dark-mode .pymol-item-status { color: #aaa; }
