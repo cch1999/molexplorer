@@ -48,6 +48,7 @@
             <button class="tab-button active">Molecules</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
+            <button class="tab-button">Viewer</button>
         </div>
         <div class="content">
             <div id="molecule-library-content" class="content-panel">
@@ -149,6 +150,27 @@
                     <p id="no-protein-results-message" style="display: none;">No results found.</p>
                     <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
                         data...</div>
+                </div>
+            </div>
+            <div id="ligand-viewer-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Ligand Viewer</h2>
+                </div>
+                <div class="ligand-viewer-split">
+                    <div id="ligand-viewer-pane" class="details-viewer" style="height: 520px;">
+                        <p>Select a molecule to view</p>
+                    </div>
+                    <div class="ligand-viewer-sidebar">
+                        <div class="ligand-toolbar">
+                            <input id="ligand-search" type="text" placeholder="Filter molecules..." />
+                            <select id="ligand-style">
+                                <option value="ballstick">Ball & Stick</option>
+                                <option value="stick">Sticks</option>
+                                <option value="line">Lines</option>
+                            </select>
+                        </div>
+                        <div id="ligand-list" class="ligand-list"></div>
+                    </div>
                 </div>
             </div>
         </div>
