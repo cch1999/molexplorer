@@ -65,6 +65,9 @@
                                     d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z" />
                             </svg>
                         </button>
+                        <button id="export-session-btn" class="export-btn" title="Export notebook session">
+                            <span class="material-icons">description</span>
+                        </button>
                     </div>
                 </div>
                 <div id="molecule-grid" class="molecule-grid">
@@ -210,6 +213,35 @@
             </div>
         </div>
     </main>
+
+    <div id="notes-panel" class="notes-panel collapsed">
+        <div class="notes-header">
+            <h3>Notes</h3>
+            <button id="notes-toggle" class="collapse-btn">&lt;</button>
+        </div>
+        <div class="notes-content">
+            <div class="notes-toolbar">
+                <button data-md="bold"><b>B</b></button>
+                <button data-md="italic"><i>I</i></button>
+                <button data-md="ul">&#8226;</button>
+            </div>
+            <textarea id="notes-editor" placeholder="Write notes..."></textarea>
+            <input type="text" id="notes-tags" placeholder="Tags (comma separated)">
+            <button id="snapshot-btn" class="action-btn">Add Snapshot</button>
+            <div id="snapshot-container" class="snapshot-container"></div>
+        </div>
+    </div>
+
+    <div id="timeline-dock" class="timeline-dock collapsed">
+        <div class="timeline-header">
+            <span>Timeline</span>
+            <button id="timeline-toggle" class="collapse-btn">▲</button>
+        </div>
+        <div class="timeline-content">
+            <input type="text" id="timeline-filter" placeholder="Filter actions...">
+            <ul id="timeline-list" class="timeline-list"></ul>
+        </div>
+    </div>
 
     <!-- Add Fragment Modal -->
     <div id="add-fragment-modal" class="modal">
@@ -410,6 +442,7 @@
       "formula": null
     }
 }</pre>
+                        <button id="copy-json-btn" class="copy-btn">Copy JSON</button>
                     </div>
                 </div>
             </div>
