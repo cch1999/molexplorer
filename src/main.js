@@ -213,75 +213,86 @@ class MoleculeManager {
         }
     }
 }
+// Single-run bootstrap to prevent double init/bindings
+function bootstrapAppOnce() {
+    if (window.__ligandSurferBootstrapped) return;
+    window.__ligandSurferBootstrapped = true;
 
-const moleculeManager = new MoleculeManager().init();
-moleculeManager.loadAllMolecules();
+    const moleculeManager = new MoleculeManager().init();
+    moleculeManager.loadAllMolecules();
 
-const rdkitPromise =
-    typeof initRDKitModule === 'function'
-        ? initRDKitModule()
-        : Promise.resolve(null);
+    const rdkitPromise =
+        typeof initRDKitModule === 'function'
+            ? initRDKitModule()
+            : Promise.resolve(null);
 
-const fragmentLibrary = new FragmentLibrary(moleculeManager, {
-    notify: showNotification,
-    rdkit: rdkitPromise
-}).init();
-fragmentLibrary.loadFragments();
+    const fragmentLibrary = new FragmentLibrary(moleculeManager, {
+        notify: showNotification,
+        rdkit: rdkitPromise
+    }).init();
+    fragmentLibrary.loadFragments();
 
-// Add Fragment Modal handlers
-const addFragmentModal = document.getElementById('add-fragment-modal');
-const addFragmentBtn = document.getElementById('add-fragment-btn');
-const cancelAddFragmentBtn = document.getElementById('cancel-add-fragment-btn');
-const closeFragmentModalBtn = document.getElementById('close-fragment-modal');
-const confirmAddFragmentBtn = document.getElementById('confirm-add-fragment-btn');
+    // Add Fragment Modal handlers
+    const addFragmentModal = document.getElementById('add-fragment-modal');
+    const addFragmentBtn = document.getElementById('add-fragment-btn');
+    const cancelAddFragmentBtn = document.getElementById('cancel-add-fragment-btn');
+    const closeFragmentModalBtn = document.getElementById('close-fragment-modal');
+    const confirmAddFragmentBtn = document.getElementById('confirm-add-fragment-btn');
 
-const openFragmentModal = () => {
-    if (addFragmentModal) {
-        addFragmentModal.style.display = 'block';
-    }
-};
-
-const closeFragmentModal = () => {
-    if (addFragmentModal) {
-        addFragmentModal.style.display = 'none';
-    }
-};
-
-if (addFragmentBtn) {
-    addFragmentBtn.addEventListener('click', openFragmentModal);
-}
-if (cancelAddFragmentBtn) {
-    cancelAddFragmentBtn.addEventListener('click', closeFragmentModal);
-}
-if (closeFragmentModalBtn) {
-    closeFragmentModalBtn.addEventListener('click', closeFragmentModal);
-}
-if (confirmAddFragmentBtn) {
-    confirmAddFragmentBtn.addEventListener('click', () => {
-        const nameEl = document.getElementById('fragment-name');
-        const queryEl = document.getElementById('fragment-query');
-        const sourceEl = document.getElementById('fragment-source');
-        const descEl = document.getElementById('fragment-description');
-
-        const fragmentData = {
-            name: nameEl ? nameEl.value.trim() : '',
-            query: queryEl ? queryEl.value.trim() : '',
-            source: sourceEl ? sourceEl.value.trim() : '',
-            description: descEl ? descEl.value.trim() : ''
-        };
-
-        const added = fragmentLibrary.addFragment(fragmentData);
-        if (added) {
-            if (nameEl) nameEl.value = '';
-            if (queryEl) queryEl.value = '';
-            if (sourceEl) sourceEl.value = 'custom';
-            if (descEl) descEl.value = '';
-            closeFragmentModal();
+    const openFragmentModal = () => {
+        if (addFragmentModal) {
+            addFragmentModal.style.display = 'block';
         }
-    });
-}
+    };
 
-const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+    const closeFragmentModal = () => {
+        if (addFragmentModal) {
+            addFragmentModal.style.display = 'none';
+        }
+    };
+
+    if (addFragmentBtn) {
+        addFragmentBtn.addEventListener('click', openFragmentModal, { once: false });
+    }
+    if (cancelAddFragmentBtn) {
+        cancelAddFragmentBtn.addEventListener('click', closeFragmentModal, { once: false });
+    }
+    if (closeFragmentModalBtn) {
+        closeFragmentModalBtn.addEventListener('click', closeFragmentModal, { once: false });
+    }
+    if (confirmAddFragmentBtn) {
+        confirmAddFragmentBtn.addEventListener('click', () => {
+            const nameEl = document.getElementById('fragment-name');
+            const queryEl = document.getElementById('fragment-query');
+            const sourceEl = document.getElementById('fragment-source');
+            const descEl = document.getElementById('fragment-description');
+
+            const fragmentData = {
+                name: nameEl ? nameEl.value.trim() : '',
+                query: queryEl ? queryEl.value.trim() : '',
+                source: sourceEl ? sourceEl.value.trim() : '',
+                description: descEl ? descEl.value.trim() : ''
+            };
+
+            const added = fragmentLibrary.addFragment(fragmentData);
+            if (added) {
+                if (nameEl) nameEl.value = '';
+                if (queryEl) queryEl.value = '';
+                if (sourceEl) sourceEl.value = 'custom';
+                if (descEl) descEl.value = '';
+                closeFragmentModal();
+            }
+        });
+    }
+
+    const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+
+    // Expose selected APIs for debugging/consumers
+    window.moleculeManager = moleculeManager;
+    window.fragmentLibrary = fragmentLibrary;
+    window.proteinBrowser = proteinBrowser;
+    window.showNotification = showNotification;
+}
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -323,10 +334,12 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-window.moleculeManager = moleculeManager;
-window.fragmentLibrary = fragmentLibrary;
-window.proteinBrowser = proteinBrowser;
-window.showNotification = showNotification;
+// Bootstrap once on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapAppOnce, { once: true });
+} else {
+    bootstrapAppOnce();
+}
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
@@ -353,4 +366,5 @@ function initThemeToggle() {
     }
 }
 
+// Theme toggle binding should also be idempotent; call after bootstrap
 initThemeToggle();
