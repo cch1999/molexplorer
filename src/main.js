@@ -10,6 +10,7 @@ import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import PyMolInterface from './components/PyMolInterface.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import Notebook from './components/Notebook.js';
 
 class MoleculeManager {
     constructor() {
@@ -26,6 +27,7 @@ class MoleculeManager {
         this.pdbDetailsModal = null;
         this.addModal = null;
         this.comparisonModal = null;
+        this.notebook = null;
         this.compareQueue = [];
     }
 
@@ -49,6 +51,7 @@ class MoleculeManager {
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
         this.addModal = new AddMoleculeModal(this);
         this.comparisonModal = new ComparisonModal();
+        this.notebook = new Notebook(this);
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
             if (this.addModal) {
@@ -126,6 +129,7 @@ class MoleculeManager {
         const added = this.repository.addMolecule(molecule);
         if (added) {
             this.loader.loadMolecule(molecule);
+            window.notebook?.logAction(`Added molecule ${molecule.code}`);
         }
         return added;
     }
@@ -195,6 +199,10 @@ class MoleculeManager {
     }
 
     showMoleculeDetails(ccdCode, data, format) {
+        if (window.notebook) {
+            window.notebook.setCurrentMolecule(ccdCode);
+            window.notebook.logAction(`Viewed ${ccdCode}`);
+        }
         if (this.ligandModal) {
             this.ligandModal.show(ccdCode, data, format);
         }
@@ -289,6 +297,7 @@ if (confirmAddFragmentBtn) {
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
 const pyMolInterface = new PyMolInterface().init();
+const notebook = moleculeManager.notebook;
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -334,6 +343,7 @@ window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.pyMolInterface = pyMolInterface;
+window.notebook = notebook;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {

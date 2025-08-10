@@ -15,6 +15,7 @@ class LigandDetails {
         this.detailsResidue = document.getElementById('details-residue');
         this.detailsViewer = document.getElementById('details-viewer-container');
         this.detailsJSON = document.getElementById('details-json');
+        this.copyBtn = document.getElementById('copy-json-btn');
         this.viewer = null;
 
         const closeBtn = document.getElementById('close-details-modal');
@@ -26,6 +27,26 @@ class LigandDetails {
                 this.close();
             }
         });
+
+        if (this.copyBtn) {
+            this.copyBtn.addEventListener('click', () => {
+                const text = this.detailsJSON ? this.detailsJSON.textContent : '';
+                if (navigator.clipboard && text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        if (typeof showNotification === 'function') {
+                            showNotification('JSON copied to clipboard', 'success');
+                        }
+                    }).catch(() => {});
+                } else if (text) {
+                    const area = document.createElement('textarea');
+                    area.value = text;
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(area);
+                }
+            });
+        }
     }
 
     show(ccdCode, sdfData) {

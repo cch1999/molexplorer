@@ -1798,3 +1798,127 @@ body.dark-mode .molecule-viewer,
 body.dark-mode .details-viewer {
     background: #e0e0e0;
 }
+
+/* Research Notebook */
+.notes-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.notes-panel:not(.collapsed) {
+    transform: translateX(0);
+}
+.notes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f4f4f4;
+}
+.notes-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow-y: auto;
+}
+.notes-toolbar button {
+    margin-right: 5px;
+}
+.snapshot-container {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.snapshot-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+
+.timeline-dock {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 160px;
+    background: #fff;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+.timeline-dock:not(.collapsed) {
+    transform: translateY(0);
+}
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: #f4f4f4;
+}
+.timeline-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 5px 10px;
+}
+.timeline-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.timeline-item img {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+}
+
+.collapse-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.json-container {
+    position: relative;
+}
+.json-container pre {
+    background: #1e1e1e;
+    color: #dcdcdc;
+    padding: 10px;
+    border-radius: 4px;
+    overflow: auto;
+}
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+body.dark-mode .json-container pre {
+    background: #000;
+    color: #eee;
+}
