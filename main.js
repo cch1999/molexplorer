@@ -1117,6 +1117,18 @@ class MoleculeManager {
 
             body.innerHTML = this.createPDBDetailsHTML(doc);
 
+            // Enable clicking on publication title to view associated proteins
+            const pubLink = document.getElementById('publication-link');
+            if (pubLink) {
+                pubLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pubTitle = pubLink.getAttribute('data-title');
+                    if (pubTitle) {
+                        this.showPublicationProteins(pubTitle);
+                    }
+                });
+            }
+
             // Populate bound ligands table
             this.populateBoundLigands(pdbId);
 
@@ -1171,6 +1183,8 @@ class MoleculeManager {
         const method = data.experimental_method ? data.experimental_method.join(', ') : 'N/A';
         const organism = data.organism_scientific_name ? data.organism_scientific_name.join(', ') : 'Not available';
         const pdbId = data.pdb_id;
+        const citationTitle = data.citation_title || null;
+        const journal = data.journal || null;
 
         return `
             <div class="details-section" style="padding-bottom: 0;">
@@ -1203,6 +1217,14 @@ class MoleculeManager {
                         <div class="pdb-info-label">Title</div>
                         <div class="pdb-info-value" title="${title}">${title}</div>
                     </div>
+                    ${citationTitle ? `
+                    <div class="pdb-info-item" style="grid-column: 1 / -1;">
+                        <div class="pdb-info-label">Publication</div>
+                        <div class="pdb-info-value">
+                            <a href="#" id="publication-link" data-title="${encodeURIComponent(citationTitle)}" title="View proteins associated with this publication">${citationTitle}</a>
+                            ${journal ? `<span style="margin-left:8px;color:#666;">(${journal})</span>` : ''}
+                        </div>
+                    </div>` : ''}
                     <div class="pdb-info-item" style="grid-column: 1 / -1;">
                         <div class="pdb-info-label">Authors</div>
                         <div class="pdb-info-value">${authors}</div>
@@ -1217,6 +1239,85 @@ class MoleculeManager {
                 <h4>Interactive Molecular Structure</h4>
             </div>
         `;
+    }
+
+    // Show proteins associated with a publication title
+    async showPublicationProteins(publicationTitleEncoded) {
+        const modal = document.getElementById('publication-details-modal');
+        const titleEl = document.getElementById('publication-details-title');
+        const body = document.getElementById('publication-details-body');
+
+        const publicationTitle = decodeURIComponent(publicationTitleEncoded);
+        titleEl.textContent = `Publication Proteins`;
+        body.innerHTML = '<div class="properties-loading">Loading publication details...</div>';
+        modal.style.display = 'block';
+
+        try {
+            const rawQuery = `citation_title:"${publicationTitle}"`;
+            const url = `https://www.ebi.ac.uk/pdbe/search/pdb/select?q=${encodeURIComponent(rawQuery)}&wt=json&rows=2000`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}`);
+            }
+            const data = await response.json();
+            const docs = (data && data.response && data.response.docs) ? data.response.docs : [];
+
+            if (!docs.length) {
+                body.innerHTML = '<div class="no-pdb-entries">No proteins found for this publication.</div>';
+                return;
+            }
+
+            // Build map of protein name -> set of PDB IDs
+            const proteinMap = new Map();
+            docs.forEach(doc => {
+                const pdbId = (doc.pdb_id || '').toUpperCase();
+                const names = doc.all_molecule_names || [];
+                names.forEach(name => {
+                    const key = name.trim();
+                    if (!key) return;
+                    if (!proteinMap.has(key)) proteinMap.set(key, new Set());
+                    proteinMap.get(key).add(pdbId);
+                });
+            });
+
+            // Create HTML list
+            const items = Array.from(proteinMap.entries()).sort((a,b) => a[0].localeCompare(b[0]));
+            const listHtml = items.map(([name, idsSet]) => {
+                const ids = Array.from(idsSet).sort();
+                const chips = ids.map(id => `<a href="#" class="pdb-id-chip" data-pdb="${id}">${id}</a>`).join(' ');
+                return `
+                    <div class="pub-protein-item">
+                        <div class="pub-protein-name">${name}</div>
+                        <div class="pub-protein-ids">${chips}</div>
+                    </div>
+                `;
+            }).join('');
+
+            body.innerHTML = `
+                <div class="details-section">
+                    <div style="margin-bottom:8px;color:#555;">Publication: <span style="font-weight:600;">${publicationTitle}</span></div>
+                    <div class="pub-proteins-list">${listHtml}</div>
+                </div>
+            `;
+
+            // Wire PDB chips to open PDB details
+            body.querySelectorAll('.pdb-id-chip').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const id = el.getAttribute('data-pdb');
+                    if (id) {
+                        // Open PDB details; also close publication modal for clarity
+                        const pubModal = document.getElementById('publication-details-modal');
+                        if (pubModal) pubModal.style.display = 'none';
+                        this.showPDBDetailsModal(id);
+                    }
+                });
+            });
+
+        } catch (err) {
+            console.error('Error fetching publication proteins:', err);
+            body.innerHTML = '<div class="no-pdb-entries">Could not load publication details.</div>';
+        }
     }
 
     // Populate the bound ligands table
@@ -1419,10 +1520,12 @@ document.addEventListener('DOMContentLoaded', () => {
         acceptBtn.addEventListener('click', () => {
             disclaimerModal.style.display = 'none';
             initializeApp();
+            initializeModal();
         });
     } else {
         // If the disclaimer modal doesn't exist for some reason, initialize immediately
         initializeApp();
+        initializeModal();
     }
 });
 
@@ -1533,6 +1636,19 @@ function initializeModal() {
     window.addEventListener('click', (event) => {
         if (event.target === pdbDetailsModal) {
             closePDBDetailsModal();
+        }
+    });
+
+    // Publication Details Modal
+    const publicationDetailsModal = document.getElementById('publication-details-modal');
+    const closePublicationDetailsBtn = document.getElementById('close-publication-details-modal');
+    const closePublicationDetailsModal = () => {
+        if (publicationDetailsModal) publicationDetailsModal.style.display = 'none';
+    };
+    if (closePublicationDetailsBtn) closePublicationDetailsBtn.onclick = closePublicationDetailsModal;
+    window.addEventListener('click', (event) => {
+        if (event.target === publicationDetailsModal) {
+            closePublicationDetailsModal();
         }
     });
 }
