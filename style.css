@@ -1,12 +1,33 @@
+/* Theme variables */
+:root {
+    --bg: #f4f6f8;
+    --bg-elev: #ffffff;
+    --text: #333333;
+    --muted: #555555;
+    --primary: #6e45e2;
+    --accent: #88d3ce;
+    --ring: #00e8c6;
+}
+
+[data-theme="dark"] {
+    --bg: #0f1115;
+    --bg-elev: #1a1d23;
+    --text: #e4e4e4;
+    --muted: #a0a0a0;
+    --primary: #8e75ff;
+    --accent: #00e8c6;
+    --ring: #00e8c6;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    background-color: #f4f6f8;
-    color: #333;
+    background-color: var(--bg);
+    color: var(--text);
 }
 
 header {
-    background: linear-gradient(90deg, #6e45e2 0%, #88d3ce 100%);
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
     color: white;
     padding: 20px 40px;
     text-align: center;
@@ -40,8 +61,12 @@ main {
 
 .tabs {
     display: flex;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+}
+
+[data-theme="dark"] .tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .tab-button {
@@ -51,13 +76,13 @@ main {
     cursor: pointer;
     font-size: 16px;
     font-weight: 500;
-    color: #555;
+    color: var(--muted);
     position: relative;
     transition: color 0.3s;
 }
 
 .tab-button.active {
-    color: #6e45e2;
+    color: var(--primary);
 }
 
 .tab-button.active::after {
@@ -67,7 +92,7 @@ main {
     left: 0;
     width: 100%;
     height: 3px;
-    background-color: #6e45e2;
+    background-color: var(--primary);
 }
 
 .content {
@@ -84,16 +109,23 @@ main {
     align-items: center;
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: var(--bg-elev);
     border-radius: 8px;
 }
 
 .fragment-controls input[type="text"],
 .fragment-controls select {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+}
+
+[data-theme="dark"] .fragment-controls input[type="text"],
+[data-theme="dark"] .fragment-controls select {
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .protein-controls {
@@ -102,20 +134,70 @@ main {
     align-items: center;
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: var(--bg-elev);
     border-radius: 8px;
 }
 
 .protein-controls input[type="text"],
 .protein-controls select {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
     font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+}
+
+[data-theme="dark"] .protein-controls input[type="text"],
+[data-theme="dark"] .protein-controls select {
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .protein-controls select {
     min-width: 200px;
+}
+
+/* Generic focus ring */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--bg-elev);
+    color: var(--text);
+}
+
+th, td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] th,
+[data-theme="dark"] td {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Modals */
+.modal-content {
+    background-color: var(--bg-elev);
+    color: var(--text);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .fragment-card {
@@ -1167,8 +1249,8 @@ main {
 }
 
 .molecule-card {
-    background: white;
-    border: 1px solid #e0e0e0;
+    background: var(--bg-elev);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -1177,6 +1259,11 @@ main {
     flex-direction: column;
     justify-content: space-between;
     position: relative;
+}
+
+[data-theme="dark"] .molecule-card {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .drag-handle {
@@ -1334,22 +1421,26 @@ main {
     margin: 0 0 5px;
     font-size: 14px;
     font-weight: 500;
-    color: #6e45e2;
+    color: var(--primary);
 }
 
 .molecule-card .formula {
     margin: 0 0 10px;
     font-size: 12px;
-    color: #888;
+    color: var(--muted);
 }
 
 .molecule-card .viewer-container {
     width: 100%;
     height: 200px;
-    /* Adjust as needed */
     position: relative;
-    border: 1px solid #eee;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 4px;
+    background: var(--bg-elev);
+}
+
+[data-theme="dark"] .molecule-card .viewer-container {
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .fragment-card .viewer-container {
@@ -1373,7 +1464,7 @@ main {
 .molecule-card .info {
     margin-top: 10px;
     font-size: 12px;
-    color: #666;
+    color: var(--muted);
     display: flex;
     justify-content: space-between;
 }
@@ -1381,7 +1472,7 @@ main {
 .molecule-card p {
     margin: 10px 0 0;
     font-size: 14px;
-    color: #666;
+    color: var(--muted);
 }
 
 .loading-indicator {
@@ -1730,71 +1821,10 @@ main {
     left: 20px;
     background: transparent;
     border: none;
-    color: white;
+    color: inherit;
     cursor: pointer;
 }
 
 .theme-toggle .material-icons {
     font-size: 24px;
-}
-
-/* Dark mode styles */
-body.dark-mode {
-    background-color: #121212;
-    color: #eee;
-}
-
-body.dark-mode header {
-    background: linear-gradient(90deg, #333 0%, #555 100%);
-}
-
-body.dark-mode .theme-toggle {
-    color: #ffd54f;
-}
-
-body.dark-mode .tabs {
-    border-bottom-color: #444;
-}
-
-body.dark-mode .tab-button {
-    color: #bbb;
-}
-
-body.dark-mode .tab-button.active {
-    color: #fff;
-}
-
-body.dark-mode .tab-button.active::after {
-    background-color: #fff;
-}
-
-body.dark-mode .fragment-controls,
-body.dark-mode .protein-controls {
-    background-color: #2c2c2c;
-}
-
-body.dark-mode .database-header h2 {
-    color: #eee;
-}
-
-body.dark-mode .molecule-card {
-    background: #151515;
-    border-color: #333;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-mode .molecule-card h3 {
-    color: #88d3ce;
-}
-
-body.dark-mode .molecule-card .formula,
-body.dark-mode .molecule-card .info,
-body.dark-mode .molecule-card p {
-    color: #ccc;
-}
-
-body.dark-mode .viewer-container,
-body.dark-mode .molecule-viewer,
-body.dark-mode .details-viewer {
-    background: #e0e0e0;
 }

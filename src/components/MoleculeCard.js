@@ -113,11 +113,13 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+                const bgColor = dark ? '#0f1115' : 'white';
                 const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
                 viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
-                viewer.setStyle({}, { stick: {} });
+                const stickOpts = { radius: dark ? 0.3 : 0.2, colorscheme: dark ? 'Jmol' : 'element' };
+                viewer.setStyle({}, { stick: stickOpts });
                 viewer.setStyle({ elem: 'H' }, {});
                 viewer.zoomTo();
                 viewer.render();

@@ -63,7 +63,8 @@ class LigandDetails {
                 .then(pdbData => {
                     setTimeout(() => {
                         try {
-                            const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                            const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+                            const bgColor = dark ? '#0f1115' : 'white';
                             const viewer = $3Dmol.createViewer(this.detailsViewer, {
                                 backgroundColor: bgColor,
                                 width: '100%',
@@ -80,12 +81,12 @@ class LigandDetails {
                             const pocketSel = { within: { distance: 5, sel: ligandSel } };
                             // Surrounding residues as element-coloured sticks
                             viewer.setStyle(pocketSel, {
-                                stick: { radius: 0.15, colorscheme: 'element' }
+                                stick: { radius: dark ? 0.25 : 0.15, colorscheme: dark ? 'Jmol' : 'element' }
                             });
                             // Ligand in ball-and-stick with element colouring
                             viewer.setStyle(ligandSel, {
-                                stick: { radius: 0.2, colorscheme: 'element' },
-                                sphere: { scale: 0.3, colorscheme: 'element' }
+                                stick: { radius: dark ? 0.3 : 0.2, colorscheme: dark ? 'Jmol' : 'element' },
+                                sphere: { scale: 0.3, colorscheme: dark ? 'Jmol' : 'element' }
                             });
                             // Transparent surface around binding pocket
                             viewer.addSurface($3Dmol.SurfaceType.MS,
@@ -108,7 +109,8 @@ class LigandDetails {
         } else if (sdfData) {
             setTimeout(() => {
                 try {
-                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                    const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+                    const bgColor = dark ? '#0f1115' : 'white';
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
                         backgroundColor: bgColor,
                         width: '100%',
@@ -116,10 +118,9 @@ class LigandDetails {
                     });
                     this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, {
-                        stick: { radius: 0.2, colorscheme: 'element' },
-                        sphere: { scale: 0.3, colorscheme: 'element' }
-                    });
+                    const stick = { radius: dark ? 0.3 : 0.2, colorscheme: dark ? 'Jmol' : 'element' };
+                    const sphere = { scale: 0.3, colorscheme: dark ? 'Jmol' : 'element' };
+                    viewer.setStyle({}, { stick, sphere });
                     viewer.setStyle({ elem: 'H' }, {});
                     viewer.zoomTo();
                     viewer.render();
