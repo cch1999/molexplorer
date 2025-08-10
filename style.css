@@ -670,14 +670,14 @@ main {
     color: #666;
 }
 
-/* PyMOL viewer fills remaining viewport height dynamically (JS adjusts height) */
-#pymol-viewer {
+/* Viewer fills remaining viewport height dynamically (JS adjusts height) */
+#viewer-container {
     height: auto;
     min-height: 300px;
 }
 
-/* Ensure PyMOL content layout stacks controls and viewer */
-#pymol-interface-content {
+/* Ensure viewer content layout stacks controls and viewer */
+#viewer-interface-content {
     display: flex;
     flex-direction: column;
     gap: 10px;
