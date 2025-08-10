@@ -9,6 +9,7 @@ import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import EnzymeDesigner from './components/EnzymeDesigner.js';
 
 class MoleculeManager {
     constructor() {
@@ -25,6 +26,7 @@ class MoleculeManager {
         this.pdbDetailsModal = null;
         this.addModal = null;
         this.comparisonModal = null;
+        this.enzymeDesigner = null;
         this.compareQueue = [];
     }
 
@@ -48,6 +50,7 @@ class MoleculeManager {
         this.pdbDetailsModal = new PdbDetailsModal(this.boundLigandTable);
         this.addModal = new AddMoleculeModal(this);
         this.comparisonModal = new ComparisonModal();
+        this.enzymeDesigner = new EnzymeDesigner().init();
 
         document.getElementById('add-molecule-btn').addEventListener('click', () => {
             if (this.addModal) {
@@ -102,7 +105,8 @@ class MoleculeManager {
         const panels = [
             document.getElementById('molecule-library-content'),
             document.getElementById('fragment-library-content'),
-            document.getElementById('protein-browser-content')
+            document.getElementById('protein-browser-content'),
+            document.getElementById('enzyme-design-content')
         ];
         tabButtons.forEach((button, index) => {
             button.addEventListener('click', () => {
