@@ -8,6 +8,7 @@ import MoleculeCard from './components/MoleculeCard.js';
 import PdbDetailsModal from './modal/PdbDetailsModal.js';
 import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
+import PyMolInterface from './components/PyMolInterface.js';
 import ComparisonModal from './modal/ComparisonModal.js';
 
 class MoleculeManager {
@@ -102,13 +103,18 @@ class MoleculeManager {
         const panels = [
             document.getElementById('molecule-library-content'),
             document.getElementById('fragment-library-content'),
-            document.getElementById('protein-browser-content')
+            document.getElementById('protein-browser-content'),
+            document.getElementById('pymol-interface-content')
         ];
         tabButtons.forEach((button, index) => {
             button.addEventListener('click', () => {
                 tabButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
                 panels.forEach((panel, i) => {
                     panel.style.display = i === index ? 'block' : 'none';
+                    if (i === index && panel.id === 'pymol-interface-content' && window.pyMolInterface) {
+                        // Ensure the viewer resizes correctly when the tab is shown
+                        setTimeout(() => window.pyMolInterface.resizeToWindow(), 0);
+                    }
                 });
             });
         });
@@ -282,6 +288,7 @@ if (confirmAddFragmentBtn) {
 }
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
+const pyMolInterface = new PyMolInterface().init();
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -326,6 +333,7 @@ function showNotification(message, type = 'info') {
 window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
+window.pyMolInterface = pyMolInterface;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {

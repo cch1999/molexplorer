@@ -670,6 +670,19 @@ main {
     color: #666;
 }
 
+/* PyMOL viewer fills remaining viewport height dynamically (JS adjusts height) */
+#pymol-viewer {
+    height: auto;
+    min-height: 300px;
+}
+
+/* Ensure PyMOL content layout stacks controls and viewer */
+#pymol-interface-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
 .json-container {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
