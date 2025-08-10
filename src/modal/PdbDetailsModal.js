@@ -75,8 +75,10 @@ class PdbDetailsModal {
                         stick: { radius: 0.5, colorscheme: 'element' }
                     });
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
+                    this.addBindingInteractions(viewer);
                     viewer.zoomTo();
                     viewer.render();
+                    this.addInteractionLegend(viewerContainer);
                 } catch (e) {
                     console.error('Error creating 3Dmol viewer:', e);
                     viewerContainer.innerHTML = '<div class="no-pdb-entries">Could not render 3D structure.</div>';
@@ -99,6 +101,79 @@ class PdbDetailsModal {
         if (this.modal) {
             this.modal.style.display = 'none';
         }
+    }
+
+    addBindingInteractions(viewer) {
+        try {
+            const model = viewer?.getModel(0);
+            if (!model) return;
+            const atoms = model.selectedAtoms({});
+
+            const hbPairs = [];
+            const saltPairs = [];
+
+            const donorsAcceptors = atoms.filter(a => (a.elem === 'N' || a.elem === 'O'));
+            for (let i = 0; i < donorsAcceptors.length; i++) {
+                const a = donorsAcceptors[i];
+                if (['HOH', 'H2O', 'WAT'].includes(a.resn)) continue;
+                for (let j = i + 1; j < donorsAcceptors.length; j++) {
+                    const b = donorsAcceptors[j];
+                    if (a.hetflag === b.hetflag) continue;
+                    if (['HOH', 'H2O', 'WAT'].includes(b.resn)) continue;
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dz = a.z - b.z;
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    if (dist <= 3.5) hbPairs.push([a, b]);
+                }
+            }
+
+            const positiveResidues = ['ARG', 'LYS', 'HIS'];
+            const negativeResidues = ['ASP', 'GLU'];
+            const positiveAtoms = atoms.filter(a => positiveResidues.includes(a.resn) && a.elem === 'N');
+            const negativeAtoms = atoms.filter(a => negativeResidues.includes(a.resn) && a.elem === 'O');
+            for (const a of positiveAtoms) {
+                for (const b of negativeAtoms) {
+                    if (a.hetflag === b.hetflag) continue;
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const dz = a.z - b.z;
+                    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                    if (dist <= 4.0) saltPairs.push([a, b]);
+                }
+            }
+
+            hbPairs.forEach(([a, b]) => {
+                viewer.addLine({
+                    start: { x: a.x, y: a.y, z: a.z },
+                    end: { x: b.x, y: b.y, z: b.z },
+                    dashed: true,
+                    color: '#00aaff'
+                });
+            });
+
+            saltPairs.forEach(([a, b]) => {
+                viewer.addLine({
+                    start: { x: a.x, y: a.y, z: a.z },
+                    end: { x: b.x, y: b.y, z: b.z },
+                    dashed: true,
+                    color: '#ff00ff'
+                });
+            });
+        } catch (e) {
+            console.error('Error computing interactions:', e);
+        }
+    }
+
+    addInteractionLegend(container) {
+        if (!container) return;
+        const legend = document.createElement('div');
+        legend.className = 'interaction-legend';
+        legend.innerHTML = `
+            <span class="legend-item"><span class="legend-color hbond"></span>H-bond</span>
+            <span class="legend-item"><span class="legend-color salt"></span>Salt bridge</span>
+        `;
+        container.appendChild(legend);
     }
 
     createPDBDetailsHTML(data) {
