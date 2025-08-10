@@ -28,6 +28,39 @@
             <div id="molecule-grid" class="molecule-grid">
                 <div class="loading-indicator">Loading molecules...</div>
             </div>
+
+            <!-- Library Viewer Section -->
+            <div class="viewer-section">
+                <h2 style="margin-top: 28px;">Library Viewer</h2>
+                <div class="viewer-toolbar">
+                    <div class="viewer-controls">
+                        <label for="viewer-style">Style</label>
+                        <select id="viewer-style">
+                            <option value="ballstick">Ball & Stick</option>
+                            <option value="stick">Stick</option>
+                            <option value="line">Line</option>
+                            <option value="sphere">Spacefill</option>
+                        </select>
+                        <label class="checkbox">
+                            <input type="checkbox" id="viewer-hide-h" checked>
+                            Hide H
+                        </label>
+                    </div>
+                    <div class="viewer-actions">
+                        <button id="viewer-load-all" class="btn-secondary">Load All</button>
+                        <button id="viewer-clear" class="btn-secondary">Clear</button>
+                    </div>
+                </div>
+                <div class="viewer-split">
+                    <div id="library-viewer-canvas" class="library-viewer" aria-label="3D viewer"></div>
+                    <div class="library-list" aria-label="Molecule list">
+                        <div class="library-list-header">Molecules</div>
+                        <div id="library-items" class="library-items">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 

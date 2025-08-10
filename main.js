@@ -1677,3 +1677,223 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 }); 
+
+// ---------------- Library Viewer (PyMOL-like) ----------------
+// Lightweight viewer + list to browse all ligands and render them on the left
+(() => {
+    let viewer = null;
+    let currentStyle = 'ballstick'; // ballstick | stick | line | sphere
+    let hideHydrogens = true;
+    const loadedModels = new Map(); // code -> model
+
+    const DEFAULT_CODES = ['HEM', 'NAD', 'FAD', 'COA', 'ATP', 'ADP', '355', 'MPV', 'YQD', 'J9N', 'VIA'];
+
+    function getManager() {
+        return window.moleculeManager || null;
+    }
+
+    function getAllCodes() {
+        const m = getManager();
+        if (m && Array.isArray(m.molecules)) {
+            return m.molecules.map(x => x.code).filter(Boolean);
+        }
+        return DEFAULT_CODES;
+    }
+
+    async function fetchSDF(code) {
+        const resp = await fetch(`https://files.rcsb.org/ligands/view/${code}_ideal.sdf`);
+        if (!resp.ok) throw new Error(`Failed to fetch SDF for ${code}`);
+        return await resp.text();
+    }
+
+    function styleObject() {
+        switch (currentStyle) {
+            case 'stick':
+                return { stick: {} };
+            case 'line':
+                return { line: {} };
+            case 'sphere':
+                return { sphere: { scale: 0.3 } };
+            case 'ballstick':
+            default:
+                return { stick: { radius: 0.2 }, sphere: { scale: 0.3 } };
+        }
+    }
+
+    function applyGlobalStyle() {
+        if (!viewer) return;
+        viewer.setStyle({}, styleObject());
+        // Hide or show hydrogens globally
+        if (hideHydrogens) {
+            viewer.setStyle({ elem: 'H' }, {});
+        }
+        viewer.render();
+    }
+
+    async function loadCode(code) {
+        if (!viewer) return;
+        try {
+            const sdf = await fetchSDF(code);
+            const model = viewer.addModel(sdf, 'sdf');
+            model.setStyle({}, styleObject());
+            if (hideHydrogens) {
+                model.setStyle({ elem: 'H' }, {});
+            }
+            loadedModels.set(code.toUpperCase(), model);
+            viewer.zoomTo();
+            viewer.render();
+        } catch (e) {
+            console.warn(`Could not load ${code}:`, e.message);
+        }
+    }
+
+    function removeCode(code) {
+        const key = code.toUpperCase();
+        const model = loadedModels.get(key);
+        if (viewer && model) {
+            viewer.removeModel(model);
+            loadedModels.delete(key);
+            viewer.render();
+        }
+    }
+
+    function clearViewer() {
+        if (!viewer) return;
+        viewer.removeAllModels();
+        loadedModels.clear();
+        viewer.render();
+    }
+
+    function buildList() {
+        const container = document.getElementById('library-items');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const uniqueCodes = Array.from(new Set(getAllCodes().map(c => (c || '').toUpperCase()).filter(Boolean)));
+        if (uniqueCodes.length === 0) {
+            const empty = document.createElement('div');
+            empty.style.padding = '12px';
+            empty.style.color = '#666';
+            empty.textContent = 'No molecules in library yet.';
+            container.appendChild(empty);
+            return;
+        }
+
+        uniqueCodes.forEach(code => {
+            const row = document.createElement('div');
+            row.className = 'library-item';
+
+            const left = document.createElement('div');
+            left.className = 'code';
+            left.textContent = code;
+
+            const right = document.createElement('div');
+            right.className = 'actions';
+
+            const btnLoad = document.createElement('button');
+            btnLoad.className = 'btn-secondary';
+            btnLoad.textContent = loadedModels.has(code) ? 'Reload' : 'Load';
+            btnLoad.addEventListener('click', async () => {
+                removeCode(code);
+                await loadCode(code);
+                // refresh label
+                btnLoad.textContent = 'Reload';
+                btnRemove.disabled = false;
+            });
+
+            const btnRemove = document.createElement('button');
+            btnRemove.className = 'btn-secondary';
+            btnRemove.textContent = 'Remove';
+            btnRemove.disabled = !loadedModels.has(code);
+            btnRemove.addEventListener('click', () => {
+                removeCode(code);
+                btnLoad.textContent = 'Load';
+                btnRemove.disabled = true;
+            });
+
+            right.appendChild(btnLoad);
+            right.appendChild(btnRemove);
+
+            row.appendChild(left);
+            row.appendChild(right);
+            container.appendChild(row);
+        });
+    }
+
+    function bindToolbar() {
+        const styleSel = document.getElementById('viewer-style');
+        const hideH = document.getElementById('viewer-hide-h');
+        const loadAll = document.getElementById('viewer-load-all');
+        const clear = document.getElementById('viewer-clear');
+
+        if (styleSel) {
+            styleSel.value = currentStyle;
+            styleSel.addEventListener('change', () => {
+                currentStyle = styleSel.value;
+                applyGlobalStyle();
+            });
+        }
+        if (hideH) {
+            hideH.checked = hideHydrogens;
+            hideH.addEventListener('change', () => {
+                hideHydrogens = hideH.checked;
+                applyGlobalStyle();
+            });
+        }
+        if (loadAll) {
+            loadAll.addEventListener('click', async () => {
+                clearViewer();
+                const codes = getAllCodes();
+                for (const code of codes) {
+                    await loadCode(code);
+                }
+                buildList();
+            });
+        }
+        if (clear) {
+            clear.addEventListener('click', () => {
+                clearViewer();
+                buildList();
+            });
+        }
+    }
+
+    function hookManager() {
+        const m = getManager();
+        if (!m || typeof m.addMolecule !== 'function') return;
+        if (m.__viewerHooked) return;
+        const original = m.addMolecule.bind(m);
+        m.addMolecule = function (code) {
+            const res = original(code);
+            try { buildList(); } catch (_) { }
+            return res;
+        };
+        m.__viewerHooked = true;
+    }
+
+    function initViewer() {
+        const canvas = document.getElementById('library-viewer-canvas');
+        if (!canvas || typeof $3Dmol === 'undefined') return;
+        if (!viewer) {
+            viewer = $3Dmol.createViewer(canvas, { backgroundColor: 'white' });
+            viewer.render();
+        }
+        bindToolbar();
+        hookManager();
+        buildList();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const accept = document.getElementById('accept-disclaimer-btn');
+        if (accept) {
+            accept.addEventListener('click', () => setTimeout(initViewer, 0));
+            // Fallback if already accepted
+            setTimeout(() => {
+                const modal = document.getElementById('disclaimer-modal');
+                if (!modal || modal.style.display === 'none') initViewer();
+            }, 800);
+        } else {
+            initViewer();
+        }
+    });
+})();

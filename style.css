@@ -853,6 +853,126 @@ main {
     border-radius: 4px;
 }
 
+/* Library Viewer Layout */
+.viewer-section {
+    margin-top: 20px;
+}
+
+.viewer-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 10px 0 12px;
+}
+
+.viewer-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.viewer-controls label {
+    font-size: 13px;
+    color: #555;
+}
+
+.viewer-controls select {
+    padding: 6px 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.viewer-controls .checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 6px;
+}
+
+.viewer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.viewer-split {
+    display: flex;
+    gap: 16px;
+}
+
+.library-viewer {
+    flex: 1 1 auto;
+    min-height: 480px;
+    height: 60vh;
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.library-list {
+    width: 320px;
+    flex: 0 0 320px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.library-list-header {
+    padding: 10px 12px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: 600;
+    color: #555;
+}
+
+.library-items {
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.library-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.library-item .code {
+    font-weight: 600;
+    color: #6e45e2;
+}
+
+.library-item .actions {
+    display: flex;
+    gap: 6px;
+}
+
+.library-item button {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+@media (max-width: 1024px) {
+    .viewer-split {
+        flex-direction: column;
+    }
+    .library-list {
+        width: 100%;
+        flex: 0 0 auto;
+        max-height: 40vh;
+    }
+    .library-items {
+        max-height: 35vh;
+    }
+}
+
 .molecule-card .info {
     margin-top: 10px;
     font-size: 12px;
