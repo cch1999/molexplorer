@@ -113,8 +113,10 @@ describe('ApiService', () => {
     const opts = global.fetch.mock.calls[0].arguments[1];
     const body = JSON.parse(opts.body);
     assert.strictEqual(opts.method, 'POST');
-    assert.strictEqual(body.return_type, 'mol_definition');
+    assert.strictEqual(body.request_options.return_type, 'chem_comp');
     assert.strictEqual(body.query.parameters.descriptor_type, 'SMILES');
+    assert.strictEqual(body.query.parameters.match_type, 'fingerprint-similarity');
+    assert.strictEqual(body.query.parameters.similarity_cutoff, 0.6);
     assert.strictEqual(body.query.parameters.value, 'CCO');
     assert.deepStrictEqual(res, [{ id: 'PAR', score: 0.8 }]);
   });

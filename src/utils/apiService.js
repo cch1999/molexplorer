@@ -125,10 +125,14 @@ export default class ApiService {
         parameters: {
           value: smiles,
           type: 'descriptor',
-          descriptor_type: 'SMILES'
+          descriptor_type: 'SMILES',
+          match_type: 'fingerprint-similarity',
+          similarity_cutoff: 0.6
         }
       },
-      return_type: 'mol_definition'
+      request_options: {
+        return_type: 'chem_comp'
+      }
     };
 
     const response = await fetch(RCSB_SEARCH_API_URL, {
@@ -143,9 +147,9 @@ export default class ApiService {
       throw error;
     }
     const data = await response.json();
-    return (data?.result_set || []).map(r => ({
-      id: r.identifier || r.chemid || r.chem_comp_id,
-      score: r.score
+    return (data?.result_set || []).map(({ identifier, score }) => ({
+      id: identifier,
+      score
     }));
   }
 
