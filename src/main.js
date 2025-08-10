@@ -111,6 +111,10 @@ class MoleculeManager {
                 tabButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
                 panels.forEach((panel, i) => {
                     panel.style.display = i === index ? 'block' : 'none';
+                    if (i === index && panel.id === 'pymol-interface-content' && window.pyMolInterface) {
+                        // Ensure the viewer resizes correctly when the tab is shown
+                        setTimeout(() => window.pyMolInterface.resizeToWindow(), 0);
+                    }
                 });
             });
         });

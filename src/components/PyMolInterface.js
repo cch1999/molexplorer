@@ -19,6 +19,8 @@ class PyMolInterface {
     this.zoomLigandsBtn = null;
     this.resetViewBtn = null;
     this.spinToggle = null;
+
+    this._resizeHandler = null;
   }
 
   init() {
@@ -58,6 +60,20 @@ class PyMolInterface {
     if (this.resetViewBtn) this.resetViewBtn.addEventListener('click', () => this.resetView());
     if (this.spinToggle) this.spinToggle.addEventListener('change', () => this.updateSpin());
 
+    // Dynamic sizing
+    this._resizeHandler = () => this.resizeToWindow();
+    window.addEventListener('resize', this._resizeHandler);
+    // Resize when panel becomes visible or layout changes
+    const panel = document.getElementById('pymol-interface-content');
+    if (panel && typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(() => this.resizeToWindow());
+      ro.observe(panel);
+      this._panelObserver = ro;
+    }
+
+    // Initial size
+    setTimeout(() => this.resizeToWindow(), 0);
+
     return this;
   }
 
@@ -86,6 +102,7 @@ class PyMolInterface {
     try {
       this.ensureViewer();
       if (!this.viewer) return;
+      this.resizeToWindow();
       const pdb = await ApiService.getPdbFile(pdbId.toUpperCase());
       this.viewer.clear();
       this.viewer.addModel(pdb, 'pdb');
@@ -110,6 +127,7 @@ class PyMolInterface {
 
   applyStyles() {
     if (!this.viewer) return;
+    this.resizeToWindow();
     const showCartoon = !!this.showCartoon?.checked;
     const showSticks = !!this.showSticks?.checked;
     const showSurface = !!this.showSurface?.checked;
@@ -168,6 +186,24 @@ class PyMolInterface {
       this.viewer.spin('y');
     } else {
       this.viewer.spin(false);
+    }
+  }
+
+  resizeToWindow() {
+    if (!this.viewerContainer) return;
+    try {
+      const rect = this.viewerContainer.getBoundingClientRect();
+      // Fill remaining viewport below the top of the viewer container, with padding
+      const padding = 20;
+      let available = window.innerHeight - rect.top - padding;
+      if (available < 200) available = 200;
+      this.viewerContainer.style.height = `${Math.floor(available)}px`;
+      if (this.viewer && typeof this.viewer.resize === 'function') {
+        this.viewer.resize();
+        this.viewer.render();
+      }
+    } catch (_) {
+      // noop
     }
   }
 }

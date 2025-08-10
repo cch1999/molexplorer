@@ -670,11 +670,17 @@ main {
     color: #666;
 }
 
-/* Make only the PyMOL viewer square without affecting others */
+/* PyMOL viewer fills remaining viewport height dynamically (JS adjusts height) */
 #pymol-viewer {
-    aspect-ratio: 1 / 1;
-    height: auto; /* override fixed height */
-    min-height: 300px; /* ensure usable size on narrow layouts */
+    height: auto;
+    min-height: 300px;
+}
+
+/* Ensure PyMOL content layout stacks controls and viewer */
+#pymol-interface-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .json-container {
