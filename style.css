@@ -670,6 +670,13 @@ main {
     color: #666;
 }
 
+/* Make only the PyMOL viewer square without affecting others */
+#pymol-viewer {
+    aspect-ratio: 1 / 1;
+    height: auto; /* override fixed height */
+    min-height: 300px; /* ensure usable size on narrow layouts */
+}
+
 .json-container {
     background: #f8f9fa;
     border: 1px solid #e9ecef;
