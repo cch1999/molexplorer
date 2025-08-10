@@ -49,26 +49,59 @@
         </div>
         <div class="content">
             <div id="molecule-library-content" class="content-panel">
-                <div class="database-header">
-                    <h2>Molecular Database</h2>
-                    <div class="header-buttons">
-                        <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
-                        <button id="delete-all-btn" class="delete-all-btn" title="Delete all molecules">
-                            <svg viewBox="0 0 24 24" width="18" height="18">
-                                <path fill="currentColor"
-                                    d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
-                            </svg>
-                        </button>
-                        <button id="export-btn" class="export-btn" title="Export all molecules">
-                            <svg viewBox="0 0 24 24" width="18" height="18">
-                                <path fill="currentColor"
-                                    d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div id="molecule-grid" class="molecule-grid">
-                    <div class="loading-indicator">Loading molecules...</div>
+                <div id="workspace" class="split-pane">
+                    <aside id="sidebar" class="sidebar">
+                        <div class="sidebar-toolbar">
+                            <input type="text" id="molecule-search" placeholder="Search molecules..." />
+                            <button id="add-molecule-btn" class="add-btn" title="Add new molecule">+</button>
+                            <button id="delete-all-btn" class="delete-all-btn" title="Delete all molecules">
+                                <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path fill="currentColor" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                </svg>
+                            </button>
+                            <button id="export-btn" class="export-btn" title="Export all molecules">
+                                <svg viewBox="0 0 24 24" width="18" height="18">
+                                    <path fill="currentColor" d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7Z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="molecule-grid" class="molecule-list">
+                            <div class="loading-indicator">Loading molecules...</div>
+                        </div>
+                    </aside>
+                    <div id="splitter" class="splitter"></div>
+                    <section id="molecule-details" class="details-pane">
+                        <div class="details-toolbar">
+                            <button id="sidebar-toggle" class="mobile-only">☰</button>
+                            <button id="detail-refresh" title="Refresh">⟳</button>
+                            <button id="detail-download" title="Download">⬇</button>
+                            <button id="detail-copy" title="Copy">📋</button>
+                            <button id="detail-pdbe" title="Open in PDBe">PDBe</button>
+                            <button id="detail-rcsb" title="Open in RCSB">RCSB</button>
+                        </div>
+                        <div class="details-content">
+                            <div class="details-section" id="info-section">
+                                <h3 class="section-header">Info</h3>
+                                <div class="section-body"></div>
+                            </div>
+                            <div class="details-section" id="two-d-section">
+                                <h3 class="section-header">2D</h3>
+                                <div class="section-body"></div>
+                            </div>
+                            <div class="details-section" id="three-d-section">
+                                <h3 class="section-header">3D</h3>
+                                <div class="section-body"></div>
+                            </div>
+                            <div class="details-section" id="similar-section">
+                                <h3 class="section-header">Similar</h3>
+                                <div class="section-body"></div>
+                            </div>
+                            <div class="details-section" id="pdb-section">
+                                <h3 class="section-header">PDB</h3>
+                                <div class="section-body"></div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
             <div id="fragment-library-content" class="content-panel" style="display: none;">
