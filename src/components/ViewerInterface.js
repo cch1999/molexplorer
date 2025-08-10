@@ -1,6 +1,6 @@
 import ApiService from '../utils/apiService.js';
 
-class PyMolInterface {
+class ViewerInterface {
   constructor() {
     this.viewerContainer = null;
     this.viewer = null;
@@ -25,19 +25,19 @@ class PyMolInterface {
 
   init() {
     // Hook up DOM
-    this.viewerContainer = document.getElementById('pymol-viewer');
-    this.pdbInput = document.getElementById('pymol-pdb-id');
-    this.loadBtn = document.getElementById('pymol-load-btn');
-    this.showCartoon = document.getElementById('pymol-cartoon');
-    this.showSticks = document.getElementById('pymol-sticks');
-    this.showSurface = document.getElementById('pymol-surface');
-    this.surfaceOpacity = document.getElementById('pymol-surface-opacity');
-    this.colorScheme = document.getElementById('pymol-color-scheme');
-    this.hideSolvent = document.getElementById('pymol-hide-solvent');
-    this.hideIons = document.getElementById('pymol-hide-ions');
-    this.zoomLigandsBtn = document.getElementById('pymol-zoom-ligands');
-    this.resetViewBtn = document.getElementById('pymol-reset-view');
-    this.spinToggle = document.getElementById('pymol-spin');
+    this.viewerContainer = document.getElementById('viewer-container');
+    this.pdbInput = document.getElementById('viewer-pdb-id');
+    this.loadBtn = document.getElementById('viewer-load-btn');
+    this.showCartoon = document.getElementById('viewer-cartoon');
+    this.showSticks = document.getElementById('viewer-sticks');
+    this.showSurface = document.getElementById('viewer-surface');
+    this.surfaceOpacity = document.getElementById('viewer-surface-opacity');
+    this.colorScheme = document.getElementById('viewer-color-scheme');
+    this.hideSolvent = document.getElementById('viewer-hide-solvent');
+    this.hideIons = document.getElementById('viewer-hide-ions');
+    this.zoomLigandsBtn = document.getElementById('viewer-zoom-ligands');
+    this.resetViewBtn = document.getElementById('viewer-reset-view');
+    this.spinToggle = document.getElementById('viewer-spin');
 
     if (this.loadBtn) this.loadBtn.addEventListener('click', () => this.handleLoad());
     if (this.pdbInput) {
@@ -64,7 +64,7 @@ class PyMolInterface {
     this._resizeHandler = () => this.resizeToWindow();
     window.addEventListener('resize', this._resizeHandler);
     // Resize when panel becomes visible or layout changes
-    const panel = document.getElementById('pymol-interface-content');
+    const panel = document.getElementById('viewer-interface-content');
     if (panel && typeof ResizeObserver !== 'undefined') {
       const ro = new ResizeObserver(() => this.resizeToWindow());
       ro.observe(panel);
@@ -208,4 +208,4 @@ class PyMolInterface {
   }
 }
 
-export default PyMolInterface;
+export default ViewerInterface;

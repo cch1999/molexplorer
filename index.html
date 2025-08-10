@@ -45,7 +45,7 @@
             <button class="tab-button active">Molecules</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
-            <button class="tab-button">PyMOL</button>
+            <button class="tab-button">Viewer</button>
         </div>
         <div class="content">
             <div id="molecule-library-content" class="content-panel">
@@ -155,56 +155,56 @@
                         data...</div>
                 </div>
             </div>
-            <div id="pymol-interface-content" class="content-panel" style="display: none;">
+            <div id="viewer-interface-content" class="content-panel" style="display: none;">
                 <div class="database-header">
-                    <h2>PyMOL-style Viewer</h2>
+                    <h2>3D Viewer</h2>
                 </div>
                 <div class="protein-controls">
-                    <input type="text" id="pymol-pdb-id" placeholder="Enter PDB ID (e.g., 1CBS)">
-                    <button id="pymol-load-btn" class="action-btn">Load</button>
-                    <select id="pymol-color-scheme" title="Color scheme">
+                    <input type="text" id="viewer-pdb-id" placeholder="Enter PDB ID (e.g., 1CBS)">
+                    <button id="viewer-load-btn" class="action-btn">Load</button>
+                    <select id="viewer-color-scheme" title="Color scheme">
                         <option value="chain">Color: Chain</option>
                         <option value="spectrum">Color: Spectrum</option>
                         <option value="element">Color: Element</option>
                     </select>
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-hide-solvent" class="toggle-switch-checkbox" checked>
-                        <label class="toggle-switch-label" for="pymol-hide-solvent"></label>
+                        <input type="checkbox" id="viewer-hide-solvent" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="viewer-hide-solvent"></label>
                         <span>Hide Solvent</span>
                     </div>
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-hide-ions" class="toggle-switch-checkbox" checked>
-                        <label class="toggle-switch-label" for="pymol-hide-ions"></label>
+                        <input type="checkbox" id="viewer-hide-ions" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="viewer-hide-ions"></label>
                         <span>Hide Ions</span>
                     </div>
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-spin" class="toggle-switch-checkbox">
-                        <label class="toggle-switch-label" for="pymol-spin"></label>
+                        <input type="checkbox" id="viewer-spin" class="toggle-switch-checkbox">
+                        <label class="toggle-switch-label" for="viewer-spin"></label>
                         <span>Spin</span>
                     </div>
                 </div>
                 <div class="protein-controls">
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-cartoon" class="toggle-switch-checkbox" checked>
-                        <label class="toggle-switch-label" for="pymol-cartoon"></label>
+                        <input type="checkbox" id="viewer-cartoon" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="viewer-cartoon"></label>
                         <span>Cartoon</span>
                     </div>
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-sticks" class="toggle-switch-checkbox" checked>
-                        <label class="toggle-switch-label" for="pymol-sticks"></label>
+                        <input type="checkbox" id="viewer-sticks" class="toggle-switch-checkbox" checked>
+                        <label class="toggle-switch-label" for="viewer-sticks"></label>
                         <span>Ligand Sticks</span>
                     </div>
                     <div class="toggle-switch">
-                        <input type="checkbox" id="pymol-surface" class="toggle-switch-checkbox">
-                        <label class="toggle-switch-label" for="pymol-surface"></label>
+                        <input type="checkbox" id="viewer-surface" class="toggle-switch-checkbox">
+                        <label class="toggle-switch-label" for="viewer-surface"></label>
                         <span>Surface</span>
                     </div>
-                    <label for="pymol-surface-opacity">Surface opacity</label>
-                    <input id="pymol-surface-opacity" type="range" min="0" max="1" step="0.05" value="0.5">
-                    <button id="pymol-zoom-ligands" class="action-btn">Zoom Ligands</button>
-                    <button id="pymol-reset-view" class="action-btn">Reset View</button>
+                    <label for="viewer-surface-opacity">Surface opacity</label>
+                    <input id="viewer-surface-opacity" type="range" min="0" max="1" step="0.05" value="0.5">
+                    <button id="viewer-zoom-ligands" class="action-btn">Zoom Ligands</button>
+                    <button id="viewer-reset-view" class="action-btn">Reset View</button>
                 </div>
-                <div id="pymol-viewer" class="details-viewer">
+                <div id="viewer-container" class="details-viewer">
                     <p>Load a PDB to begin...</p>
                 </div>
             </div>
