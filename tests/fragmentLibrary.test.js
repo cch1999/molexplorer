@@ -29,9 +29,16 @@ describe('FragmentLibrary', () => {
       addMolecule: () => true,
       showMoleculeDetails: () => {}
     };
+    let callCount = 0;
+    const rdkitStub = {
+      get_mol: () => ({
+        get_smiles: () => `SMI${++callCount}`,
+        delete: () => {}
+      })
+    };
     library = new FragmentLibrary(moleculeManager, {
       notify: () => {},
-      rdkit: Promise.resolve(null)
+      rdkit: Promise.resolve(rdkitStub)
     });
     library.init();
     // Stub createFragmentCard to simplify DOM interactions
@@ -92,15 +99,16 @@ describe('FragmentLibrary', () => {
     assert.match(msg, /already exists/i);
   });
 
-  it('importFragmentsFromSdf parses and adds fragments and source option', () => {
+  it('importFragmentsFromSdf parses and adds fragments and source option', async () => {
     library.fragments = [];
     library.renderFragments = () => {};
     const sdf = `Frag1\nM  END\n$$$$\nFrag2\nM  END\n$$$$`;
-    const count = library.importFragmentsFromSdf(sdf, 'SDFLIB');
+    const count = await library.importFragmentsFromSdf(sdf, 'SDFLIB');
     assert.strictEqual(count, 2);
     assert.strictEqual(library.fragments.length, 2);
     assert.strictEqual(library.fragments[0].source, 'SDFLIB');
     assert.strictEqual(library.fragments[0].kind, 'SDF');
+    assert.strictEqual(library.fragments[0].name, 'SMI2');
     assert.ok(library.sourceFilter.children.some(o => o.value === 'SDFLIB'));
   });
 
@@ -143,7 +151,7 @@ describe('FragmentLibrary', () => {
       { id: '2', name: 'FragB', source: 'LibTwo', in_ccd: false, kind: 'OTHER', query: '' }
     ];
 
-    library.searchInput.value = 'libone';
+    library.searchInput.value = ' libone ';
     library.sourceFilter.value = 'all';
     library.ccdToggle.checked = false;
     library.renderFragments();

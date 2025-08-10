@@ -82,7 +82,9 @@ class FragmentLibrary {
         if (!this.grid) return;
         this.grid.innerHTML = '';
 
-        const searchTerm = this.searchInput ? this.searchInput.value.toLowerCase() : '';
+        const searchTerm = this.searchInput
+            ? this.searchInput.value.toLowerCase().trim()
+            : '';
         const source = this.sourceFilter ? this.sourceFilter.value : 'all';
         const onlyInCCD = this.ccdToggle ? this.ccdToggle.checked : false;
 
@@ -260,35 +262,52 @@ class FragmentLibrary {
                 libraryName = input.trim();
             }
         }
-        file.text().then(text => {
-            const count = this.importFragmentsFromSdf(text, libraryName);
-            if (count > 0) {
-                this.notify(`${count} fragments imported from ${file.name}`, 'success');
-            } else {
-                this.notify('No fragments were imported from SDF', 'error');
-            }
-            this.fileInput.value = '';
-        }).catch(err => {
-            console.error('Failed to import SDF file:', err);
-            this.notify('Failed to import SDF file', 'error');
-            this.fileInput.value = '';
-        });
+        file
+            .text()
+            .then(text => this.importFragmentsFromSdf(text, libraryName))
+            .then(count => {
+                if (count > 0) {
+                    this.notify(`${count} fragments imported from ${file.name}`, 'success');
+                } else {
+                    this.notify('No fragments were imported from SDF', 'error');
+                }
+                this.fileInput.value = '';
+            })
+            .catch(err => {
+                console.error('Failed to import SDF file:', err);
+                this.notify('Failed to import SDF file', 'error');
+                this.fileInput.value = '';
+            });
     }
 
-    importFragmentsFromSdf(sdfText, source = 'custom') {
+    async importFragmentsFromSdf(sdfText, source = 'custom') {
         if (!sdfText) return 0;
+        const RDKit = await this.rdkitPromise;
         const blocks = sdfText.split(/\$\$\$\$/).map(b => b.trim()).filter(Boolean);
         let added = 0;
-        blocks.forEach((block, idx) => {
-            const lines = block.split(/\r?\n/);
-            const name = lines[0] ? lines[0].trim() : `Fragment ${idx + 1}`;
+        for (let idx = 0; idx < blocks.length; idx++) {
+            const block = blocks[idx];
+            let smiles = '';
+            if (RDKit) {
+                try {
+                    const mol = RDKit.get_mol(block);
+                    smiles = mol.get_smiles();
+                    mol.delete();
+                } catch (err) {
+                    console.error('Failed to compute SMILES for fragment', err);
+                }
+            }
+            if (!smiles) {
+                const lines = block.split(/\r?\n/);
+                smiles = lines[0] ? lines[0].trim() : `Fragment ${idx + 1}`;
+            }
             const duplicate = this.fragments.some(
-                f => f.name.toLowerCase() === name.toLowerCase()
+                f => f.name.toLowerCase() === smiles.toLowerCase()
             );
-            if (duplicate) return;
+            if (duplicate) continue;
             this.fragments.unshift({
                 id: `custom-${Date.now()}-${idx}`,
-                name,
+                name: smiles,
                 kind: 'SDF',
                 query: block,
                 description: '',
@@ -299,7 +318,7 @@ class FragmentLibrary {
                 in_ccd: false
             });
             added++;
-        });
+        }
         if (added > 0) {
             this.ensureSourceOption(source);
             this.renderFragments();
