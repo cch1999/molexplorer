@@ -27,13 +27,14 @@ class ComparisonModal {
         }
         setTimeout(() => {
             try {
-                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+                const bgColor = dark ? '#0f1115' : 'white';
                 const viewer = $3Dmol.createViewer(this.viewerContainer, { backgroundColor: bgColor });
                 this.viewerContainer.viewer = viewer;
                 const model1 = viewer.addModel(molA.sdf, 'sdf');
                 const model2 = viewer.addModel(molB.sdf, 'sdf');
-                model1.setStyle({}, { stick: { colorscheme: 'cyanCarbon' } });
-                model2.setStyle({}, { stick: { colorscheme: 'magentaCarbon' } });
+                model1.setStyle({}, { stick: { colorscheme: 'cyanCarbon', radius: dark ? 0.3 : 0.2 } });
+                model2.setStyle({}, { stick: { colorscheme: 'magentaCarbon', radius: dark ? 0.3 : 0.2 } });
                 this._alignModels(model1, model2);
                 viewer.zoomTo();
                 viewer.render();

@@ -61,7 +61,8 @@ class PdbDetailsModal {
 
             setTimeout(() => {
                 try {
-                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                    const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+                    const bgColor = dark ? '#0f1115' : 'white';
                     const viewer = $3Dmol.createViewer(viewerContainer, {
                         backgroundColor: bgColor,
                         width: '100%',
@@ -72,7 +73,7 @@ class PdbDetailsModal {
                     viewer.setStyle({}, { cartoon: { color: '#b3b3b3', opacity: 0.7 } });
                     // highlight bound ligands with element-based colors using thick sticks
                     viewer.setStyle({ hetflag: true }, {
-                        stick: { radius: 0.5, colorscheme: 'element' }
+                        stick: { radius: dark ? 0.6 : 0.5, colorscheme: dark ? 'Jmol' : 'element' }
                     });
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
                     viewer.zoomTo();

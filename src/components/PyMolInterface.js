@@ -79,7 +79,8 @@ class PyMolInterface {
 
   ensureViewer() {
     if (!this.viewer && this.viewerContainer) {
-      const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+      const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
+      const bgColor = dark ? '#0f1115' : 'white';
       this.viewer = $3Dmol.createViewer(this.viewerContainer, {
         backgroundColor: bgColor,
         width: '100%',
@@ -135,6 +136,7 @@ class PyMolInterface {
     const hideIons = !!this.hideIons?.checked;
     const scheme = this.colorScheme?.value || 'chain';
     const opacity = Number(this.surfaceOpacity?.value || 0.5);
+    const dark = document?.documentElement?.getAttribute('data-theme') === 'dark';
 
     // Clear styles and surfaces
     this.viewer.setStyle({}, {});
@@ -156,8 +158,9 @@ class PyMolInterface {
 
     // Sticks for hetero
     if (showSticks) {
-      // Always color ligands (hetero) by element; slightly thicker sticks
-      this.viewer.setStyle(hetSelection, { stick: { radius: 0.25, colorscheme: 'element' } });
+      const stickRadius = dark ? 0.3 : 0.25;
+      const stickScheme = dark ? 'Jmol' : 'element';
+      this.viewer.setStyle(hetSelection, { stick: { radius: stickRadius, colorscheme: stickScheme } });
     }
 
     // Surface for polymer

@@ -336,29 +336,53 @@ window.proteinBrowser = proteinBrowser;
 window.pyMolInterface = pyMolInterface;
 window.showNotification = showNotification;
 
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    const bg = isDark ? '#e0e0e0' : 'white';
+function applyTheme(theme) {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', theme);
+    try {
+        localStorage.setItem('theme', theme);
+    } catch (_) { }
+    const dark = theme === 'dark';
+    const bg = dark ? '#0f1115' : 'white';
     document.querySelectorAll('.viewer-container, .molecule-viewer, .details-viewer').forEach(el => {
         if (el.viewer && typeof el.viewer.setBackgroundColor === 'function') {
             el.viewer.setBackgroundColor(bg);
+            if (typeof el.viewer.setStyle === 'function') {
+                el.viewer.setStyle({}, { stick: { radius: dark ? 0.3 : 0.2, colorscheme: dark ? 'Jmol' : 'element' } });
+                el.viewer.setStyle({ elem: 'H' }, {});
+            }
             el.viewer.render();
         } else {
             el.style.background = bg;
         }
     });
     const icon = document.getElementById('theme-toggle-icon');
-    if (icon) {
-        icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+    if (icon) icon.textContent = dark ? 'light_mode' : 'dark_mode';
+}
+
+function initTheme() {
+    let stored;
+    try {
+        stored = localStorage.getItem('theme');
+    } catch (_) {
+        stored = null;
     }
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(current);
 }
 
 function initThemeToggle() {
     const btn = document.getElementById('theme-toggle');
     if (btn) {
-        btn.addEventListener('click', toggleDarkMode);
+        btn.addEventListener('click', toggleTheme);
     }
 }
 
+initTheme();
 initThemeToggle();
