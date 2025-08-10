@@ -118,6 +118,29 @@ main {
     min-width: 200px;
 }
 
+.enzyme-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
+#enzyme-sequence-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+#sequence-analysis-result {
+    margin-top: 10px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
 .fragment-card {
     display: flex;
     flex-direction: column;

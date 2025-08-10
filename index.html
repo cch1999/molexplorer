@@ -45,6 +45,7 @@
             <button class="tab-button active">Molecules</button>
             <button class="tab-button">Fragments</button>
             <button class="tab-button">Proteins</button>
+            <button class="tab-button">Enzymes</button>
         </div>
         <div class="content">
             <div id="molecule-library-content" class="content-panel">
@@ -152,6 +153,16 @@
                     <p id="no-protein-results-message" style="display: none;">No results found.</p>
                     <div class="loading-indicator" id="protein-loading-indicator" style="display: none;">Loading protein
                         data...</div>
+                </div>
+            </div>
+            <div id="enzyme-design-content" class="content-panel" style="display: none;">
+                <div class="database-header">
+                    <h2>Enzyme Design</h2>
+                </div>
+                <div class="enzyme-controls">
+                    <textarea id="enzyme-sequence-input" rows="4" placeholder="Enter amino acid sequence..."></textarea>
+                    <button id="analyze-sequence-btn" class="action-btn">Analyze Sequence</button>
+                    <div id="sequence-analysis-result"></div>
                 </div>
             </div>
         </div>
