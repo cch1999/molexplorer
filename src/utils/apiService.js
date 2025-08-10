@@ -12,6 +12,7 @@
 import {
   RCSB_LIGAND_BASE_URL,
   RCSB_MODEL_BASE_URL,
+  RCSB_SEARCH_API_URL,
   FRAGMENT_LIBRARY_URL,
   PD_BE_SIMILARITY_BASE_URL,
   PD_BE_IN_PDB_BASE_URL,
@@ -105,6 +106,51 @@ export default class ApiService {
     return this.fetchText(
       `${RCSB_LIGAND_BASE_URL}/${ccdCode.toUpperCase()}_ideal.sdf`
     );
+  }
+
+  /**
+   * Search Chemical Component Dictionary by SMILES string.
+   *
+   * Sends a similarity search request to RCSB's search API using the provided
+   * SMILES string and returns matching CCD codes with their similarity scores.
+   *
+   * @param {string} smiles - Query SMILES string.
+   * @returns {Promise<Array<{id: string, score: number}>>} Array of results.
+   */
+  static async searchCcdsBySmiles(smiles) {
+    const body = {
+      query: {
+        type: 'terminal',
+        service: 'chemical',
+        parameters: {
+          value: smiles,
+          type: 'descriptor',
+          descriptor_type: 'SMILES',
+          match_type: 'fingerprint-similarity',
+          similarity_cutoff: 0.6
+        }
+      },
+      request_options: {
+        return_type: 'chem_comp'
+      }
+    };
+
+    const response = await fetch(RCSB_SEARCH_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+      const error = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status;
+      error.url = RCSB_SEARCH_API_URL;
+      throw error;
+    }
+    const data = await response.json();
+    return (data?.result_set || []).map(({ identifier, score }) => ({
+      id: identifier,
+      score
+    }));
   }
 
   /**
