@@ -1,10 +1,5 @@
 import ApiService from '../utils/apiService.js';
-import {
-    MOLJS_BG_COLOR_DARK,
-    MOLJS_BG_COLOR_LIGHT,
-    MOLJS_VIEWER_DIMENSIONS,
-    MOLJS_HIDE_HYDROGENS_SELECTION
-} from '../utils/constants.js';
+import { MOLJS } from '../utils/constants.js';
 
 class LigandDetails {
     constructor(moleculeManager) {
@@ -70,11 +65,11 @@ class LigandDetails {
                     setTimeout(() => {
                         try {
                             const bgColor = document.body?.classList?.contains('dark-mode')
-                                ? MOLJS_BG_COLOR_DARK
-                                : MOLJS_BG_COLOR_LIGHT;
+                                ? MOLJS.BG_COLOR_DARK
+                                : MOLJS.BG_COLOR_LIGHT;
                             const viewer = $3Dmol.createViewer(this.detailsViewer, {
                                 backgroundColor: bgColor,
-                                ...MOLJS_VIEWER_DIMENSIONS
+                                ...MOLJS.VIEWER_DIMENSIONS
                             });
                             this.detailsViewer.viewer = viewer;
                             viewer.addModel(pdbData, 'pdb');
@@ -99,7 +94,7 @@ class LigandDetails {
                                 { opacity: 0.6, color: 'white' },
                                 pocketSel
                             );
-                            viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
+                            viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                             viewer.zoomTo(ligandSel);
                             viewer.render();
                             this.viewer = viewer;
@@ -117,11 +112,11 @@ class LigandDetails {
             setTimeout(() => {
                 try {
                     const bgColor = document.body?.classList?.contains('dark-mode')
-                        ? MOLJS_BG_COLOR_DARK
-                        : MOLJS_BG_COLOR_LIGHT;
+                        ? MOLJS.BG_COLOR_DARK
+                        : MOLJS.BG_COLOR_LIGHT;
                     const viewer = $3Dmol.createViewer(this.detailsViewer, {
                         backgroundColor: bgColor,
-                        ...MOLJS_VIEWER_DIMENSIONS
+                        ...MOLJS.VIEWER_DIMENSIONS
                     });
                     this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
@@ -129,7 +124,7 @@ class LigandDetails {
                         stick: { radius: 0.2, colorscheme: 'element' },
                         sphere: { scale: 0.3, colorscheme: 'element' }
                     });
-                    viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
+                    viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();
                     viewer.render();
                     this.viewer = viewer;

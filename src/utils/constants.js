@@ -47,9 +47,11 @@ export const CRYSTALLIZATION_AIDS = [
 ];
 export const ION_LIGANDS = ['ZN', 'MG', 'CA', 'NA', 'K', 'CL'];
 
-// MolJs viewer constants
-export const MOLJS_BG_COLOR_LIGHT = 'white';
-export const MOLJS_BG_COLOR_DARK = '#e0e0e0';
-export const MOLJS_VIEWER_DIMENSIONS = { width: '100%', height: '100%' };
-export const MOLJS_DEFAULT_STICK_STYLE = { stick: {} };
-export const MOLJS_HIDE_HYDROGENS_SELECTION = { elem: 'H' };
+// MolJs viewer constants grouped to avoid scattered imports
+export const MOLJS = Object.freeze({
+  BG_COLOR_LIGHT: 'white',
+  BG_COLOR_DARK: '#e0e0e0',
+  VIEWER_DIMENSIONS: { width: '100%', height: '100%' },
+  DEFAULT_STICK_STYLE: { stick: {} },
+  HIDE_HYDROGENS_SELECTION: { elem: 'H' }
+});

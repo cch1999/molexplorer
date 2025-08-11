@@ -2,10 +2,7 @@ import ApiService from '../utils/apiService.js';
 import {
     RCSB_STRUCTURE_BASE_URL,
     PD_BE_ENTRY_BASE_URL,
-    MOLJS_BG_COLOR_DARK,
-    MOLJS_BG_COLOR_LIGHT,
-    MOLJS_VIEWER_DIMENSIONS,
-    MOLJS_HIDE_HYDROGENS_SELECTION
+    MOLJS
 } from '../utils/constants.js';
 
 class PdbDetailsModal {
@@ -69,11 +66,11 @@ class PdbDetailsModal {
             setTimeout(() => {
                 try {
                     const bgColor = document.body?.classList?.contains('dark-mode')
-                        ? MOLJS_BG_COLOR_DARK
-                        : MOLJS_BG_COLOR_LIGHT;
+                        ? MOLJS.BG_COLOR_DARK
+                        : MOLJS.BG_COLOR_LIGHT;
                     const viewer = $3Dmol.createViewer(viewerContainer, {
                         backgroundColor: bgColor,
-                        ...MOLJS_VIEWER_DIMENSIONS
+                        ...MOLJS.VIEWER_DIMENSIONS
                     });
                     viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
@@ -83,7 +80,7 @@ class PdbDetailsModal {
                         stick: { radius: 0.5, colorscheme: 'element' }
                     });
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
-                    viewer.setStyle(MOLJS_HIDE_HYDROGENS_SELECTION, {});
+                    viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();
                     viewer.render();
                 } catch (e) {
