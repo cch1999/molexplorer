@@ -10,6 +10,7 @@ import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ViewerInterface from './components/ViewerInterface.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import DftDataViewer from './components/DftDataViewer.js';
 
 class MoleculeManager {
     constructor() {
@@ -289,6 +290,7 @@ if (confirmAddFragmentBtn) {
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
 const viewerInterface = new ViewerInterface().init();
+const dftDataViewer = new DftDataViewer();
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -334,6 +336,7 @@ window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.viewerInterface = viewerInterface;
+window.dftDataViewer = dftDataViewer;
 window.showNotification = showNotification;
 
 function toggleDarkMode() {

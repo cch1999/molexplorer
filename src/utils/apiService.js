@@ -298,9 +298,25 @@ export default class ApiService {
    * - Used for analyzing protein-ligand interactions
    *
    * @see https://www.ebi.ac.uk/pdbe/graph-api/pdbe_doc/ for bound ligands API
-   */
+  */
   static getLigandMonomers(pdbId) {
     return this.fetchJson(`${PD_BE_LIGAND_MONOMERS_BASE_URL}/${pdbId}`);
+  }
+
+  /**
+   * Fetch Density Functional Theory (DFT) data for a chemical component.
+   *
+   * The application stores pre-computed DFT properties in JSON files grouped
+   * by chemical component code. This helper loads the JSON for a given CCD
+   * code and returns the parsed object. The exact shape of the data depends on
+   * the calculation but typically contains key/value pairs such as energies or
+   * orbital information.
+   *
+   * @param {string} ccdCode - Three letter chemical component code.
+   * @returns {Promise<Object>} Parsed DFT data object.
+   */
+  static getDftData(ccdCode) {
+    return this.fetchJson(`/data/dft/${ccdCode.toUpperCase()}.json`);
   }
 
   /**
