@@ -1,5 +1,9 @@
 import ApiService from '../utils/apiService.js';
-import { RCSB_STRUCTURE_BASE_URL, PD_BE_ENTRY_BASE_URL } from '../utils/constants.js';
+import {
+    RCSB_STRUCTURE_BASE_URL,
+    PD_BE_ENTRY_BASE_URL,
+    MOLJS
+} from '../utils/constants.js';
 
 class PdbDetailsModal {
     constructor(boundLigandTable) {
@@ -61,20 +65,20 @@ class PdbDetailsModal {
 
             setTimeout(() => {
                 try {
-                    const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                    const bgColor = document.body?.classList?.contains('dark-mode')
+                        ? MOLJS.BG_COLOR_DARK
+                        : MOLJS.BG_COLOR_LIGHT;
                     const viewer = $3Dmol.createViewer(viewerContainer, {
                         backgroundColor: bgColor,
-                        width: '100%',
-                        height: '100%'
+                        ...MOLJS.VIEWER_DIMENSIONS
                     });
                     viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
                     viewer.setStyle({}, { cartoon: { color: '#b3b3b3', opacity: 0.7 } });
-                    // highlight bound ligands with element-based colors using thick sticks
-                    viewer.setStyle({ hetflag: true }, {
-                        stick: { radius: 0.5, colorscheme: 'element' }
-                    });
+                    // highlight bound ligands with consistent ligand style
+                    viewer.setStyle({ hetflag: true }, MOLJS.LIGAND_STYLE);
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
+                    viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();
                     viewer.render();
                 } catch (e) {

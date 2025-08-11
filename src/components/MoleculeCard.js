@@ -1,4 +1,5 @@
 import ApiService from '../utils/apiService.js';
+import { MOLJS } from '../utils/constants.js';
 
 class MoleculeCard {
     constructor(grid, repository, callbacks = {}) {
@@ -113,12 +114,14 @@ class MoleculeCard {
 
         setTimeout(() => {
             try {
-                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const bgColor = document.body?.classList?.contains('dark-mode')
+                    ? MOLJS.BG_COLOR_DARK
+                    : MOLJS.BG_COLOR_LIGHT;
                 const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
                 viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
-                viewer.setStyle({}, { stick: {} });
-                viewer.setStyle({ elem: 'H' }, {});
+                viewer.setStyle({}, MOLJS.LIGAND_STYLE);
+                viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                 viewer.zoomTo();
                 viewer.render();
             } catch (e) {

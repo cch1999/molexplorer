@@ -1,3 +1,5 @@
+import { MOLJS } from '../utils/constants.js';
+
 class ComparisonModal {
     constructor() {
         this.modal = document.getElementById('comparison-modal');
@@ -27,7 +29,9 @@ class ComparisonModal {
         }
         setTimeout(() => {
             try {
-                const bgColor = document.body?.classList?.contains('dark-mode') ? '#e0e0e0' : 'white';
+                const bgColor = document.body?.classList?.contains('dark-mode')
+                    ? MOLJS.BG_COLOR_DARK
+                    : MOLJS.BG_COLOR_LIGHT;
                 const viewer = $3Dmol.createViewer(this.viewerContainer, { backgroundColor: bgColor });
                 this.viewerContainer.viewer = viewer;
                 const model1 = viewer.addModel(molA.sdf, 'sdf');
@@ -35,6 +39,7 @@ class ComparisonModal {
                 model1.setStyle({}, { stick: { colorscheme: 'cyanCarbon' } });
                 model2.setStyle({}, { stick: { colorscheme: 'magentaCarbon' } });
                 this._alignModels(model1, model2);
+                viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                 viewer.zoomTo();
                 viewer.render();
             } catch (e) {
