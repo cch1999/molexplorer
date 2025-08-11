@@ -198,6 +198,141 @@ main {
     visibility: hidden;
 }
 
+/* Split-pane layout */
+#workspace.split-pane {
+    display: grid;
+    grid-template-columns: 320px 4px 1fr;
+    height: calc(100vh - 160px);
+    /* adjust based on header */
+}
+
+.sidebar {
+    overflow-y: auto;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.sidebar-toolbar input[type="text"] {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.splitter {
+    width: 4px;
+    cursor: col-resize;
+    background: #eee;
+}
+
+.details-pane {
+    overflow-y: auto;
+    background: #fafafa;
+    position: relative;
+}
+
+.details-toolbar {
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    position: sticky;
+    top: 0;
+    background: #fafafa;
+    border-bottom: 1px solid #ddd;
+    z-index: 10;
+}
+
+.details-section {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.details-section .section-header {
+    margin: 0;
+    padding: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    background: #f0f0f0;
+}
+
+.details-section .section-body {
+    padding: 12px;
+}
+
+.details-section.collapsed .section-body {
+    display: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    #workspace.split-pane {
+        grid-template-columns: 0 0 1fr;
+    }
+    .sidebar {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 80%;
+        max-width: 320px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .splitter {
+        display: none;
+    }
+    .mobile-only {
+        display: inline-block;
+    }
+}
+
+.mobile-only {
+    display: none;
+}
+
+/* Compact molecule list */
+.molecule-list {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.molecule-list .molecule-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.molecule-list .molecule-card:hover {
+    background: #f5f5f5;
+}
+
+.molecule-list .card-actions {
+    margin-left: auto;
+    display: none;
+    gap: 4px;
+}
+
+.molecule-list .molecule-card:hover .card-actions {
+    display: flex;
+}
+
 .toggle-switch-label {
     cursor: pointer;
     text-indent: -9999px;
