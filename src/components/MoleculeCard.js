@@ -153,7 +153,7 @@ class MoleculeCard {
                 const viewer = $3Dmol.createViewer(viewerContainer, { backgroundColor: bgColor });
                 viewerContainer.viewer = viewer;
                 viewer.addModel(data, format);
-                viewer.setStyle({}, MOLJS.DEFAULT_STICK_STYLE);
+                viewer.setStyle({}, MOLJS.LIGAND_STYLE);
                 viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                 viewer.zoomTo();
                 viewer.render();

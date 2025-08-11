@@ -80,15 +80,9 @@ class LigandDetails {
                                 resi: parseInt(molecule.authorResidueNumber, 10)
                             };
                             const pocketSel = { within: { distance: 5, sel: ligandSel } };
-                            // Surrounding residues as element-coloured sticks
-                            viewer.setStyle(pocketSel, {
-                                stick: { radius: 0.15, colorscheme: 'element' }
-                            });
-                            // Ligand in ball-and-stick with element colouring
-                            viewer.setStyle(ligandSel, {
-                                stick: { radius: 0.2, colorscheme: 'element' },
-                                sphere: { scale: 0.3, colorscheme: 'element' }
-                            });
+                            // Surrounding residues and ligand with consistent stick styling
+                            viewer.setStyle(pocketSel, MOLJS.LIGAND_STYLE);
+                            viewer.setStyle(ligandSel, MOLJS.LIGAND_STYLE);
                             // Transparent surface around binding pocket
                             viewer.addSurface($3Dmol.SurfaceType.MS,
                                 { opacity: 0.6, color: 'white' },
@@ -120,10 +114,7 @@ class LigandDetails {
                     });
                     this.detailsViewer.viewer = viewer;
                     viewer.addModel(sdfData, 'sdf');
-                    viewer.setStyle({}, {
-                        stick: { radius: 0.2, colorscheme: 'element' },
-                        sphere: { scale: 0.3, colorscheme: 'element' }
-                    });
+                    viewer.setStyle({}, MOLJS.LIGAND_STYLE);
                     viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();
                     viewer.render();

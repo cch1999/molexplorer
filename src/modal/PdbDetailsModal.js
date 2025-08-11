@@ -75,10 +75,8 @@ class PdbDetailsModal {
                     viewerContainer.viewer = viewer;
                     viewer.addModel(pdbData, 'pdb');
                     viewer.setStyle({}, { cartoon: { color: '#b3b3b3', opacity: 0.7 } });
-                    // highlight bound ligands with element-based colors using thick sticks
-                    viewer.setStyle({ hetflag: true }, {
-                        stick: { radius: 0.5, colorscheme: 'element' }
-                    });
+                    // highlight bound ligands with consistent ligand style
+                    viewer.setStyle({ hetflag: true }, MOLJS.LIGAND_STYLE);
                     viewer.setStyle({ hetflag: true, resn: ['HOH', 'H2O', 'WAT'] }, {});
                     viewer.setStyle(MOLJS.HIDE_HYDROGENS_SELECTION, {});
                     viewer.zoomTo();

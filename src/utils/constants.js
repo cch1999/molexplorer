@@ -52,6 +52,6 @@ export const MOLJS = Object.freeze({
   BG_COLOR_LIGHT: 'white',
   BG_COLOR_DARK: '#e0e0e0',
   VIEWER_DIMENSIONS: { width: '100%', height: '100%' },
-  DEFAULT_STICK_STYLE: { stick: {} },
+  LIGAND_STYLE: { stick: { radius: 0.2, colorscheme: 'element' } },
   HIDE_HYDROGENS_SELECTION: { elem: 'H' }
 });
