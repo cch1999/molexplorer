@@ -10,6 +10,7 @@ import AddMoleculeModal from './modal/AddMoleculeModal.js';
 import ProteinBrowser from './components/ProteinBrowser.js';
 import ViewerInterface from './components/ViewerInterface.js';
 import ComparisonModal from './modal/ComparisonModal.js';
+import Viewer from './components/Viewer.js';
 
 class MoleculeManager {
     constructor() {
@@ -98,10 +99,11 @@ class MoleculeManager {
             closeExport();
         });
 
-        // Tab switching for Molecules, Fragments, Proteins
+        // Tab switching for Molecules, Viewer, Fragments, Proteins
         const tabButtons = document.querySelectorAll('.tab-button');
         const panels = [
             document.getElementById('molecule-library-content'),
+            document.getElementById('viewer-content'),
             document.getElementById('fragment-library-content'),
             document.getElementById('protein-browser-content'),
             document.getElementById('viewer-interface-content')
@@ -116,6 +118,9 @@ class MoleculeManager {
                         setTimeout(() => window.viewerInterface.resizeToWindow(), 0);
                     }
                 });
+                if (index === 1 && window.viewer) {
+                    window.viewer.resize();
+                }
             });
         });
 
@@ -125,6 +130,11 @@ class MoleculeManager {
     addMolecule(molecule) {
         const added = this.repository.addMolecule(molecule);
         if (added) {
+            // If the SDF is already available, add immediately
+            if (molecule.sdf && typeof window !== 'undefined' && window.viewer) {
+                window.viewer.addMolecule({ code: molecule.code, sdf: molecule.sdf });
+            }
+            // Always load so cards and any missing data are populated
             this.loader.loadMolecule(molecule);
         }
         return added;
@@ -138,6 +148,9 @@ class MoleculeManager {
         if (this.repository.removeMolecule(code)) {
             const card = this.grid.querySelector(`[data-molecule-code="${code}"]`);
             if (card) card.remove();
+            if (typeof window !== 'undefined' && window.viewer) {
+                window.viewer.removeMolecule(code);
+            }
             return true;
         }
         return false;
@@ -147,6 +160,9 @@ class MoleculeManager {
         this.repository.deleteAllMolecules();
         if (this.cardUI) {
             this.cardUI.clearAll();
+        }
+        if (typeof window !== 'undefined' && window.viewer) {
+            window.viewer.clear();
         }
         showNotification('All molecules deleted successfully!', 'info');
     }
@@ -221,6 +237,12 @@ class MoleculeManager {
 }
 
 const moleculeManager = new MoleculeManager().init();
+const viewer = new Viewer().init();
+
+// Expose early so loaders can register molecules as they arrive
+window.moleculeManager = moleculeManager;
+window.viewer = viewer;
+
 moleculeManager.loadAllMolecules();
 
 const rdkitPromise =
@@ -330,7 +352,6 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
-window.moleculeManager = moleculeManager;
 window.fragmentLibrary = fragmentLibrary;
 window.proteinBrowser = proteinBrowser;
 window.viewerInterface = viewerInterface;
