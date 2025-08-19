@@ -19,6 +19,7 @@ class ViewerInterface {
     this.zoomLigandsBtn = null;
     this.resetViewBtn = null;
     this.spinToggle = null;
+    this.showInteractionsBtn = null;
 
     this._resizeHandler = null;
   }
@@ -38,6 +39,7 @@ class ViewerInterface {
     this.zoomLigandsBtn = document.getElementById('viewer-zoom-ligands');
     this.resetViewBtn = document.getElementById('viewer-reset-view');
     this.spinToggle = document.getElementById('viewer-spin');
+    this.showInteractionsBtn = document.getElementById('viewer-show-interactions');
 
     if (this.loadBtn) this.loadBtn.addEventListener('click', () => this.handleLoad());
     if (this.pdbInput) {
@@ -59,6 +61,7 @@ class ViewerInterface {
     if (this.zoomLigandsBtn) this.zoomLigandsBtn.addEventListener('click', () => this.zoomLigands());
     if (this.resetViewBtn) this.resetViewBtn.addEventListener('click', () => this.resetView());
     if (this.spinToggle) this.spinToggle.addEventListener('change', () => this.updateSpin());
+    if (this.showInteractionsBtn) this.showInteractionsBtn.addEventListener('click', () => this.showInteractingSidechains());
 
     // Dynamic sizing
     this._resizeHandler = () => this.resizeToWindow();
@@ -177,6 +180,29 @@ class ViewerInterface {
   resetView() {
     if (!this.viewer) return;
     this.viewer.zoomTo();
+    this.viewer.render();
+  }
+
+  showInteractingSidechains() {
+    if (!this.viewer) return;
+    // Reapply base styles to ensure consistent state
+    this.applyStyles();
+
+    const notList = [];
+    if (this.hideSolvent?.checked) notList.push(...this.getSolventResidues());
+    if (this.hideIons?.checked) notList.push(...this.getIonResidues());
+
+    const ligandSel = notList.length
+      ? { hetflag: true, not: { resn: notList } }
+      : { hetflag: true };
+
+    const interactingSel = {
+      byres: true,
+      within: { distance: 5, sel: ligandSel },
+      not: { atom: ['N', 'CA', 'C', 'O', 'OXT'] }
+    };
+
+    this.viewer.setStyle(interactingSel, { stick: { colorscheme: 'element' } });
     this.viewer.render();
   }
 
