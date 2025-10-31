@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ligand Surfer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://unpkg.com/@rdkit/rdkit/Code/MinimalLib/dist/RDKit_minimal.js"></script>
@@ -35,12 +38,17 @@
     </div>
 
     <!-- Main App Content -->
-    <header>
-        <h1>Ligand Surfer</h1>
-        <p>Interactive exploration of ligands, fragments, and proteins</p>
-        <p class="author">By Charlie Harris 🛡️</p>
-    </header>
-    <main>
+    <div class="app-shell">
+        <header>
+            <button id="theme-toggle" class="theme-toggle">
+                <span class="material-icons" id="theme-toggle-icon">dark_mode</span>
+                <span>Toggle theme</span>
+            </button>
+            <h1>Ligand Surfer</h1>
+            <p>Interactive exploration of ligands, fragments, and proteins</p>
+            <p class="author">By Charlie Harris 🛡️</p>
+        </header>
+        <main>
         <div class="tabs">
             <button class="tab-button active">Molecules</button>
             <button class="tab-button">Fragments</button>
@@ -209,7 +217,8 @@
                 </div>
             </div>
         </div>
-    </main>
+        </main>
+    </div>
 
     <!-- Add Fragment Modal -->
     <div id="add-fragment-modal" class="modal">
