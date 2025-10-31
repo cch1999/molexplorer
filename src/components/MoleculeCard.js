@@ -72,7 +72,7 @@ class MoleculeCard {
         smilesLabel.className = 'smiles-label';
         smilesLabel.textContent = `SMILES: ${smiles}`;
         smilesLabel.style.fontSize = '10px';
-        smilesLabel.style.color = '#666';
+        smilesLabel.style.color = 'var(--text-muted)';
         smilesLabel.style.marginTop = '5px';
         card.appendChild(smilesLabel);
 
@@ -83,10 +83,10 @@ class MoleculeCard {
 
     renderSmilesIn2D(smiles, container) {
         container.innerHTML = `
-            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f8f9fa;border:1px solid #e9ecef;border-radius:4px;">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;background:var(--surface-color);border:1px solid var(--surface-border);border-radius:18px;box-shadow:inset 0 1px 0 var(--surface-highlight);">
                 <div style="text-align:center;padding:10px;">
                     <div style="font-size:24px;margin-bottom:5px;">🧪</div>
-                    <div style="font-size:10px;color:#666;">SMILES</div>
+                    <div style="font-size:10px;color:var(--text-muted);">SMILES</div>
                 </div>
             </div>
         `;
