@@ -283,6 +283,15 @@ if (confirmAddFragmentBtn) {
 
 const proteinBrowser = new ProteinBrowser(moleculeManager).init();
 
+// Handle launch disclaimer
+const disclaimerModal = document.getElementById('launch-disclaimer-modal');
+const acceptDisclaimerBtn = document.getElementById('accept-disclaimer-btn');
+if (disclaimerModal && acceptDisclaimerBtn) {
+    acceptDisclaimerBtn.addEventListener('click', () => {
+        disclaimerModal.style.display = 'none';
+    });
+}
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
