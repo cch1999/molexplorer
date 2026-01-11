@@ -96,6 +96,10 @@ main {
     font-size: 14px;
 }
 
+#fragment-sort {
+    min-width: 150px;
+}
+
 .protein-controls {
     display: flex;
     gap: 15px;
