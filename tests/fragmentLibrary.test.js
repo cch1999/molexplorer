@@ -1,7 +1,8 @@
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it, beforeEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from './domStub.js';
 import FragmentLibrary from '../src/components/FragmentLibrary.js';
+import ApiService from '../src/utils/apiService.js';
 
 let dom;
 let library;
@@ -40,6 +41,31 @@ describe('FragmentLibrary', () => {
       el.textContent = fragment.name;
       return el;
     };
+  });
+
+  it('loadFragments merges PDBe and ChEMBL data', async () => {
+    const tsv = 'id\tname\tkind\tquery\tdescription\tcomment\turl\tsource\tccd\tin_ccd\n1\tFrag1\tSMILES\tC\tdesc\t\t\tPDBe\t\tFalse';
+    const tsvMock = mock.method(ApiService, 'getFragmentLibraryTsv', async () => tsv);
+    const chemblMock = mock.method(ApiService, 'getChEMBLFragments', async () => [
+      {
+        id: 'CHEMBL1',
+        name: 'ChemblFrag',
+        kind: 'SMILES',
+        query: 'N',
+        description: '',
+        comment: '',
+        url: '',
+        source: 'ChEMBL',
+        ccd: '',
+        in_ccd: false
+      }
+    ]);
+
+    await library.loadFragments();
+    assert.strictEqual(library.fragments.length, 2);
+    assert(library.fragments.some((f) => f.source === 'ChEMBL'));
+    chemblMock.mock.restore();
+    tsvMock.mock.restore();
   });
 
   it('sanitizeSMILES strips invalid characters', () => {
