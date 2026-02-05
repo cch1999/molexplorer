@@ -1,0 +1,83 @@
+/* Reset and base styles */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-background);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* Skip navigation link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--space-4);
+  z-index: 9999;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-primary);
+  color: #000;
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-md);
+  transition: top var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  top: var(--space-4);
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for accessibility */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus-ring);
+}
+
+/* Form elements use design tokens */
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}

@@ -1,0 +1,1014 @@
+# Comprehensive Prompt for Converting Your Vibe-Coded Website to Phage Explorer Style Copy and paste this entire prompt into your coding agent: --- ## MISSION Convert my existing pure JavaScript website to match the premium,
+
+cyberpunk-holographic aesthetic and architecture of Phage Explorer. This is a scientific visualization app with a dark theme,
+glassmorphism effects,
+and Stripe-level polish. ## TECH STACK TO USE - **Build tool:** Vite 7+- **Framework:** React 19 (or vanilla JS if preferred) - **State management:** Zustand - **Animations:** @react-spring/web+@use-gesture/react - **Styling:** CSS custom properties (no Tailwind - pure CSS) - **Fonts:** JetBrains Mono (monospace), Inter (sans-serif) ## DESIGN SYSTEM - CSS VARIABLES Create a `variables.css` file with this exact design token system: ```css:root {
+    color-scheme: dark;
+
+    /* === CORE COLORS === */
+    --color-primary: #22d3ee;
+    /* Cyan */
+    --color-primary-hover: #67e8f9;
+    --color-secondary: #c084fc;
+    /* Purple */
+    --color-accent: #fbbf24;
+    /* Amber */
+    --color-background: #0a0a0f;
+    /* Deep dark */
+    --color-background-alt: #12121a;
+    --color-background-elevated: #16161f;
+    --color-background-hover: #1c1c27;
+    --color-background-glass: rgba(10, 10, 15, 0.85);
+
+    /* === TEXT HIERARCHY === */
+    --color-text: #f0f0f8;
+    --color-text-dim: #9ca3af;
+    --color-text-muted: #6b7280;
+
+    /* === BORDERS === */
+    --color-border: #2d2d3a;
+    --color-border-subtle: #232330;
+    --color-border-light: #3d3d4a;
+    --color-border-focus: #22d3ee;
+
+    /* === STATUS COLORS === */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #22d3ee;
+
+    /* === GLASS MORPHISM === */
+    --glass-bg: rgba(18, 18, 26, 0.75);
+    --glass-bg-elevated: rgba(22, 22, 31, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-blur: 16px;
+
+    /* === SHADOWS - PREMIUM LAYERED === */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    --shadow-floating: 0 12px 28px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 8px rgba(34, 211, 238, 0.3), 0 0 16px rgba(34, 211, 238, 0.3);
+    --shadow-focus-ring: 0 0 0 2px var(--color-background), 0 0 0 5px rgba(34, 211, 238, 0.65);
+
+    /* === SPACING SCALE === */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* === BORDER RADIUS === */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+    --radius-full: 9999px;
+
+    /* === ANIMATION TIMING === */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* === Z-INDEX SCALE === */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-tooltip: 700;
+    --z-toast: 800;
+
+    /* === TYPOGRAPHY === */
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+}
+
+``` ## COMPONENT PATTERNS ### 1. BUTTONS ```css .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    min-height: 36px;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text);
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover {
+    background: var(--color-background-hover);
+    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus-ring);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #000;
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+}
+
+.btn-ghost:hover {
+    background: var(--color-background-hover);
+}
+
+.btn-sm {
+    padding: var(--space-1) var(--space-3);
+    min-height: 28px;
+    font-size: var(--text-xs);
+}
+
+``` ### 2. PANELS / CARDS (Glassmorphism) ```css .panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-floating);
+    padding: var(--space-4);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border-subtle);
+    margin-bottom: var(--space-3);
+}
+
+.panel-header h3 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+    margin: 0;
+}
+
+``` ### 3. BADGES ```css .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    background: rgba(34, 211, 238, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: var(--radius-sm);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+``` ### 4. MODAL / OVERLAY SYSTEM ```css .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-modal-backdrop);
+    animation: fade-in var(--duration-normal) var(--ease-out);
+}
+
+.overlay-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow: auto;
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-floating);
+    z-index: var(--z-modal);
+    animation: scale-in var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+``` ### 5. TOAST NOTIFICATIONS ```css .toast-container {
+    position: fixed;
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.toast-item {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: toast-slide-in var(--duration-normal) var(--ease-out);
+}
+
+.toast-item--info {
+    border-left: 3px solid var(--color-info);
+}
+
+.toast-item--success {
+    border-left: 3px solid var(--color-success);
+}
+
+.toast-item--warning {
+    border-left: 3px solid var(--color-warning);
+}
+
+.toast-item--error {
+    border-left: 3px solid var(--color-error);
+}
+
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+``` ### 6. MOBILE BOTTOM SHEET ```css .bottom-sheet__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-modal-backdrop);
+}
+
+.bottom-sheet__container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    background: var(--color-background-elevated);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    box-shadow: var(--shadow-floating);
+    z-index: var(--z-modal);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-sheet__handle {
+    width: 36px;
+    height: 4px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-full);
+    margin: var(--space-2) auto var(--space-3);
+}
+
+``` ### 7. SKELETON LOADING ```css .skeleton {
+    background: var(--color-background-elevated);
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.04) 20%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.04) 80%,
+            transparent 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.8s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+``` ## HOLOGRAPHIC THEME (OPTIONAL PREMIUM EFFECT) For the holographic glassmorphism effect on panels: ```css [data-theme="holographic"] .panel {
+    background: rgba(5, 0, 30, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(191, 0, 255, 0.1),
+        inset 0 0 60px rgba(0, 245, 255, 0.03);
+}
+
+/* Shimmer border on top of panels */
+[data-theme="holographic"] .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(0, 245, 255, 0.5) 20%,
+            rgba(191, 0, 255, 0.5) 50%,
+            rgba(255, 0, 110, 0.5) 80%,
+            transparent 100%);
+}
+
+``` ## STATE MANAGEMENT PATTERN (Zustand) ```javascript import {
+    create
+}
+
+from 'zustand';
+
+export const useAppStore=create((set, get)=> ({
+
+        // Current selected item
+        currentItem: null,
+        setCurrentItem: (item)=> set({
+            currentItem: item
+        }),
+
+    // Loading states
+    isLoading: false,
+    setLoading: (loading)=> set({
+        isLoading: loading
+    }),
+
+// Overlay stack (max 3)
+overlays: [],
+openOverlay: (id)=> set((state)=> ({
+        overlays: [...state.overlays.filter(o=> o !==id), id].slice(-3)
+
+    })),
+closeOverlay: (id)=> set((state)=> ({
+        overlays: id ? state.overlays.filter(o=> o !==id) : state.overlays.slice(0, -1)
+    })),
+isOverlayOpen: (id)=> get().overlays.includes(id),
+
+// Theme
+theme: 'holographic',
+setTheme: (theme)=> set({
+    theme
+}),
+}));
+
+``` ## APP SHELL STRUCTURE ```jsx function AppShell({
+    children
+
+}) {
+    return (<div className="app-shell" > <header className="app-header" > {
+            /* Logo, nav, actions */
+        }
+
+        </header> <main className="app-body" > {
+            children
+        }
+
+        </main> <footer className="app-footer" > {
+            /* Status, keyboard hints */
+        }
+
+        </footer> </div>);
+}
+
+``` ```css .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    height: 3rem;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.app-body {
+    flex: 1;
+    padding: var(--space-4);
+    overflow-y: auto;
+}
+
+.app-footer {
+    height: 2rem;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    background: var(--color-background-alt);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+``` ## ACCESSIBILITY REQUIREMENTS 1. All interactive elements must have `:focus-visible` styles with the focus ring 2. Use `prefers-reduced-motion` to disable animations 3. Semantic HTML: use `<button>`,
+`<nav>`,
+`role="dialog" `,
+`aria-label`,
+etc. 4. Skip navigation link at the top 5. Toast notifications use `role="alert" ` and `aria-live="polite" ` ```css @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+``` ## MOBILE CONSIDERATIONS 1. Touch targets minimum 44px 2. Use bottom sheets instead of modals on mobile 3. Disable `backdrop-filter` on touch devices (causes flicker on iOS) 4. Safe area padding: `env(safe-area-inset-bottom)` ```css @media (hover: none) and (pointer: coarse) {
+
+    .panel,
+    .app-header {
+        backdrop-filter: none;
+        background: rgba(5, 0, 30, 0.95);
+    }
+}
+
+``` ## IMPLEMENTATION CHECKLIST - [] Set up Vite with React (or vanilla) - [] Create CSS variable system in `variables.css` - [] Create `components.css` with button,
+panel,
+badge,
+toast styles - [] Create `animations.css` with keyframes - [] Create `typography.css` with font loading and text utilities - [] Set up Zustand store for state management - [] Build AppShell component with header/body/footer - [] Build overlay/modal system with stack management - [] Build toast notification system - [] Add mobile bottom sheet for touch devices - [] Add skeleton loading states - [] Test reduced-motion and high-contrast modes --- ## KEY DESIGN PRINCIPLES 1. **Dark background with cyan/purple accents** - Primary cyan (#22d3ee),
+secondary purple (#c084fc),
+amber accent (#fbbf24) 2. **Glassmorphism panels** - Semi-transparent backgrounds with backdrop blur 3. **Layered shadows** - Multiple shadow layers for depth perception 4. **Spring-physics animations** - Use spring easing for natural-feeling motion 5. **Meticulous spacing** - Consistent spacing scale (4px increments) 6. **Premium focus states** - Animated focus rings with glow effects 7. **Performance-conscious** - Disable expensive effects on mobile/reduced-motion (base) ➜ phage_explorer git:(main) ✗ amp [2]+98733 suspended amp (base) ➜ phage_explorer git:(main) ✗ (base) ➜ phage_explorer git:(main) ✗ (base) ➜ phage_explorer git:(main) ✗ (base) ➜ phage_explorer git:(main) ✗ (base) ➜ phage_explorer git:(main) ✗ bat VIBE_CODE_CONVERSION_PROMPT.md (base) ➜ phage_explorer git:(main) ✗ (base) ➜ phage_explorer git:(main) ✗ cat VIBE_CODE_CONVERSION_PROMPT.md # Comprehensive Prompt for Converting Your Vibe-Coded Website to Phage Explorer Style Copy and paste this entire prompt into your coding agent: --- ## MISSION Convert my existing pure JavaScript website to match the premium,
+cyberpunk-holographic aesthetic and architecture of Phage Explorer. This is a scientific visualization app with a dark theme,
+glassmorphism effects,
+and Stripe-level polish. ## TECH STACK TO USE - **Build tool:** Vite 7+- **Framework:** React 19 (or vanilla JS if preferred) - **State management:** Zustand - **Animations:** @react-spring/web+@use-gesture/react - **Styling:** CSS custom properties (no Tailwind - pure CSS) - **Fonts:** JetBrains Mono (monospace), Inter (sans-serif) ## DESIGN SYSTEM - CSS VARIABLES Create a `variables.css` file with this exact design token system: ```css:root {
+    color-scheme: dark;
+
+    /* === CORE COLORS === */
+    --color-primary: #22d3ee;
+    /* Cyan */
+    --color-primary-hover: #67e8f9;
+    --color-secondary: #c084fc;
+    /* Purple */
+    --color-accent: #fbbf24;
+    /* Amber */
+    --color-background: #0a0a0f;
+    /* Deep dark */
+    --color-background-alt: #12121a;
+    --color-background-elevated: #16161f;
+    --color-background-hover: #1c1c27;
+    --color-background-glass: rgba(10, 10, 15, 0.85);
+
+    /* === TEXT HIERARCHY === */
+    --color-text: #f0f0f8;
+    --color-text-dim: #9ca3af;
+    --color-text-muted: #6b7280;
+
+    /* === BORDERS === */
+    --color-border: #2d2d3a;
+    --color-border-subtle: #232330;
+    --color-border-light: #3d3d4a;
+    --color-border-focus: #22d3ee;
+
+    /* === STATUS COLORS === */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #22d3ee;
+
+    /* === GLASS MORPHISM === */
+    --glass-bg: rgba(18, 18, 26, 0.75);
+    --glass-bg-elevated: rgba(22, 22, 31, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-blur: 16px;
+
+    /* === SHADOWS - PREMIUM LAYERED === */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.15);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -4px rgba(0, 0, 0, 0.2);
+    --shadow-floating: 0 12px 28px rgba(0, 0, 0, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-glow: 0 0 8px rgba(34, 211, 238, 0.3), 0 0 16px rgba(34, 211, 238, 0.3);
+    --shadow-focus-ring: 0 0 0 2px var(--color-background), 0 0 0 5px rgba(34, 211, 238, 0.65);
+
+    /* === SPACING SCALE === */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* === BORDER RADIUS === */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+    --radius-full: 9999px;
+
+    /* === ANIMATION TIMING === */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* === Z-INDEX SCALE === */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 400;
+    --z-modal: 500;
+    --z-tooltip: 700;
+    --z-toast: 800;
+
+    /* === TYPOGRAPHY === */
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --font-medium: 500;
+    --font-semibold: 600;
+    --font-bold: 700;
+}
+
+``` ## COMPONENT PATTERNS ### 1. BUTTONS ```css .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    min-height: 36px;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text);
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.btn:hover {
+    background: var(--color-background-hover);
+    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus-ring);
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #000;
+    border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-glow);
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: transparent;
+}
+
+.btn-ghost:hover {
+    background: var(--color-background-hover);
+}
+
+.btn-sm {
+    padding: var(--space-1) var(--space-3);
+    min-height: 28px;
+    font-size: var(--text-xs);
+}
+
+``` ### 2. PANELS / CARDS (Glassmorphism) ```css .panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-floating);
+    padding: var(--space-4);
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--color-border-subtle);
+    margin-bottom: var(--space-3);
+}
+
+.panel-header h3 {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--color-text);
+    margin: 0;
+}
+
+``` ### 3. BADGES ```css .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    background: rgba(34, 211, 238, 0.1);
+    color: var(--color-primary);
+    border: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: var(--radius-sm);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+``` ### 4. MODAL / OVERLAY SYSTEM ```css .overlay-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-modal-backdrop);
+    animation: fade-in var(--duration-normal) var(--ease-out);
+}
+
+.overlay-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow: auto;
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-floating);
+    z-index: var(--z-modal);
+    animation: scale-in var(--duration-normal) var(--ease-spring);
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+``` ### 5. TOAST NOTIFICATIONS ```css .toast-container {
+    position: fixed;
+    bottom: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.toast-item {
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-background-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: toast-slide-in var(--duration-normal) var(--ease-out);
+}
+
+.toast-item--info {
+    border-left: 3px solid var(--color-info);
+}
+
+.toast-item--success {
+    border-left: 3px solid var(--color-success);
+}
+
+.toast-item--warning {
+    border-left: 3px solid var(--color-warning);
+}
+
+.toast-item--error {
+    border-left: 3px solid var(--color-error);
+}
+
+@keyframes toast-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+``` ### 6. MOBILE BOTTOM SHEET ```css .bottom-sheet__backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: var(--z-modal-backdrop);
+}
+
+.bottom-sheet__container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 90vh;
+    background: var(--color-background-elevated);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    box-shadow: var(--shadow-floating);
+    z-index: var(--z-modal);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.bottom-sheet__handle {
+    width: 36px;
+    height: 4px;
+    background: var(--color-border-light);
+    border-radius: var(--radius-full);
+    margin: var(--space-2) auto var(--space-3);
+}
+
+``` ### 7. SKELETON LOADING ```css .skeleton {
+    background: var(--color-background-elevated);
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.04) 20%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.04) 80%,
+            transparent 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.8s ease infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+``` ## HOLOGRAPHIC THEME (OPTIONAL PREMIUM EFFECT) For the holographic glassmorphism effect on panels: ```css [data-theme="holographic"] .panel {
+    background: rgba(5, 0, 30, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(191, 0, 255, 0.1),
+        inset 0 0 60px rgba(0, 245, 255, 0.03);
+}
+
+/* Shimmer border on top of panels */
+[data-theme="holographic"] .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(0, 245, 255, 0.5) 20%,
+            rgba(191, 0, 255, 0.5) 50%,
+            rgba(255, 0, 110, 0.5) 80%,
+            transparent 100%);
+}
+
+``` ## STATE MANAGEMENT PATTERN (Zustand) ```javascript import {
+    create
+}
+
+from 'zustand';
+
+export const useAppStore=create((set, get)=> ({
+
+        // Current selected item
+        currentItem: null,
+        setCurrentItem: (item)=> set({
+            currentItem: item
+        }),
+
+    // Loading states
+    isLoading: false,
+    setLoading: (loading)=> set({
+        isLoading: loading
+    }),
+
+// Overlay stack (max 3)
+overlays: [],
+openOverlay: (id)=> set((state)=> ({
+        overlays: [...state.overlays.filter(o=> o !==id), id].slice(-3)
+
+    })),
+closeOverlay: (id)=> set((state)=> ({
+        overlays: id ? state.overlays.filter(o=> o !==id) : state.overlays.slice(0, -1)
+    })),
+isOverlayOpen: (id)=> get().overlays.includes(id),
+
+// Theme
+theme: 'holographic',
+setTheme: (theme)=> set({
+    theme
+}),
+}));
+
+``` ## APP SHELL STRUCTURE ```jsx function AppShell({
+    children
+
+}) {
+    return (<div className="app-shell" > <header className="app-header" > {
+            /* Logo, nav, actions */
+        }
+
+        </header> <main className="app-body" > {
+            children
+        }
+
+        </main> <footer className="app-footer" > {
+            /* Status, keyboard hints */
+        }
+
+        </footer> </div>);
+}
+
+``` ```css .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    height: 3rem;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.app-body {
+    flex: 1;
+    padding: var(--space-4);
+    overflow-y: auto;
+}
+
+.app-footer {
+    height: 2rem;
+    padding: 0 var(--space-4);
+    display: flex;
+    align-items: center;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    background: var(--color-background-alt);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+``` ## ACCESSIBILITY REQUIREMENTS 1. All interactive elements must have `:focus-visible` styles with the focus ring 2. Use `prefers-reduced-motion` to disable animations 3. Semantic HTML: use `<button>`,
+`<nav>`,
+`role="dialog" `,
+`aria-label`,
+etc. 4. Skip navigation link at the top 5. Toast notifications use `role="alert" ` and `aria-live="polite" ` ```css @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+``` ## MOBILE CONSIDERATIONS 1. Touch targets minimum 44px 2. Use bottom sheets instead of modals on mobile 3. Disable `backdrop-filter` on touch devices (causes flicker on iOS) 4. Safe area padding: `env(safe-area-inset-bottom)` ```css @media (hover: none) and (pointer: coarse) {
+
+    .panel,
+    .app-header {
+        backdrop-filter: none;
+        background: rgba(5, 0, 30, 0.95);
+    }
+}
+
+``` ## IMPLEMENTATION CHECKLIST - [] Set up Vite with React (or vanilla) - [] Create CSS variable system in `variables.css` - [] Create `components.css` with button,
+panel,
+badge,
+toast styles - [] Create `animations.css` with keyframes - [] Create `typography.css` with font loading and text utilities - [] Set up Zustand store for state management - [] Build AppShell component with header/body/footer - [] Build overlay/modal system with stack management - [] Build toast notification system - [] Add mobile bottom sheet for touch devices - [] Add skeleton loading states - [] Test reduced-motion and high-contrast modes --- ## KEY DESIGN PRINCIPLES 1. **Dark background with cyan/purple accents** - Primary cyan (#22d3ee),
+secondary purple (#c084fc),
+amber accent (#fbbf24) 2. **Glassmorphism panels** - Semi-transparent backgrounds with backdrop blur 3. **Layered shadows** - Multiple shadow layers for depth perception 4. **Spring-physics animations** - Use spring easing for natural-feeling motion 5. **Meticulous spacing** - Consistent spacing scale (4px increments) 6. **Premium focus states** - Animated focus rings with glow effects 7. **Performance-conscious** - Disable expensive effects on mobile/reduced-motion
