@@ -13,7 +13,7 @@ class MoleculeCard {
     createMoleculeCardFromSmiles(smiles, ccdCode, id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
-        card.draggable = true;
+        card.draggable = false;
         card.setAttribute('data-molecule-code', ccdCode);
         card.setAttribute('data-molecule-id', id);
 
@@ -21,6 +21,14 @@ class MoleculeCard {
         dragHandle.className = 'drag-handle';
         dragHandle.innerHTML = '⋯';
         card.appendChild(dragHandle);
+        dragHandle.addEventListener('mousedown', () => {
+            card.draggable = true;
+        });
+        ['mouseup', 'mouseleave'].forEach(evt => {
+            dragHandle.addEventListener(evt, () => {
+                card.draggable = false;
+            });
+        });
 
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
@@ -89,7 +97,7 @@ class MoleculeCard {
     createMoleculeCard(data, ccdCode, format = 'sdf', id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
-        card.draggable = true;
+        card.draggable = false;
         card.setAttribute('data-molecule-code', ccdCode);
         card.setAttribute('data-molecule-id', id);
 
@@ -97,6 +105,14 @@ class MoleculeCard {
         dragHandle.className = 'drag-handle';
         dragHandle.innerHTML = '⋯';
         card.appendChild(dragHandle);
+        dragHandle.addEventListener('mousedown', () => {
+            card.draggable = true;
+        });
+        ['mouseup', 'mouseleave'].forEach(evt => {
+            dragHandle.addEventListener(evt, () => {
+                card.draggable = false;
+            });
+        });
 
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
@@ -164,7 +180,7 @@ class MoleculeCard {
     createNotFoundCard(ccdCode, message = 'Not found', id = ccdCode) {
         const card = document.createElement('div');
         card.className = 'molecule-card';
-        card.draggable = true;
+        card.draggable = false;
         card.setAttribute('data-molecule-code', ccdCode);
         card.setAttribute('data-molecule-id', id);
 
@@ -172,6 +188,14 @@ class MoleculeCard {
         dragHandle.className = 'drag-handle';
         dragHandle.innerHTML = '⋯';
         card.appendChild(dragHandle);
+        dragHandle.addEventListener('mousedown', () => {
+            card.draggable = true;
+        });
+        ['mouseup', 'mouseleave'].forEach(evt => {
+            dragHandle.addEventListener(evt, () => {
+                card.draggable = false;
+            });
+        });
 
         const deleteBtn = document.createElement('div');
         deleteBtn.className = 'delete-btn';
